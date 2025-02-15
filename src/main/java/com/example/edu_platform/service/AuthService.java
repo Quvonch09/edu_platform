@@ -103,7 +103,7 @@ public class AuthService {
     private User saveUser(AuthRegister auth, Role role)
     {
         User user = User.builder()
-                .fullName(auth.getLastName())
+                .fullName(auth.getFullName())
                 .phoneNumber(auth.getPhoneNumber())
                 .password(passwordEncoder.encode(auth.getPassword()))
                 .role(role)
