@@ -1,7 +1,8 @@
 package com.example.edu_platform.payload;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+
+import java.time.LocalTime;
 
 @Getter
 @Setter
@@ -9,8 +10,9 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class RoomDTO {
-    @Schema(hidden = true)
     private Long id;
     private String name;
     private String color;
+    private LocalTime startTime;
+    private LocalTime endTime;
 }
