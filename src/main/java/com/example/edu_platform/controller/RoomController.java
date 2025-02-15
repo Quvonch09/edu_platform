@@ -16,21 +16,20 @@ public class RoomController {
 
     private final RoomService roomService;
 
-
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
-    @Operation(summary = "Room qushish")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN','ROLE_ADMIN')")
+    @Operation(summary = "Super Admin va Admin room qushish")
     @PostMapping
-    public ResponseEntity<ApiResponse> saveRoom(@RequestBody RoomDTO roomDTO){
+    public ResponseEntity<ApiResponse> saveRoom(@RequestBody RoomDTO roomDTO) {
         ApiResponse apiResponse = roomService.saveRoom(roomDTO);
         return ResponseEntity.ok(apiResponse);
     }
 
 
-    @GetMapping("/{roomId}")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
-    @Operation(summary = "Room kurish")
-    public ResponseEntity<ApiResponse> getRoomById(@PathVariable Long roomId){
-        ApiResponse apiResponse = roomService.getRoomById(roomId);
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN','ROLE_ADMIN')")
+    @Operation(summary = "Super Admin va Admin roomni kurish")
+    @GetMapping("/id")
+    public ResponseEntity<ApiResponse> getRoomById(Long id) {
+        ApiResponse apiResponse = roomService.getRoomById(id);
         return ResponseEntity.ok(apiResponse);
     }
 }
