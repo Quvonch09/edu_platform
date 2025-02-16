@@ -6,15 +6,12 @@ import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.LessonDTO;
 import com.example.edu_platform.payload.ResponseError;
 import com.example.edu_platform.payload.req.LessonRequest;
-import com.example.edu_platform.repository.FileRepository;
-import com.example.edu_platform.repository.LessonRepository;
-import com.example.edu_platform.repository.LessonTrackingRepository;
-import com.example.edu_platform.repository.ModuleRepository;
+import com.example.edu_platform.repository.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +20,7 @@ public class LessonService {
     private final ModuleRepository moduleRepository;
     private final FileRepository fileRepository;
     private final LessonTrackingRepository lessonTrackingRepository;
+    private final GroupRepository groupRepository;
 
     public ApiResponse createLesson(LessonRequest lessonRequest) {
 
@@ -31,20 +29,22 @@ public class LessonService {
             return new ApiResponse(ResponseError.NOTFOUND("Module"));
         }
 
-        List<File> files = fileRepository.findAllById(lessonRequest.getFileIds());
-        if (files.size() != lessonRequest.getFileIds().size()) {
-            List<Long> notFoundFileIds = lessonRequest.getFileIds().stream()
-                    .filter(id -> files.stream().noneMatch(file -> file.getId().equals(id)))
-                    .toList();
-            return new ApiResponse(ResponseError.NOTFOUND("Fayllar: " + notFoundFileIds));
-        }
+//        File kiritmasligi mumkin, majburiy qilish shartmas
+
+//        List<File> files = fileRepository.findAllById(lessonRequest.getFileIds());
+//        if (files.size() != lessonRequest.getFileIds().size()) {
+//            List<Long> notFoundFileIds = lessonRequest.getFileIds().stream()
+//                    .filter(id -> files.stream().noneMatch(file -> file.getId().equals(id)))
+//                    .toList();
+//            return new ApiResponse(ResponseError.NOTFOUND("Fayllar: " + notFoundFileIds));
+//        }
 
         Lesson lesson = Lesson.builder()
                 .name(lessonRequest.getName())
                 .description(lessonRequest.getDescription())
                 .videoLink(lessonRequest.getVideoLink())
                 .module(module)
-                .files(files)
+                .files(findFilesByLessonId(lessonRequest.getFileIds()))
                 .deleted(false)
                 .build();
 
@@ -52,6 +52,7 @@ public class LessonService {
         return new ApiResponse("Dars muvaffaqiyatli yaratildi");
     }
 
+    @Transactional
     public ApiResponse getLessonInModule(Long moduleId) {
 
         Module optionalModule = moduleRepository.findById(moduleId).orElse(null);
@@ -79,18 +80,22 @@ public class LessonService {
         } else if (module == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Modul"));
         }
-        List<File> files = fileRepository.findAllById(lessonRequest.getFileIds());
-        if (files.size() != lessonRequest.getFileIds().size()) {
-            List<Long> notFoundFileIds = lessonRequest.getFileIds().stream()
-                    .filter(id -> files.stream().noneMatch(file -> file.getId().equals(id)))
-                    .toList();
-            return new ApiResponse(ResponseError.NOTFOUND("Fayllar: " + notFoundFileIds));
-        }
+
+//        File kiritmasligi ham mumkin
+
+//        List<File> files = fileRepository.findAllById(lessonRequest.getFileIds());
+//        if (files.size() != lessonRequest.getFileIds().size()) {
+//            List<Long> notFoundFileIds = lessonRequest.getFileIds().stream()
+//                    .filter(id -> files.stream().noneMatch(file -> file.getId().equals(id)))
+//                    .toList();
+//            return new ApiResponse(ResponseError.NOTFOUND("Fayllar: " + notFoundFileIds));
+//        }
+
         currentLesson.setName(lessonRequest.getName());
         currentLesson.setDescription(lessonRequest.getDescription());
         currentLesson.setVideoLink(lessonRequest.getVideoLink());
         currentLesson.setModule(module);
-        currentLesson.setFiles(files);
+        currentLesson.setFiles(findFilesByLessonId(lessonRequest.getFileIds()));
 
         lessonRepository.save(currentLesson);
         return new ApiResponse("Lesson yangilandi");
@@ -101,25 +106,33 @@ public class LessonService {
         if (lesson == null){
             return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
         }
+
         lesson.setDeleted(true);
         lessonRepository.save(lesson);
         return new ApiResponse("Lesson o'chirildi");
     }
 
     public ApiResponse allowLesson(Long groupId,Long lessonId){
-        //Group group = groupRepository.findById(groupId).orElse(null);
+        boolean b = lessonTrackingRepository.existsByLessonIdAndGroupId(lessonId, groupId);
+        if (b) {
+            return new ApiResponse(ResponseError.ALREADY_EXIST("Bu lessonTracking"));
+        }
+
+        Group group = groupRepository.findById(groupId).orElse(null);
         Lesson lesson = lessonRepository.findById(lessonId).orElse(null);
         if (lesson == null){
             return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
         }
-//        else if (group == null) {
-//            return new ApiResponse(ResponseError.NOTFOUND("Group"));
-//        }
+        else if (group == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
+
         LessonTracking lessonTracking = LessonTracking.builder()
-                //.group(group)
+                .group(group)
                 .lesson(lesson)
                 .build();
         lessonTrackingRepository.save(lessonTracking);
+
         return new ApiResponse("Lesson guruh uchun ochildi");
     }
 
@@ -178,8 +191,18 @@ public class LessonService {
                 .name(lesson.getName())
                 .description(lesson.getDescription())
                 .videoLink(lesson.getVideoLink())
-                .fileIds(lesson.getFiles().stream().map(File::getId).toList())
+                .fileIds(lesson.getFiles() != null ? lesson.getFiles().stream().map(File::getId).toList() : null)
                 .createdAt(lesson.getCreatedAt())
                 .build();
+    }
+
+
+    private List<File> findFilesByLessonId(List<Long> lessonId) {
+        List<File> fileList = new ArrayList<>();
+        for (Long fileId : lessonId) {
+            File file = fileRepository.findById(fileId).orElse(null);
+            fileList.add(file);
+        }
+        return fileList;
     }
 }
