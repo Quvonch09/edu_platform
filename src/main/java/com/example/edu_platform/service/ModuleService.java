@@ -3,6 +3,7 @@ package com.example.edu_platform.service;
 import com.example.edu_platform.entity.Category;
 import com.example.edu_platform.entity.Module;
 import com.example.edu_platform.payload.ApiResponse;
+import com.example.edu_platform.payload.ModuleDTO;
 import com.example.edu_platform.payload.ResponseError;
 import com.example.edu_platform.payload.req.ModuleRequest;
 import com.example.edu_platform.repository.CategoryRepository;
@@ -37,7 +38,15 @@ public class ModuleService {
         if (foundModule == null){
             return new ApiResponse(ResponseError.NOTFOUND("Modul"));
         }
-        return new ApiResponse(foundModule);
+
+        ModuleDTO moduleDTO = ModuleDTO.builder()
+                .id(foundModule.getId())
+                .name(foundModule.getName())
+                .categoryId(foundModule.getCategory().getId())
+                .createdAt(foundModule.getCreatedAt())
+                .createdBy(foundModule.getCreatedBy())
+                .build();
+        return new ApiResponse(moduleDTO);
     }
 
     public ApiResponse update(Long moduleId,ModuleRequest moduleRequest){
