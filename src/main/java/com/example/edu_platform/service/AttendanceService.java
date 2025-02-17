@@ -1,9 +1,6 @@
 package com.example.edu_platform.service;
 
-import com.example.edu_platform.entity.Attendance;
-import com.example.edu_platform.entity.GraphicDay;
-import com.example.edu_platform.entity.Group;
-import com.example.edu_platform.entity.User;
+import com.example.edu_platform.entity.*;
 import com.example.edu_platform.exception.NotFoundException;
 import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.AttendDto;
@@ -143,7 +140,7 @@ public class AttendanceService {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException("group not found"));
 
-        List<GraphicDay> days = group.getDays();
+        GraphicDay days = group.getDays();
 
         LocalDate startOfMonth = LocalDate.of(year, Month.of(month), 1);
         LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
@@ -151,8 +148,8 @@ public class AttendanceService {
         List<LocalDate> classDates = new ArrayList<>();
 
         for (LocalDate date = startOfMonth; !date.isAfter(endOfMonth); date = date.plusDays(1)) {
-            for (GraphicDay graphicDay : days) {
-                if (date.getDayOfWeek().name().equalsIgnoreCase(graphicDay.getWeekDay().name())) {
+            for (DayOfWeek day : days.getWeekDay()) {
+                if (date.getDayOfWeek().name().equalsIgnoreCase(day.toString())) {
                     classDates.add(date);
                     break;
                 }

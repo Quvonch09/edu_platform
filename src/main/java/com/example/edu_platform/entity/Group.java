@@ -4,7 +4,6 @@ import com.example.edu_platform.entity.template.AbsEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -25,6 +24,6 @@ public class Group extends AbsEntity {
     @ManyToMany
     private List<User> students;
     private LocalDate endDate;
-    @OneToMany
-    private List<GraphicDay> days;
+    @ManyToOne
+    private GraphicDay days;
 }
