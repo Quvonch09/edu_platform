@@ -1,12 +1,10 @@
 package com.example.edu_platform.entity;
 
 import com.example.edu_platform.entity.template.AbsEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -25,6 +23,8 @@ public class Group extends AbsEntity {
     @ManyToOne
     private Category category;
     @ManyToMany
-    private List<User> studentList;
+    private List<User> students;
     private LocalDate endDate;
+    @OneToMany
+    private List<GraphicDay> days;
 }
