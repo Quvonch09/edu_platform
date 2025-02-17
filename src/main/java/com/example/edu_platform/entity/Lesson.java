@@ -21,4 +21,5 @@ public class Lesson extends AbsEntity {
     private Module module;
     @ManyToMany
     private List<File> files;
+    private boolean deleted;
 }

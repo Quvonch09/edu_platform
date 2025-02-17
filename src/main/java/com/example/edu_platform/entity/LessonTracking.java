@@ -2,6 +2,7 @@ package com.example.edu_platform.entity;
 
 import com.example.edu_platform.entity.template.AbsEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import lombok.*;
 
@@ -12,7 +13,7 @@ import lombok.*;
 @Builder
 @Entity
 public class LessonTracking extends AbsEntity {
-    @OneToOne
+    @ManyToOne
     private Lesson lesson;
     @OneToOne
     private Group group;
