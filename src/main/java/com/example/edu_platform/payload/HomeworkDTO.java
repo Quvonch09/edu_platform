@@ -9,9 +9,10 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ModuleDTO {
-    private Long id;
-    private String name;
-    private String category;
-    private boolean deleted;
+public class HomeworkDTO {
+    private Long homeworkId;
+    private String answer;
+    private Integer ball;
+    private String studentName;
+    private Long taskId;
 }

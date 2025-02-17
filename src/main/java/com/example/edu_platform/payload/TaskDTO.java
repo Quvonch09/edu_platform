@@ -9,9 +9,9 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ModuleDTO {
+public class TaskDTO {
     private Long id;
-    private String name;
-    private String category;
-    private boolean deleted;
+    private String title;
+    private Long lessonId;
+    private Long fileId;
 }
