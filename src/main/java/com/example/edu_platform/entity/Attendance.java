@@ -1,24 +1,25 @@
 package com.example.edu_platform.entity;
 
+
 import com.example.edu_platform.entity.template.AbsEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDate;
+
+@Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@SuperBuilder
-@Entity
-public class Feedback extends AbsEntity {
-    private String feedback;
-    private Integer rating; // 5 ball
+@Builder
+public class Attendance extends AbsEntity {
+
+    private Boolean attendance;
+    private LocalDate date;
     @ManyToOne
-    private User teacher;
+    private Group group;
     @ManyToOne
-    private Lesson lesson;
-    @ManyToOne
-    private Quiz quiz;
+    private User student;
 }
