@@ -53,7 +53,7 @@ public class AuthService {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Phone number"));
         }
 
-        saveUser(auth, Role.ROLE_USER);
+        saveUser(auth, Role.ROLE_STUDENT);
 
         return new ApiResponse("Success");
     }
@@ -72,7 +72,7 @@ public class AuthService {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
 
-        User user = saveUser(auth, Role.ROLE_USER);
+        User user = saveUser(auth, Role.ROLE_STUDENT);
 
         List<User> students = group.getStudentList();
         students.add(user);
@@ -103,7 +103,7 @@ public class AuthService {
     private User saveUser(AuthRegister auth, Role role)
     {
         User user = User.builder()
-                .fullName(auth.getLastName())
+                .fullName(auth.getFullName())
                 .phoneNumber(auth.getPhoneNumber())
                 .password(passwordEncoder.encode(auth.getPassword()))
                 .role(role)
