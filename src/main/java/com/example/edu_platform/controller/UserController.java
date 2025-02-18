@@ -20,7 +20,7 @@ public class UserController {
     private final UserService userService;
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
     @Operation(summary = "CEO/ADMIN teacher qushish")
     @PostMapping("/saveTeacher")
     public ResponseEntity<ApiResponse> saveTeacher(@RequestBody ReqTeacher reqTeacher) {
@@ -30,7 +30,7 @@ public class UserController {
 
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
     @Operation(summary = "CEO/ADMIN teacherni search qilish")
     @GetMapping("/searchTeacher")
     public ResponseEntity<ApiResponse> searchTeacher(@RequestParam(required = false, value = "fullName") String fullName,
@@ -44,7 +44,7 @@ public class UserController {
 
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
     @Operation(summary = "CEO/ADMIN teacherni bittasini kurish")
     @GetMapping("/teacherById/{teacherId}")
     public ResponseEntity<ApiResponse> getOneTeacher(@PathVariable Long teacherId) {
@@ -54,7 +54,7 @@ public class UserController {
 
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
     @Operation(summary = "CEO/ADMIN teacherni update qilish")
     @PutMapping("/updateTeacher/{teacherId}")
     public ResponseEntity<ApiResponse> updateTeacher(@PathVariable Long teacherId, @RequestBody ReqTeacher reqTeacher) {
@@ -64,7 +64,7 @@ public class UserController {
 
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
     @Operation(summary = "CEO/ADMIN teacherni activeni uzgartirish")
     @PutMapping("/updateTeacher/active/{teacherId}")
     public ResponseEntity<ApiResponse> updateTeacherActive(@PathVariable Long teacherId, @RequestParam Boolean active) {
@@ -73,7 +73,7 @@ public class UserController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
     @Operation(summary = "CEO/ADMIN teacher/admin delete qilish")
     @DeleteMapping("/deleteTeacher/{userId}")
     public ResponseEntity<ApiResponse> deleteUser(@PathVariable Long userId, @CurrentUser User user) {
@@ -83,7 +83,7 @@ public class UserController {
 
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_CEO')")
     @Operation(summary = "CEO admin qushish")
     @PostMapping("/saveAdmin")
     public ResponseEntity<ApiResponse> saveAdmin(@RequestBody ReqAdmin reqAdmin) {
@@ -92,7 +92,7 @@ public class UserController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_CEO')")
     @Operation(summary = "CEO admin bittasini kurish")
     @GetMapping("/adminById/{adminId}")
     public ResponseEntity<ApiResponse> getOneAdmin(@PathVariable Long adminId) {
@@ -101,7 +101,7 @@ public class UserController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_CEO')")
     @Operation(summary = "CEO adminni search qilish")
     @GetMapping("/searchAdmin")
     public ResponseEntity<ApiResponse> searchAdmin(@RequestParam(required = false, value = "fullName") String fullName,
@@ -113,7 +113,7 @@ public class UserController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_CEO')")
     @Operation(summary = "CEO/ADMIN teacherni update qilish")
     @PutMapping("/updateAdmin/{adminId}")
     public ResponseEntity<ApiResponse> updateAdmin(@PathVariable Long adminId, @RequestBody ReqAdmin reqAdmin) {
@@ -122,7 +122,7 @@ public class UserController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_STUDENT','ROLE_TEACHER', 'ROLE_ADMIN', 'ROLE_CEO', 'ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_STUDENT','ROLE_TEACHER', 'ROLE_ADMIN', 'ROLE_CEO')")
     @Operation(summary = "Barcha uzini profilini kurish")
     @GetMapping("/getMe")
     public ResponseEntity<ApiResponse> getMe(@CurrentUser User user) {
@@ -131,7 +131,7 @@ public class UserController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_STUDENT','ROLE_TEACHER', 'ROLE_ADMIN', 'ROLE_CEO', 'ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_STUDENT','ROLE_TEACHER', 'ROLE_ADMIN', 'ROLE_CEO')")
     @Operation(summary = "Barcha user uzini profilini update qilish")
     @PutMapping("/updateUser")
     public ResponseEntity<ApiResponse> updateUser(@CurrentUser User user, @RequestBody UserDTO userDTO) {

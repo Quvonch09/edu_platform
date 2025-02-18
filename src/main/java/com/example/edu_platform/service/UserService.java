@@ -7,6 +7,7 @@ import com.example.edu_platform.payload.*;
 import com.example.edu_platform.payload.auth.ResponseLogin;
 import com.example.edu_platform.payload.req.ReqAdmin;
 import com.example.edu_platform.payload.req.ReqTeacher;
+import com.example.edu_platform.payload.res.ResPageable;
 import com.example.edu_platform.repository.CategoryRepository;
 import com.example.edu_platform.repository.FileRepository;
 import com.example.edu_platform.repository.GroupRepository;
@@ -36,7 +37,7 @@ public class UserService {
     //    Teacher CRUD
     public ApiResponse saveTeacher(ReqTeacher reqTeacher) {
         boolean b = userRepository
-                .existsByPhoneNumberAndFullNameAndRole(reqTeacher.getPhoneNumber(), reqTeacher.getFullName(), Role.ROLE_TEACHER);
+                .existsByPhoneNumberAndFullNameAndRoleAndEnabledTrue(reqTeacher.getPhoneNumber(), reqTeacher.getFullName(), Role.ROLE_TEACHER);
         if (b) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu User"));
         }
@@ -78,7 +79,15 @@ public class UserService {
             }
             teacherList.add(convertUserToTeacherDTO(allTeacher,categoryIds));
         }
-        return new ApiResponse(teacherList);
+
+        ResPageable resPageable = ResPageable.builder()
+                .page(page)
+                .size(size)
+                .totalElements(allTeachers.getTotalElements())
+                .totalElements(allTeachers.getTotalElements())
+                .body(teacherList)
+                .build();
+        return new ApiResponse(resPageable);
     }
 
 
@@ -144,7 +153,7 @@ public class UserService {
 
 //    Admin CRUD
     public ApiResponse saveAdmin(ReqAdmin reqAdmin){
-        boolean b = userRepository.existsByPhoneNumberAndFullNameAndRole(reqAdmin.getPhoneNumber(), reqAdmin.getFullName(), Role.ROLE_ADMIN);
+        boolean b = userRepository.existsByPhoneNumberAndFullNameAndRoleAndEnabledTrue(reqAdmin.getPhoneNumber(), reqAdmin.getFullName(), Role.ROLE_ADMIN);
         if (b) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu Admin"));
         }
@@ -208,7 +217,14 @@ public class UserService {
                     .build();
             userList.add(adminDTO);
         }
-        return new ApiResponse(userList);
+        ResPageable resPageable = ResPageable.builder()
+                .page(page)
+                .size(size)
+                .totalPage(users.getTotalPages())
+                .totalElements(users.getTotalElements())
+                .body(userList)
+                .build();
+        return new ApiResponse(resPageable);
     }
 
 
