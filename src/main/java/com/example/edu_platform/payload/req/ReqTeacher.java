@@ -12,4 +12,5 @@ public class ReqTeacher {
     private String phoneNumber;
     private Long categoryId;
     private String password;
+    private Long fileId;
 }

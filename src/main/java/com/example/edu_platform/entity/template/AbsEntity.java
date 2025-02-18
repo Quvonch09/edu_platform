@@ -2,8 +2,10 @@ package com.example.edu_platform.entity.template;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -16,6 +18,7 @@ import java.time.LocalDateTime;
 @EntityListeners({AuditingEntityListener.class})
 @AllArgsConstructor
 @NoArgsConstructor
+@SuperBuilder
 public abstract class AbsEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
