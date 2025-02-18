@@ -9,6 +9,12 @@ import com.example.edu_platform.payload.ApiResponse;
 public class NotFoundException extends RuntimeException {
 
     private ApiResponse apiResponse;
+    private String message;
+
+    public NotFoundException(String message) {
+        this.message = message;
+    }
+
     public NotFoundException(ApiResponse apiResponse) {
         this.apiResponse = apiResponse;
     }

@@ -74,9 +74,9 @@ public class AuthService {
 
         User user = saveUser(auth, Role.ROLE_STUDENT);
 
-        List<User> students = group.getStudentList();
+        List<User> students = group.getStudents();
         students.add(user);
-        group.setStudentList(students);
+        group.setStudents(students);
         groupRepository.save(group);
         user.setRole(Role.ROLE_STUDENT);
         userRepository.save(user);

@@ -1,21 +1,17 @@
 package com.example.edu_platform.payload;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ModuleDTO {
     private Long id;
     private String name;
-    private Long categoryId;
-    private LocalDateTime createdAt;
-    private Long createdBy;
-    @Schema(hidden = true)
-    private LocalDateTime updatedAt;
+    private String category;
+    private boolean deleted;
 }

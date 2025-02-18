@@ -4,12 +4,13 @@ import com.example.edu_platform.entity.template.AbsEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 @Entity
 public class Feedback extends AbsEntity {
     private String feedback;

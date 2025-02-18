@@ -38,15 +38,12 @@ public class ModuleService {
         if (foundModule == null){
             return new ApiResponse(ResponseError.NOTFOUND("Modul"));
         }
+        return new ApiResponse(moduleDTO(foundModule));
+    }
 
-        ModuleDTO moduleDTO = ModuleDTO.builder()
-                .id(foundModule.getId())
-                .name(foundModule.getName())
-                .categoryId(foundModule.getCategory().getId())
-                .createdAt(foundModule.getCreatedAt())
-                .createdBy(foundModule.getCreatedBy())
-                .build();
-        return new ApiResponse(moduleDTO);
+    public ApiResponse getModulesByCategory(Long categoryId){
+        //todo
+        return null;
     }
 
     public ApiResponse update(Long moduleId,ModuleRequest moduleRequest){
@@ -73,5 +70,14 @@ public class ModuleService {
         module.setDeleted(true);
         moduleRepository.save(module);
         return new ApiResponse("Modul o'chirildi");
+    }
+
+    private ModuleDTO moduleDTO(Module module){
+        return ModuleDTO.builder()
+                .id(module.getId())
+                .name(module.getName())
+                .category(module.getCategory().getName())
+                .deleted(module.isDeleted())
+                .build();
     }
 }
