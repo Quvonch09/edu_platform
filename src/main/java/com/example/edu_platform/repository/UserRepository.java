@@ -116,7 +116,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
                             @Param("phoneNumber") String phoneNumber, Pageable pageable);
 
 
-    @Query(value = "SELECT u.full_name, u.phone_number, g.id, u.created_at, u.age, u.user_status, u.parent_phone_number " +
+
+    @Query(value = "SELECT u.id, u.full_name, u.phone_number, g.id as groupId, u.created_at, u.age, u.user_status as status, u.parent_phone_number, " +
+            "CASE WHEN  extract(month from p.payment_date)  = EXTRACT(month from  current_date) THEN true ELSE false END AS hasPaid " +
             "FROM users u " +
             "JOIN groups_students gsl ON u.id = gsl.students_id " +
             "JOIN groups g ON gsl.group_id = g.id " +
@@ -128,7 +130,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "AND (:teacherId IS NULL OR g.teacher_id = :teacherId) " +
             "AND (:startAge IS NULL OR u.age >= :startAge) " +
             "AND (:endAge IS NULL OR u.age <= :endAge) " +
-            "AND (:date IS NULL OR p.payment_date >= CAST(:date AS TIMESTAMP)) " +
             "AND u.role = 'ROLE_STUDENT'",
             nativeQuery = true)
     Page<ResStudent> searchStudents(@Param("fullName") String fullName,
@@ -136,7 +137,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
                                     @Param("userStatus") String userStatus,
                                     @Param("groupName") String groupName,
                                     @Param("teacherId") Long teacherId,
-                                    @Param("date") LocalDateTime date,
                                     @Param("startAge") Integer startAge,
                                     @Param("endAge") Integer endAge,
                                     Pageable pageable);
