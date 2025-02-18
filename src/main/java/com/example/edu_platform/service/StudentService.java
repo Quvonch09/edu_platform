@@ -66,7 +66,7 @@ public class StudentService {
                 .accountNonExpired(true)
                 .build();
 
-        group.getStudentList().add(student);
+        group.getStudents().add(student);
         userRepository.save(student);
         groupRepository.save(group);
         return new ApiResponse("Successfully saved student");
@@ -139,7 +139,7 @@ public class StudentService {
 
         Group group = groupRepository.findByStudentId(user.getId()).orElse(null);
         if (group != null) {
-            group.getStudentList().remove(user.getId());
+            group.getStudents().remove(user.getId());
             groupRepository.save(group);
             groupRepository.deleteUserGroupStudentList(user.getId());
         }
