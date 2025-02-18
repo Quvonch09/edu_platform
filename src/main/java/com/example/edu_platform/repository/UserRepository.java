@@ -43,7 +43,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = "SELECT u.full_name, u.phone_number, g.id, u.created_at, u.age, u.user_status, u.parent_phone_number " +
             "FROM users u " +
-            "JOIN groups_student_list gsl ON u.id = gsl.student_list_id " +
+            "JOIN groups_students gsl ON u.id = gsl.students_id " +
             "JOIN groups g ON gsl.group_id = g.id " +
             "LEFT JOIN payment p ON p.student_id = u.id " +
             "WHERE (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%'))) " +
