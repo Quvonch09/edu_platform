@@ -517,3 +517,8 @@
 2025-02-18T14:53:54.776+05:00  INFO 4828 --- [Edu_platform] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
 2025-02-18T14:53:55.431+05:00  WARN 4828 --- [Edu_platform] [http-nio-8080-exec-1] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Error: 0, SQLState: 02000
 2025-02-18T14:53:55.432+05:00 ERROR 4828 --- [Edu_platform] [http-nio-8080-exec-1] o.h.engine.jdbc.spi.SqlExceptionHelper   : No results were returned by the query.
+2025-02-18T15:12:00.252+05:00  INFO 4828 --- [Edu_platform] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-02-18T15:12:00.748+05:00  INFO 4828 --- [Edu_platform] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-02-18T15:12:00.854+05:00  INFO 4828 --- [Edu_platform] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-02-18T15:12:00.947+05:00  INFO 4828 --- [Edu_platform] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-02-18T15:12:01.053+05:00  INFO 4828 --- [Edu_platform] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
