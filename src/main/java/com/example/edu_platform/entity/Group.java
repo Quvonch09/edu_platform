@@ -23,6 +23,7 @@ public class Group extends AbsEntity {
     private Category category;
     @ManyToMany
     private List<User> students;
+    private LocalDate startDate;
     private LocalDate endDate;
     @ManyToOne
     private GraphicDay days;

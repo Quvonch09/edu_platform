@@ -9,6 +9,7 @@ import com.example.edu_platform.payload.ResponseError;
 import com.example.edu_platform.payload.StudentDTO;
 import com.example.edu_platform.payload.auth.ResponseLogin;
 import com.example.edu_platform.payload.req.ReqStudent;
+import com.example.edu_platform.payload.res.ResPageable;
 import com.example.edu_platform.payload.res.ResStudent;
 import com.example.edu_platform.repository.FileRepository;
 import com.example.edu_platform.repository.GroupRepository;
@@ -78,8 +79,15 @@ public class StudentService {
                                      int page, int size){
         PageRequest pageRequest = PageRequest.of(page, size);
         Page<ResStudent> users = userRepository.searchStudents(fullName, phoneNumber, userStatus.name(), groupName,
-                teacherId, LocalDateTime.now(), startAge, endAge, pageRequest);
-        return new ApiResponse(users.getContent());
+                teacherId, startAge, endAge, pageRequest);
+        ResPageable resPageable = ResPageable.builder()
+                .page(page)
+                .size(size)
+                .totalPage(users.getTotalPages())
+                .totalElements(users.getTotalElements())
+                .body(users.getContent())
+                .build();
+        return new ApiResponse(resPageable);
 
     }
 
