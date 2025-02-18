@@ -9,9 +9,9 @@ import java.util.Optional;
 public interface GroupRepository extends JpaRepository<Group, Long> {
     Integer countByTeacherId(Long teacherId);
 
-    @Query(value = "select * from groups g join groups_student_list gsl on gsl.student_list_id = ?1", nativeQuery = true)
+    @Query(value = "select * from groups g join groups_students gsl on gsl.students_id = ?1", nativeQuery = true)
     Optional<Group> findByStudentId(Long studentId);
 
-    @Query(value = "delete from groups_student_list where student_list_id = ?1", nativeQuery = true)
+    @Query(value = "delete from groups_students where students_id = ?1", nativeQuery = true)
     void deleteUserGroupStudentList(Long studentId);
 }
