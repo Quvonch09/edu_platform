@@ -16,4 +16,5 @@ public class Quiz {
     private String title;
     @ManyToOne
     private Lesson lesson;
+    private boolean deleted;
 }

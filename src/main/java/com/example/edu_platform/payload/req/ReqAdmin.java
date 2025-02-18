@@ -1,5 +1,6 @@
 package com.example.edu_platform.payload.req;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 @Getter
@@ -7,10 +8,11 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ReqTeacher {
+public class ReqAdmin {
+    @Schema(hidden = true)
+    private Long id;
     private String fullName;
     private String phoneNumber;
-    private Long categoryId;
     private String password;
     private Long fileId;
 }

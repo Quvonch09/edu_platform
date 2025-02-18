@@ -19,7 +19,7 @@ public class Lesson extends AbsEntity {
     private String videoLink;
     @ManyToOne
     private Module module;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     private List<File> files;
     private boolean deleted;
 }

@@ -35,6 +35,8 @@ public class User extends AbsEntity implements UserDetails {
     private String departure_description;
     @Enumerated(EnumType.STRING)
     private Role role;
+    @OneToOne
+    private File file;
 
 
     private boolean accountNonExpired = true;

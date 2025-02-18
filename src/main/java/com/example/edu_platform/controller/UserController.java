@@ -1,7 +1,11 @@
 package com.example.edu_platform.controller;
 
+import com.example.edu_platform.entity.User;
 import com.example.edu_platform.payload.ApiResponse;
+import com.example.edu_platform.payload.UserDTO;
+import com.example.edu_platform.payload.req.ReqAdmin;
 import com.example.edu_platform.payload.req.ReqTeacher;
+import com.example.edu_platform.security.CurrentUser;
 import com.example.edu_platform.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -70,10 +74,69 @@ public class UserController {
 
 
     @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_CEO')")
-    @Operation(summary = "CEO/ADMIN teacherni delete qilish")
-    @DeleteMapping("/deleteTeacher/{teacherId}")
-    public ResponseEntity<ApiResponse> deleteTeacher(@PathVariable Long teacherId) {
-        ApiResponse apiResponse = userService.deleteTeacher(teacherId);
+    @Operation(summary = "CEO/ADMIN teacher/admin delete qilish")
+    @DeleteMapping("/deleteTeacher/{userId}")
+    public ResponseEntity<ApiResponse> deleteUser(@PathVariable Long userId, @CurrentUser User user) {
+        ApiResponse apiResponse = userService.deleteTeacher(userId, user);
         return ResponseEntity.ok(apiResponse);
     }
+
+
+
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_CEO')")
+    @Operation(summary = "CEO admin qushish")
+    @PostMapping("/saveAdmin")
+    public ResponseEntity<ApiResponse> saveAdmin(@RequestBody ReqAdmin reqAdmin) {
+        ApiResponse apiResponse = userService.saveAdmin(reqAdmin);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_CEO')")
+    @Operation(summary = "CEO admin bittasini kurish")
+    @GetMapping("/adminById/{adminId}")
+    public ResponseEntity<ApiResponse> getOneAdmin(@PathVariable Long adminId) {
+        ApiResponse apiResponse = userService.getOneAdmin(adminId);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_CEO')")
+    @Operation(summary = "CEO adminni search qilish")
+    @GetMapping("/searchAdmin")
+    public ResponseEntity<ApiResponse> searchAdmin(@RequestParam(required = false, value = "fullName") String fullName,
+                                                     @RequestParam(required = false, value = "phoneNumber") String phoneNumber,
+                                                     @RequestParam(defaultValue = "0") int page,
+                                                     @RequestParam(defaultValue = "10") int size) {
+        ApiResponse apiResponse = userService.searchAdmin(fullName, phoneNumber, page, size);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_CEO')")
+    @Operation(summary = "CEO/ADMIN teacherni update qilish")
+    @PutMapping("/updateAdmin/{adminId}")
+    public ResponseEntity<ApiResponse> updateAdmin(@PathVariable Long adminId, @RequestBody ReqAdmin reqAdmin) {
+        ApiResponse apiResponse = userService.updateAdmin(adminId, reqAdmin);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+
+    @PreAuthorize("hasAnyRole('ROLE_STUDENT','ROLE_TEACHER', 'ROLE_ADMIN', 'ROLE_CEO', 'ROLE_SUPER_ADMIN')")
+    @Operation(summary = "Barcha uzini profilini kurish")
+    @GetMapping("/getMe")
+    public ResponseEntity<ApiResponse> getMe(@CurrentUser User user) {
+        ApiResponse apiResponse = userService.getMe(user);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+
+    @PreAuthorize("hasAnyRole('ROLE_STUDENT','ROLE_TEACHER', 'ROLE_ADMIN', 'ROLE_CEO', 'ROLE_SUPER_ADMIN')")
+    @Operation(summary = "Barcha user uzini profilini update qilish")
+    @PutMapping("/updateUser")
+    public ResponseEntity<ApiResponse> updateUser(@CurrentUser User user, @RequestBody UserDTO userDTO) {
+        ApiResponse apiResponse = userService.updateUser(user, userDTO);
+        return ResponseEntity.ok(apiResponse);
+    }
+
 }
