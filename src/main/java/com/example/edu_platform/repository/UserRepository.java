@@ -26,13 +26,49 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Integer countAllByStudent();
 
 
-    @Query(" SELECT " +
-            "    TO_CHAR(createdAt, 'Month YYYY') AS month, " +
-            "    COUNT(*) AS count " +
-            "FROM User " +
-            "GROUP BY month " +
-            "ORDER BY TO_DATE(month, 'Month YYYY') ")
-    List<ResCEODiagram> findByYearlyStatistic();
+    @Query(value = """
+       WITH months AS (
+           SELECT generate_series(
+                          DATE_TRUNC('year', CURRENT_DATE),
+                          DATE_TRUNC('month', CURRENT_DATE),
+                          '1 month'
+                  )::DATE AS month_start
+       )
+       SELECT
+           TO_CHAR(m.month_start, 'Month') AS month,
+           COALESCE(COUNT(u.id), 0) AS count
+       FROM months m
+                LEFT JOIN users u
+                          ON EXTRACT(MONTH FROM u.created_at) = EXTRACT(MONTH FROM m.month_start)
+                              AND EXTRACT(YEAR FROM u.created_at) = EXTRACT(YEAR FROM m.month_start)
+                              AND u.role = 'ROLE_STUDENT'
+       GROUP BY m.month_start
+       ORDER BY m.month_start;
+""" , nativeQuery = true)
+    List<ResCEODiagram> getCEODiagrams();
+
+
+    @Query(value = """
+        WITH months AS (
+            SELECT generate_series(
+                           DATE_TRUNC('year', CURRENT_DATE),
+                           DATE_TRUNC('month', CURRENT_DATE),
+                           '1 month'
+                   )::DATE AS month_start
+        )
+        SELECT
+            TO_CHAR(m.month_start, 'Month') AS month,
+            COALESCE(COUNT(u.id), 0) AS count
+        FROM months m
+                 LEFT JOIN users u
+                           ON EXTRACT(MONTH FROM u.update_at) = EXTRACT(MONTH FROM m.month_start)
+                               AND EXTRACT(YEAR FROM u.update_at) = EXTRACT(YEAR FROM m.month_start)
+                               AND u.role = 'ROLE_STUDENT'
+                               AND u.user_status = 'CHIQIB_KETGAN'
+        GROUP BY m.month_start
+        ORDER BY m.month_start
+""" , nativeQuery = true)
+    List<ResCEODiagram> getLeaveStudent();
 
     boolean existsByPhoneNumberAndFullName(String phone, String fullName);
 
@@ -44,4 +80,21 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> getAllTeachers(@Param("fullName") String fullName,
                               @Param("phoneNumber") String phoneNumber,
                               @Param("groupId") Long groupId, Pageable pageable);
+
+
+    @Query(value = """
+
+            SELECT
+            COALESCE(COUNT(s.id), 0) AS student_count
+        FROM groups g
+                 JOIN users u ON g.teacher_id = u.id
+                 LEFT JOIN groups_student_list gu ON gu.group_id = g.id  -- group_user jadvali, bu yerda studentlar va guruhlar bog‘langan
+                 LEFT JOIN users s ON s.id = gu.student_list_id AND s.user_status = 'UQIYABDI'  -- Studentlarning statusi
+        WHERE g.teacher_id = :teacherId
+          AND g.active = TRUE """ , nativeQuery = true
+    )
+    Integer countAllByStudent(Long teacherId);
+
+
+
 }
