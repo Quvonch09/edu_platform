@@ -9,7 +9,6 @@ import com.example.edu_platform.payload.ResponseError;
 import com.example.edu_platform.payload.StudentDTO;
 import com.example.edu_platform.payload.auth.ResponseLogin;
 import com.example.edu_platform.payload.req.ReqStudent;
-import com.example.edu_platform.payload.res.ResPageable;
 import com.example.edu_platform.payload.res.ResStudent;
 import com.example.edu_platform.repository.FileRepository;
 import com.example.edu_platform.repository.GroupRepository;
@@ -25,8 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +37,7 @@ public class StudentService {
 
     @Transactional
     public ApiResponse saveStudent(ReqStudent reqStudent){
-        boolean b = userRepository.existsByPhoneNumberAndFullNameAndRole(
+        boolean b = userRepository.existsByPhoneNumberAndFullNameAndRoleAndEnabledTrue(
                 reqStudent.getPhoneNumber(), reqStudent.getFullName(), Role.ROLE_STUDENT);
 
         if(b){
@@ -61,6 +58,7 @@ public class StudentService {
                 .file(fileRepository.findById(reqStudent.getFileId()).orElse(null))
                 .password(passwordEncoder.encode(reqStudent.getPassword()))
                 .enabled(true)
+                .userStatus(UserStatus.UQIYAPDI)
                 .credentialsNonExpired(true)
                 .accountNonLocked(true)
                 .accountNonExpired(true)
@@ -137,12 +135,6 @@ public class StudentService {
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
 
-        Group group = groupRepository.findByStudentId(user.getId()).orElse(null);
-        if (group != null) {
-            group.getStudents().remove(user.getId());
-            groupRepository.save(group);
-            groupRepository.deleteUserGroupStudentList(user.getId());
-        }
         user.setUserStatus(UserStatus.CHIQIB_KETGAN);
         user.setEnabled(false);
         user.setDeparture_date(departureDate);
