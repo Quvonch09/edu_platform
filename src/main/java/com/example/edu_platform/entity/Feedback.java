@@ -21,4 +21,6 @@ public class Feedback extends AbsEntity {
     private Lesson lesson;
     @ManyToOne
     private Quiz quiz;
+    @ManyToOne
+    private User student;
 }
