@@ -48,4 +48,25 @@ public class PaymentController {
         ApiResponse search = paymentService.search(fullName, statusEnum, page, size);
         return ResponseEntity.ok(search);
     }
+
+
+    @PreAuthorize("hasRole('ROLE_CEO')")
+    @Operation(summary = "CEO paymentni update qilish")
+    @PutMapping("/{paymentId}")
+    public ResponseEntity<ApiResponse> updatePayment(@PathVariable Long paymentId,
+                                                     @RequestParam(required = false, value = "status")PaymentStatusEnum paymentStatus,
+                                                     @RequestParam PaymentEnum payType,
+                                                     @RequestBody ReqPayment reqPayment){
+        return ResponseEntity.ok(paymentService.updatePayment(paymentId, paymentStatus, payType, reqPayment));
+    }
+
+
+
+    @PreAuthorize("hasRole('ROLE_CEO')")
+    @Operation(summary = "CEO paymentni delete qilish")
+    @DeleteMapping("/{paymentId}")
+    public ResponseEntity<ApiResponse> deletePayment(@PathVariable Long paymentId){
+        ApiResponse apiResponse = paymentService.deletePayment(paymentId);
+        return ResponseEntity.ok(apiResponse);
+    }
 }
