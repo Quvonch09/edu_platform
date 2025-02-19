@@ -1,6 +1,7 @@
 package com.example.edu_platform.exception;
 
 import com.example.edu_platform.payload.ApiResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,18 +15,23 @@ import java.nio.file.AccessDeniedException;
 public class GlobalException {
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiResponse> accessDeniedExceptionHandler(AccessDeniedException e) {
-        return ResponseEntity.ok(new ApiResponse(ResponseError.ACCESS_DENIED()));
+    public ResponseEntity<String> accessDeniedExceptionHandler(AccessDeniedException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<String> BadRequestExceptionHandler(BadRequestException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ApiResponse> notFoundExceptionHandler(NotFoundException e) {
-        return ResponseEntity.ok(e.getApiResponse());
+    public ResponseEntity<String> notFoundExceptionHandler(NotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse> methodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ResponseEntity<String> methodArgumentNotValidException(MethodArgumentNotValidException e) {
         String message = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
-        return ResponseEntity.ok(new ApiResponse(ResponseError.VALIDATION_FAILED(message)));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
     }
 }

@@ -15,4 +15,6 @@ public class FeedbackDto {
     private String feedback;
     private int rating;
     private long teacherId;
+    private long quizId;
+    private long lessonId;
 }
