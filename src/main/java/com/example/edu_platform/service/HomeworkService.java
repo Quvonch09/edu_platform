@@ -25,8 +25,6 @@ public class HomeworkService {
 
         if (task == null){
             return new ApiResponse(ResponseError.NOTFOUND("Task"));
-        } else if (file == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("File"));
         }
         Homework homework = Homework.builder()
                 .answer(reqHomework.getAnswer())

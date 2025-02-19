@@ -10,13 +10,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/task")
+@RequestMapping("/api/task")
 @RequiredArgsConstructor
 public class TaskController {
     private final TaskService taskService;
 
     @PostMapping("/save-task")
-//    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
     @Operation(summary = "Task qo'shish")
     public ResponseEntity<ApiResponse> saveTask(
             @RequestBody ReqTask reqTask
@@ -42,7 +42,7 @@ public class TaskController {
 
     @PutMapping("/update/{taskId}")
     @Operation(summary = "Taskni yangilash")
-//    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> updateTask(
             @PathVariable Long taskId,
             @RequestBody ReqTask reqTask
@@ -52,7 +52,7 @@ public class TaskController {
 
     @DeleteMapping("/delete/{taskId}")
     @Operation(summary = "Taskni o'chirish")
-//    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> deleteTask(
             @PathVariable Long taskId
     ){

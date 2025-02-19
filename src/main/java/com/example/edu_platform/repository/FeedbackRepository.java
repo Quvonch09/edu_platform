@@ -14,6 +14,10 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
 
     Optional<Feedback> findByIdAndCreatedBy(long id, long createdBy);
 
+    boolean existsByCreatedByAndTeacherId(long studentId, long teacherId);
+    boolean existsByCreatedByAndLessonId(long studentId, long lessonId);
+    boolean existsByCreatedByAndQuizId(long studentId, long quizId);
+
     Page<Feedback> getAllByTeacherId(Long teacherId, Pageable pageable);
 
     Page<Feedback> getAllByCreatedBy(Long userId, Pageable pageable);

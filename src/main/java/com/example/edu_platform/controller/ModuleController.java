@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/module")
+@RequestMapping("/api/module")
 public class ModuleController {
     private final ModuleService moduleService;
 

@@ -70,8 +70,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             COALESCE(COUNT(u.id), 0) AS count
         FROM months m
                  LEFT JOIN users u
-                           ON EXTRACT(MONTH FROM u.update_at) = EXTRACT(MONTH FROM m.month_start)
-                               AND EXTRACT(YEAR FROM u.update_at) = EXTRACT(YEAR FROM m.month_start)
+                           ON EXTRACT(MONTH FROM u.updated_at) = EXTRACT(MONTH FROM m.month_start)
+                               AND EXTRACT(YEAR FROM u.updated_at) = EXTRACT(YEAR FROM m.month_start)
                                AND u.role = 'ROLE_STUDENT'
                                AND u.user_status = 'CHIQIB_KETGAN'
         GROUP BY m.month_start
