@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.List;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByPhoneNumber(String phoneNumber);
@@ -78,17 +79,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
 """ , nativeQuery = true)
     List<ResCEODiagram> getLeaveStudent();
 
-    boolean existsByPhoneNumberAndFullName(String phone, String fullName);
     boolean existsByPhoneNumberAndFullNameAndRoleAndEnabledTrue(String phone, String fullName, Role role);
 
 
-    @Query(value = "select u.* from users u join groups g on u.id = g.teacher_id where " +
-            "(:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%'))) " +
-            "and (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%'))) " +
-            "and (:groupId IS NULL OR g.id = :groupId) and role = 'ROLE_TEACHER'" , nativeQuery = true)
-    Page<User> searchTeachers(@Param("fullName") String fullName,
+    @Query(value = "select distinct u.* from users u  left join groups g on u.id = g.teacher_id where\n" +
+            "                                    (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%')))\n" +
+            "                                    and (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%')))\n" +
+            "                                    and (:groupId IS NULL OR g.id = :groupId) and u.role = :role and u.enabled = true" , nativeQuery = true)
+    Page<User> searchUsers(@Param("fullName") String fullName,
                               @Param("phoneNumber") String phoneNumber,
-                              @Param("groupId") Long groupId, Pageable pageable);
+                              @Param("groupId") Long groupId,
+                              @Param("role") String role, Pageable pageable);
 
 
     @Query(value = """
@@ -103,17 +104,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
           AND g.active = TRUE """ , nativeQuery = true
     )
     Integer countAllByStudent(Long teacherId);
-
-
-
-
-
-    @Query(value = "select * from users u where " +
-            "(:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%'))) " +
-            "and (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%'))) " +
-            "and role = 'ROLE_ADMIN'", nativeQuery = true)
-    Page<User> searchAdmins(@Param("fullName") String fullName,
-                            @Param("phoneNumber") String phoneNumber, Pageable pageable);
 
 
 
@@ -138,7 +128,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
                                     @Param("groupName") String groupName,
                                     @Param("teacherId") Long teacherId,
                                     @Param("startAge") Integer startAge,
-                                    @Param("endAge") Integer endAge,
-                                    Pageable pageable);
+                                    @Param("endAge") Integer endAge, Pageable pageable);
+
+
+    @Query(value = "select count(u.*) from users u join payment p on u.id = p.student_id and u.role = 'ROLE_STUDENT'" +
+            "and EXTRACT(month from p.payment_date) = EXTRACT(month from current_date)", nativeQuery = true)
+    Integer countStudentsHasPaid();
 
 }

@@ -68,9 +68,9 @@ public class UserService {
 
 
     @Transactional
-    public ApiResponse searchTeacher(String fullName, String phoneNumber, Long groupId, int page, int size){
+    public ApiResponse searchUsers(String fullName, String phoneNumber, Long groupId,Role role, int page, int size){
         PageRequest pageRequest = PageRequest.of(page, size);
-        Page<User> allTeachers = userRepository.searchTeachers(fullName, phoneNumber, groupId, pageRequest);
+        Page<User> allTeachers = userRepository.searchUsers(fullName, phoneNumber, groupId, role.name(), pageRequest);
         List<TeacherDTO> teacherList = new ArrayList<>();
         for (User allTeacher : allTeachers) {
             List<Long> categoryIds = new ArrayList<>();
@@ -204,30 +204,6 @@ public class UserService {
     }
 
 
-    public ApiResponse searchAdmin(String fullName, String phoneNumber, int page, int size){
-        PageRequest pageRequest = PageRequest.of(page, size);
-        Page<User> users = userRepository.searchAdmins(fullName, phoneNumber, pageRequest);
-        List<AdminDTO> userList = new ArrayList<>();
-        for (User user : users) {
-            AdminDTO adminDTO = AdminDTO.builder()
-                    .id(user.getId())
-                    .fullName(user.getFullName())
-                    .phoneNumber(user.getPhoneNumber())
-                    .fileId(user.getFile() != null ? user.getFile().getId() : null)
-                    .build();
-            userList.add(adminDTO);
-        }
-        ResPageable resPageable = ResPageable.builder()
-                .page(page)
-                .size(size)
-                .totalPage(users.getTotalPages())
-                .totalElements(users.getTotalElements())
-                .body(userList)
-                .build();
-        return new ApiResponse(resPageable);
-    }
-
-
     public ApiResponse getMe(User user){
         UserDTO userDTO = UserDTO.builder()
                 .id(user.getId())
@@ -257,6 +233,7 @@ public class UserService {
     private TeacherDTO convertUserToTeacherDTO(User user, List<Long> categoryIds) {
 
         return TeacherDTO.builder()
+                .id(user.getId())
                 .fullName(user.getFullName())
                 .phoneNumber(user.getPhoneNumber())
                 .categoryId(categoryIds)

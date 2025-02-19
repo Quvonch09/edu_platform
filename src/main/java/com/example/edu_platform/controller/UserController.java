@@ -1,6 +1,7 @@
 package com.example.edu_platform.controller;
 
 import com.example.edu_platform.entity.User;
+import com.example.edu_platform.entity.enums.Role;
 import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.UserDTO;
 import com.example.edu_platform.payload.req.ReqAdmin;
@@ -31,14 +32,15 @@ public class UserController {
 
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
-    @Operation(summary = "CEO/ADMIN teacherni search qilish")
-    @GetMapping("/searchTeacher")
-    public ResponseEntity<ApiResponse> searchTeacher(@RequestParam(required = false, value = "fullName") String fullName,
+    @Operation(summary = "CEO/ADMIN teacher va adminlarni search qilish")
+    @GetMapping("/searchUsers")
+    public ResponseEntity<ApiResponse> searchUsers(@RequestParam(required = false, value = "fullName") String fullName,
                                                      @RequestParam(required = false, value = "phoneNumber") String phoneNumber,
                                                      @RequestParam(required = false, value = "groupId") Long groupId,
+                                                     @RequestParam(value = "role") Role role,
                                                      @RequestParam(defaultValue = "0") int page,
                                                      @RequestParam(defaultValue = "10") int size) {
-        ApiResponse apiResponse = userService.searchTeacher(fullName, phoneNumber, groupId, page, size);
+        ApiResponse apiResponse = userService.searchUsers(fullName, phoneNumber, groupId,role, page, size);
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -100,17 +102,6 @@ public class UserController {
         return ResponseEntity.ok(apiResponse);
     }
 
-
-    @PreAuthorize("hasAnyRole('ROLE_CEO')")
-    @Operation(summary = "CEO adminni search qilish")
-    @GetMapping("/searchAdmin")
-    public ResponseEntity<ApiResponse> searchAdmin(@RequestParam(required = false, value = "fullName") String fullName,
-                                                     @RequestParam(required = false, value = "phoneNumber") String phoneNumber,
-                                                     @RequestParam(defaultValue = "0") int page,
-                                                     @RequestParam(defaultValue = "10") int size) {
-        ApiResponse apiResponse = userService.searchAdmin(fullName, phoneNumber, page, size);
-        return ResponseEntity.ok(apiResponse);
-    }
 
 
     @PreAuthorize("hasAnyRole('ROLE_CEO')")
