@@ -89,4 +89,38 @@ public class PaymentService {
                 .build();
         return new ApiResponse(resPageable);
     }
+
+
+    public ApiResponse updatePayment(Long paymentId,PaymentStatusEnum paymentStatus,
+                                     PaymentEnum paymentType,
+                                     ReqPayment reqPayment ){
+        Payment payment = paymentRepository.findById(paymentId).orElse(null);
+        if(payment == null){
+            return new ApiResponse(ResponseError.NOTFOUND("Payment"));
+        }
+        User user = userRepository.findById(reqPayment.getUserId()).orElse(null);
+        if(user == null){
+            return new ApiResponse(ResponseError.NOTFOUND("Student"));
+        }
+
+        payment.setPaymentStatus(paymentStatus);
+        payment.setPaymentType(paymentType);
+        payment.setPaymentDate(reqPayment.getPaymentDate());
+        payment.setStudent(user);
+        payment.setPrice(reqPayment.getPrice());
+        paymentRepository.save(payment);
+        return new ApiResponse("Successfully updated");
+    }
+
+
+
+    public ApiResponse deletePayment(Long paymentId){
+        Payment payment = paymentRepository.findById(paymentId).orElse(null);
+        if(payment == null){
+            return new ApiResponse(ResponseError.NOTFOUND("Payment"));
+        }
+
+        paymentRepository.delete(payment);
+        return new ApiResponse("Successfully deleted");
+    }
 }
