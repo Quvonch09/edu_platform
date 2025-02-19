@@ -1,6 +1,9 @@
 package com.example.edu_platform.repository;
 
 import com.example.edu_platform.entity.Group;
+import com.example.edu_platform.payload.res.ResCEODiagram;
+import com.example.edu_platform.payload.res.ResStudentRank;
+import com.example.edu_platform.payload.res.ResStudentStatistic;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface GroupRepository extends JpaRepository<Group, Long> {
