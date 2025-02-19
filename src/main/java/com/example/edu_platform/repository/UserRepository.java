@@ -131,7 +131,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                                     @Param("endAge") Integer endAge, Pageable pageable);
 
 
-    @Query(value = "select count(u.*) from users u join payment p on u.id = p.student_id and u.role = 'ROLE_STUDENT'" +
+    @Query(value = "select coalesce(count(u.*) , 0) from users u join payment p on u.id = p.student_id and u.role = 'ROLE_STUDENT'" +
             "and EXTRACT(month from p.payment_date) = EXTRACT(month from current_date)", nativeQuery = true)
     Integer countStudentsHasPaid();
 

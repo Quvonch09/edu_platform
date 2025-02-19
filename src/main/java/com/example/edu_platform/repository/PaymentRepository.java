@@ -12,9 +12,10 @@ import org.springframework.data.repository.query.Param;
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
 
-    @Query(value = "SELECT SUM(p.price)\n" +
-            "FROM payment p\n" +
-            "WHERE p.payment_type = :paymentType", nativeQuery = true)
+    @Query( "SELECT coalesce( SUM(p.price) , 0.0)\n" +
+            "FROM Payment  p \n" +
+            "WHERE p.paymentType = :paymentType and extract(month from p.paymentDate) " +
+            " = extract(month from current_date ) ")
     Double countPrice(@Param("paymentType") String paymentType);
 
 
@@ -23,4 +24,9 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             "and (:paymentStatus IS NULL OR p.payment_status = :paymentStatus)", nativeQuery = true)
     Page<Payment> searchPayments(@Param("name") String name,
                                  @Param("paymentStatus") String paymentStatus, Pageable pageable);
+
+    @Query("select  coalesce( avg(p.price) , 0.0 )  from Payment p where p.paymentType = 'TUSHUM' and extract(month from p.paymentDate) = "
+        +" extract(month from current_date ) ")
+    Double avgPayment();
+
 }
