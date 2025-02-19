@@ -18,7 +18,7 @@ import java.time.LocalDate;
 public class StudentController {
     private final StudentService studentService;
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
     @Operation(summary = "ADMIN/TEACHER student qushish")
     @PostMapping
     public ResponseEntity<ApiResponse> saveStudent(@RequestBody ReqStudent reqStudent){
@@ -27,12 +27,12 @@ public class StudentController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
     @Operation(summary = "Student search")
     @GetMapping
     public ResponseEntity<ApiResponse> getAllStudents(@RequestParam(required = false, value = "fullName") String fullName,
                                                       @RequestParam(required = false, value = "phoneNumber") String phoneNumber,
-                                                      @RequestParam(required = false, value = "status") UserStatus userStatus,
+                                                      @RequestParam(value = "status") UserStatus userStatus,
                                                       @RequestParam(required = false, value = "groupName") String groupName,
                                                       @RequestParam(required = false, value = "teacherId") Long teacherId,
                                                       @RequestParam(required = false, value = "startAge") Integer startAge,
@@ -44,7 +44,7 @@ public class StudentController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN','ROLE_ADMIN','ROLE_TEACHER','ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_TEACHER','ROLE_CEO')")
     @Operation(summary = "ADMIN/CEO/TEACHER studentni bittasini kurish")
     @GetMapping("/{studentId}")
     public ResponseEntity<ApiResponse> getOneStudent(@PathVariable Long studentId){
@@ -53,7 +53,7 @@ public class StudentController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN','ROLE_ADMIN','ROLE_TEACHER','ROLE_CEO','ROLE_STUDENT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_TEACHER','ROLE_CEO','ROLE_STUDENT')")
     @Operation(summary = "Barcha studentni update qilish")
     @PutMapping("/{studentId}")
     public ResponseEntity<ApiResponse> updateStudent(@PathVariable Long studentId, @RequestBody ReqStudent reqStudent){
@@ -62,7 +62,7 @@ public class StudentController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN','ROLE_ADMIN','ROLE_TEACHER','ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_TEACHER','ROLE_CEO')")
     @Operation(summary = "Admin/Ceo/Teacher studentni delete qilish")
     @DeleteMapping("/{studentId}")
     public ResponseEntity<ApiResponse> deleteStudent(@PathVariable Long studentId,

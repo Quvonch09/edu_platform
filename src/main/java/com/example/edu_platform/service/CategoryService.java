@@ -5,6 +5,7 @@ import com.example.edu_platform.entity.User;
 import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.CategoryDTO;
 import com.example.edu_platform.payload.ResponseError;
+import com.example.edu_platform.payload.res.ResPageable;
 import com.example.edu_platform.repository.CategoryRepository;
 import com.example.edu_platform.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +48,14 @@ public class CategoryService {
         for (Category category : allCategory.getContent()) {
             categoryDTOList.add(convertCategoryToCategoryDTO(category));
         }
-        return new ApiResponse(categoryDTOList);
+        ResPageable resPageable = ResPageable.builder()
+                .page(page)
+                .size(size)
+                .totalElements(allCategory.getTotalElements())
+                .totalPage(allCategory.getTotalPages())
+                .body(categoryDTOList)
+                .build();
+        return new ApiResponse(resPageable);
     }
 
 

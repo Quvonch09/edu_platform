@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/homework")
+@RequestMapping("/api/homework")
 public class HomeworkController {
     private final HomeworkService homeworkService;
 
     @PostMapping("/create-homework")
     @Operation(summary = "Student homework saqlaydi")
-//    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
     public ResponseEntity<ApiResponse> saveHomework(
             @RequestBody ReqHomework reqHomework,
             @CurrentUser User student
@@ -30,7 +30,7 @@ public class HomeworkController {
 
     @PutMapping("/check-homework/{homeworkId}")
     @Operation(summary = "Teacher homeworklarni tekshirish")
-//    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> checkHomework(
             @PathVariable Long homeworkId,
             @RequestParam Integer ball
@@ -40,7 +40,7 @@ public class HomeworkController {
 
     @GetMapping("/my-homeworks")
     @Operation(summary = "Student o'z homeworklarini ko'radi")
-//    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
     public ResponseEntity<ApiResponse> getMyHomeworks(
             @CurrentUser User student,
             @RequestParam boolean isChecked,
@@ -51,7 +51,7 @@ public class HomeworkController {
 
     @GetMapping("/get-homeworks/{id}")
     @Operation(summary = "Homeworklarni qidirish",description = "agar byStudent = true bo'lsa studentga bog'liq homeworklar aks holda taskga bog'liq")
-//    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse> getHomework(
             @RequestParam boolean isChecked,
             @PathVariable Long id,
@@ -62,7 +62,7 @@ public class HomeworkController {
 
     @GetMapping("/my-statistics")
     @Operation(summary = "O'z natijalarini ko'rish")
-//    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
     public ResponseEntity<ApiResponse> getStatistics(
             @CurrentUser User student
     ){

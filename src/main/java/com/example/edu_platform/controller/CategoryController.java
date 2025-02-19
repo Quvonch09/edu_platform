@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class CategoryController {
     private final CategoryService categoryService;
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole( 'ROLE_CEO')")
     @Operation(summary = "CEO category qushish")
     @PostMapping
     public ResponseEntity<ApiResponse> addCategory(@RequestBody CategoryDTO categoryDTO) {
@@ -24,7 +24,7 @@ public class CategoryController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_CEO','ROLE_ADMIN','ROLE_TEACHER','ROLE_STUDENT')")
+    @PreAuthorize("hasAnyRole('ROLE_CEO','ROLE_ADMIN','ROLE_TEACHER','ROLE_STUDENT')")
     @Operation(summary = "Barcha categorylarni kurish")
     @GetMapping
     public ResponseEntity<ApiResponse> search(@RequestParam(required = false, value = "name") String name,
@@ -36,7 +36,7 @@ public class CategoryController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_CEO','ROLE_ADMIN','ROLE_TEACHER','ROLE_STUDENT')")
+    @PreAuthorize("hasAnyRole('ROLE_CEO','ROLE_ADMIN','ROLE_TEACHER','ROLE_STUDENT')")
     @Operation(summary = "Barcha categoryni bittasini kurish")
     @GetMapping("/{categoryId}")
     public ResponseEntity<ApiResponse> getCategory(@PathVariable Long categoryId) {
@@ -46,7 +46,7 @@ public class CategoryController {
 
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole( 'ROLE_CEO')")
     @Operation(summary = "CEO categoryni update qilish")
     @PutMapping("/{categoryId}")
     public ResponseEntity<ApiResponse> updateCategory(@PathVariable Long categoryId, @RequestBody CategoryDTO categoryDTO) {
@@ -56,7 +56,7 @@ public class CategoryController {
 
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_CEO')")
     @Operation(summary = "CEO categoryni activeni update qilish")
     @PutMapping("/updateActive/{categoryId}")
     public ResponseEntity<ApiResponse> updateActiveCategory(@PathVariable Long categoryId, @RequestParam boolean active) {
@@ -66,7 +66,7 @@ public class CategoryController {
 
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_CEO')")
     @Operation(summary = "CEO categoryni delete qilish")
     @DeleteMapping("/{categoryId}")
     public ResponseEntity<ApiResponse> deleteCategory(@PathVariable Long categoryId) {

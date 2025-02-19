@@ -25,8 +25,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +38,7 @@ public class StudentService {
 
     @Transactional
     public ApiResponse saveStudent(ReqStudent reqStudent){
-        boolean b = userRepository.existsByPhoneNumberAndFullNameAndRole(
+        boolean b = userRepository.existsByPhoneNumberAndFullNameAndRoleAndEnabledTrue(
                 reqStudent.getPhoneNumber(), reqStudent.getFullName(), Role.ROLE_STUDENT);
 
         if(b){
@@ -61,6 +59,7 @@ public class StudentService {
                 .file(fileRepository.findById(reqStudent.getFileId()).orElse(null))
                 .password(passwordEncoder.encode(reqStudent.getPassword()))
                 .enabled(true)
+                .userStatus(UserStatus.UQIYAPDI)
                 .credentialsNonExpired(true)
                 .accountNonLocked(true)
                 .accountNonExpired(true)
@@ -80,8 +79,15 @@ public class StudentService {
                                      int page, int size){
         PageRequest pageRequest = PageRequest.of(page, size);
         Page<ResStudent> users = userRepository.searchStudents(fullName, phoneNumber, userStatus.name(), groupName,
-                teacherId, LocalDateTime.now(), startAge, endAge, pageRequest);
-        return new ApiResponse(users.getContent());
+                teacherId, startAge, endAge, pageRequest);
+        ResPageable resPageable = ResPageable.builder()
+                .page(page)
+                .size(size)
+                .totalPage(users.getTotalPages())
+                .totalElements(users.getTotalElements())
+                .body(users.getContent())
+                .build();
+        return new ApiResponse(resPageable);
 
     }
 
@@ -137,12 +143,6 @@ public class StudentService {
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
 
-        Group group = groupRepository.findByStudentId(user.getId()).orElse(null);
-        if (group != null) {
-            group.getStudents().remove(user.getId());
-            groupRepository.save(group);
-            groupRepository.deleteUserGroupStudentList(user.getId());
-        }
         user.setUserStatus(UserStatus.CHIQIB_KETGAN);
         user.setEnabled(false);
         user.setDeparture_date(departureDate);
