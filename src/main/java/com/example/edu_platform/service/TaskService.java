@@ -26,8 +26,6 @@ public class TaskService {
         File file = fileRepository.findById(reqTask.getFileId()).orElse(null);
         if (lesson == null){
             return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
-        } else if (file == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("File"));
         }
         Task task = Task.builder()
                 .title(reqTask.getTitle())

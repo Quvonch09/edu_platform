@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/lesson")
+@RequestMapping("/api/lesson")
 public class LessonController {
     private final LessonService lessonService;
 
     @PostMapping("/create-lesson")
     @Operation(summary = "O'qituvchi dars yaratish")
-//    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> createLesson(
             @RequestBody LessonRequest lessonRequest
     ){
@@ -27,7 +27,7 @@ public class LessonController {
 
     @GetMapping("/lesson-in-module/{moduleId}")
     @Operation(summary = "Moduldagi darslarni ko'rish")
-//    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse> getLessons(
             @PathVariable Long moduleId
     ){
@@ -36,7 +36,7 @@ public class LessonController {
 
     @PutMapping("/update-lesson/{lessonId}")
     @Operation(summary = "Darsni tahrirlash o'qituvchi uchun")
-//    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> update(
             @PathVariable Long lessonId,
             @RequestBody LessonRequest lessonRequest
@@ -54,7 +54,7 @@ public class LessonController {
 
     @PostMapping("/allow-lesson")
     @Operation(summary = "Darsga ruxsat berish")
-//    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> allowLesson(
             @RequestBody ReqLessonTracking reqLessonTracking
             ){
@@ -71,7 +71,7 @@ public class LessonController {
 
     @GetMapping("/statistics")
     @Operation(summary = "Dars statistikasini ko'rish")
-//    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse> getStatistics(){
         return ResponseEntity.ok(lessonService.getStatistics());
     }
