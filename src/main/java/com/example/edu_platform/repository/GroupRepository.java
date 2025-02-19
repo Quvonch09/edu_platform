@@ -199,4 +199,17 @@ ORDER BY r.rank_position;
     @Query(value = "select count(*) from groups g join groups_students gs on g.id = gs.group_id join users u on gs.students_id = u.id\n" +
             "            where u.user_status = 'CHIQIB_KETGAN'", nativeQuery = true)
     Integer countGroup(Long groupId);
+
+    @Query(value = """
+        SELECT
+            COALESCE(COUNT(DISTINCT p.student_id), 0) AS paid_students_count
+        FROM groups g
+                 JOIN groups_student_list gu ON gu.group_id = g.id
+                 JOIN users s ON s.id = gu.student_list_id AND s.user_status = 'UQIYABDI'
+                 JOIN payment p ON p.student_id = s.id AND p.payment_type = 'TUSHUM'
+        WHERE g.teacher_id = :teacherId
+          AND g.active = TRUE
+          AND extract(month from p.payment_date) = extract(month from current_date)
+""" , nativeQuery = true)
+    Integer countStudentByTeacherId(@Param("teacherId") Long teacherId);
 }
