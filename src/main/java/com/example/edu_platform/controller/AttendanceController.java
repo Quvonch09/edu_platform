@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Service
+@RestController
+@RequestMapping("/api/attendance")
 @RequiredArgsConstructor
 public class AttendanceController {
     private final AttendanceService attendanceService;

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class RoomController {
     private final RoomService roomService;
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @Operation(summary = "Admin room qushish")
     @PostMapping
     public ResponseEntity<ApiResponse> saveRoom(@RequestBody ReqRoom reqRoom){
