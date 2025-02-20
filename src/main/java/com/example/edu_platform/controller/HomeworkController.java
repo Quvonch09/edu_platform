@@ -57,10 +57,10 @@ public class HomeworkController {
             @RequestParam boolean isChecked,
             @PathVariable Long id,
             @RequestParam boolean byStudent,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(value = "page" , defaultValue = "0") int page,
+            @RequestParam(value = "size" , defaultValue = "10") int size
     ){
-        return ResponseEntity.ok(homeworkService.getHomeworks(isChecked, id, byStudent,page,size));
+        return ResponseEntity.ok(homeworkService.getHomeworks(isChecked, id, byStudent , page, size));
     }
 
     @GetMapping("/myStatistics")
