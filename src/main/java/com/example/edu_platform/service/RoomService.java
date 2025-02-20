@@ -34,11 +34,6 @@ public class RoomService {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu nomli xona"));
         }
 
-        Room room = Room.builder()
-                .name(reqRoom.getName())
-                .color(reqRoom.getColor())
-                .build();
-
         //Parse qilishda xatolik
         LocalTime startTime = LocalTime.parse(reqRoom.getStartTime());
         LocalTime endTime = LocalTime.parse(reqRoom.getEndTime());
@@ -46,6 +41,14 @@ public class RoomService {
         if (graphicDayRepository.existsByRoomIdAndStartTimeBeforeAndEndTimeAfter(reqRoom.getId(),startTime,endTime)){
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu vaqtda xona "));
         }
+
+        Room room = Room.builder()
+                .name(reqRoom.getName())
+                .color(reqRoom.getColor())
+                .build();
+        roomRepository.save(room);
+
+
 
         List<DayOfWeek> dayOfWeeks = new ArrayList<>();
         for (Integer weekDay : reqRoom.getWeekDays()) {
@@ -62,8 +65,9 @@ public class RoomService {
                 .weekDay(dayOfWeeks)
                 .room(room)
                 .build();
-        roomRepository.save(room);
         graphicDayRepository.save(graphicDay);
+        room.setGraphicDayId(graphicDay.getId());
+        roomRepository.save(room);
 
 
         return new ApiResponse("Successfully saved");

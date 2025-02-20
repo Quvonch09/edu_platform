@@ -37,7 +37,6 @@ public class User extends AbsEntity implements UserDetails {
     private Role role;
     @OneToOne
     private File file;
-    private Boolean active;
 
 
     private boolean accountNonExpired = true;
