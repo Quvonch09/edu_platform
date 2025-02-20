@@ -89,12 +89,13 @@ public class TaskService {
         return new ApiResponse("Task o'chirildi");
     }
 
-    private TaskDTO taskDTO(Task task){
+    private TaskDTO taskDTO(Task task) {
         return TaskDTO.builder()
                 .id(task.getId())
                 .title(task.getTitle())
+                .fileId(task.getFile() != null ? task.getFile().getId() : null)
                 .lessonId(task.getLesson().getId())
-                .fileId(task.getFile().getId())
                 .build();
     }
+
 }

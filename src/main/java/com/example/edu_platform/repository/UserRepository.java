@@ -92,8 +92,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             COALESCE(COUNT(s.id), 0) AS student_count
         FROM groups g
                  JOIN users u ON g.teacher_id = u.id
-                 LEFT JOIN groups_student_list gu ON gu.group_id = g.id  -- group_user jadvali, bu yerda studentlar va guruhlar bog‘langan
-                 LEFT JOIN users s ON s.id = gu.student_list_id AND s.user_status = 'UQIYABDI'  -- Studentlarning statusi
+                 LEFT JOIN groups_students gu ON gu.group_id = g.id  -- group_user jadvali, bu yerda studentlar va guruhlar bog‘langan
+                 LEFT JOIN users s ON s.id = gu.students_id AND s.user_status = 'UQIYABDI'  -- Studentlarning statusi
         WHERE g.teacher_id = :teacherId
           AND g.active = TRUE """ , nativeQuery = true
     )

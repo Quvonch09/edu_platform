@@ -20,35 +20,36 @@ import java.util.List;
 public class QuizController {
     private final QuizService quizService;
 
-    @PostMapping
-    @Operation(summary = "Quiz yaratish")
+    @PostMapping("/create")
+    @Operation(summary = "(TEACHER) Quiz yaratish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> createQuiz(@RequestBody ReqQuiz reqQuiz) {
         return ResponseEntity.ok(quizService.createQuiz(reqQuiz));
     }
 
     @GetMapping("/{quizId}")
-    @Operation(summary = "Id bo'yicha quiz olish")
-    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_SUPER_ADMIN')")
+    @Operation(summary = "(TEACHER,ADMIN) Id bo'yicha quiz olish")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN')")
     public ResponseEntity<ApiResponse> getById(@PathVariable Long quizId) {
         return ResponseEntity.ok(quizService.getQuiz(quizId));
     }
 
-    @GetMapping("/lesson/{lessonId}")
-    @Operation(summary = "Lesson bo'yicha quizlarni olish")
+    @GetMapping("/getByLesson/{lessonId}")
+    @Operation(summary = "(TEACHER,ADMIN) Lesson bo'yicha quizlarni olish")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN')")
     public ResponseEntity<ApiResponse> getByLesson(@PathVariable Long lessonId) {
         return ResponseEntity.ok(quizService.getQuizByLesson(lessonId));
     }
 
-    @PutMapping("/{quizId}")
-    @Operation(summary = "Quizni yangilash")
+    @PutMapping("/update/{quizId}")
+    @Operation(summary = "(TEACHER) Quizni yangilash")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> updateQuiz(@PathVariable Long quizId, @RequestBody ReqQuiz reqQuiz) {
         return ResponseEntity.ok(quizService.updateQuiz(quizId, reqQuiz));
     }
 
     @DeleteMapping("/{quizId}")
-    @Operation(summary = "Quizni o'chirish")
+    @Operation(summary = "(TEACHER) Quizni o'chirish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> deleteQuiz(@PathVariable Long quizId) {
         return ResponseEntity.ok(quizService.deleteQuiz(quizId));
@@ -63,8 +64,8 @@ public class QuizController {
         return ResponseEntity.ok(quizService.startTest(user, quizId));
     }
 
-    @PostMapping("/{quizId}/pass-test")
-    @Operation(summary = "Testni topshirish")
+    @PostMapping("/passTest/{quizId}")
+    @Operation(summary = "(STUDENT) Testni topshirish")
     @PreAuthorize("hasAnyRole('ROLE_STUDENT')")
     public ResponseEntity<ApiResponse> passTest(
             @PathVariable Long quizId,

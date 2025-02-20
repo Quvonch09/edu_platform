@@ -7,6 +7,7 @@ import com.example.edu_platform.service.ResultService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,16 +17,25 @@ public class ResultController {
 
     private final ResultService resultService;
 
-    @GetMapping("/user/{userId}")
-    @Operation(summary = "Userga tegishli resultlar")
-    public ResponseEntity<ApiResponse> getUserResults(@PathVariable Long userId) {
-        return ResponseEntity.ok(resultService.getUserResults(userId));
+    @GetMapping("/getByUser/{userId}")
+    @Operation(summary = "(TEACHER,ADMIN) Userga tegishli resultlar")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse> getUserResults(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(resultService.getUserResults(userId, page, size));
     }
 
-    @GetMapping("/my-results")
+    @GetMapping("/myResults")
     @Operation(summary = "User o'zining natijalar tarixi")
-    public ResponseEntity<ApiResponse> getUserResultHistory(@CurrentUser User user) {
-        return ResponseEntity.ok(resultService.getUserResultHistory(user));
+    public ResponseEntity<ApiResponse> getUserResultHistory(
+            @CurrentUser User user,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(resultService.getUserResultHistory(user, page, size));
     }
 
     @GetMapping("/{resultId}")
@@ -34,8 +44,9 @@ public class ResultController {
         return ResponseEntity.ok(resultService.getResultById(resultId));
     }
 
-    @DeleteMapping("/{resultId}")
-    @Operation(summary = "resultni o'chirish")
+    @DeleteMapping("/delete/{resultId}")
+    @Operation(summary = "(TEACHER,ADMIN) resultni o'chirish")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> deleteResult(@PathVariable Long resultId) {
         return ResponseEntity.ok(resultService.deleteResult(resultId));
     }

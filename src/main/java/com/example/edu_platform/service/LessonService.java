@@ -4,12 +4,16 @@ import com.example.edu_platform.entity.*;
 import com.example.edu_platform.entity.Module;
 import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.LessonDTO;
+import com.example.edu_platform.payload.ModuleDTO;
 import com.example.edu_platform.payload.ResponseError;
 import com.example.edu_platform.payload.req.LessonRequest;
 import com.example.edu_platform.payload.req.ReqLessonTracking;
+import com.example.edu_platform.payload.res.ResPageable;
 import com.example.edu_platform.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
@@ -123,6 +127,38 @@ public class LessonService {
         lessonTrackingRepository.save(lessonTracking);
         return new ApiResponse("Lesson guruh uchun ochildi");
     }
+
+    public ApiResponse search(String name, int size, int page) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<Lesson> lessons;
+
+        if (name == null || name.trim().isEmpty()) {
+            lessons = lessonRepository.findAll(pageRequest);
+        } else {
+            lessons = lessonRepository.findByName(name, pageRequest);
+        }
+
+        List<LessonDTO> lessonDTOS = lessons.stream()
+                .map(lesson -> LessonDTO.builder()
+                        .lessonId(lesson.getId())
+                        .name(lesson.getName())
+                        .description(lesson.getDescription())
+                        .videoLink(lesson.getVideoLink())
+                        .createdAt(lesson.getCreatedAt())
+                        .build())
+                .toList();
+
+        ResPageable resPageable = ResPageable.builder()
+                .page(page)
+                .size(size)
+                .totalPage(lessons.getTotalPages())
+                .totalElements(lessons.getTotalElements())
+                .body(lessonDTOS)
+                .build();
+
+        return new ApiResponse(resPageable);
+    }
+
 
     @Transactional
     public ApiResponse getOpenLessonsInGroup(Long groupId) {

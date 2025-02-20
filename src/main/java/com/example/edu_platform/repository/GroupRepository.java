@@ -83,7 +83,7 @@ WITH lessons_per_group AS (
          FROM groups g
                   LEFT JOIN lesson_tracking lt ON g.id = lt.group_id
          WHERE g.id IN (
-             SELECT group_id FROM groups_student_list WHERE student_list_id = :studentId
+             SELECT group_id FROM groups_students WHERE students_id = :studentId
          )
          GROUP BY g.id
      ),
@@ -134,7 +134,7 @@ FROM groups g
          LEFT JOIN ranking r ON r.student_id = :studentId
 WHERE g.active = TRUE
   AND g.id IN (
-    SELECT group_id FROM groups_student_list WHERE student_list_id = :studentId
+    SELECT group_id FROM groups_students WHERE students_id = :studentId
 )
 LIMIT 1;
 """, nativeQuery = true)
@@ -148,16 +148,16 @@ LIMIT 1;
 WITH student_scores AS (
     SELECT
         gs.group_id,
-        gs.student_list_id AS student_id,
+        gs.students_id AS student_id,
         u.full_name AS student_name,
         COALESCE(SUM(h.ball), 0) AS total_score
-    FROM groups_student_list gs
-             JOIN users u ON gs.student_list_id = u.id
+    FROM groups_students gs
+             JOIN users u ON gs.students_id = u.id
              LEFT JOIN homework h ON h.student_id = u.id AND h.checked = TRUE
     WHERE gs.group_id IN (
-        SELECT group_id FROM groups_student_list WHERE student_list_id = :studentId
+        SELECT group_id FROM groups_students WHERE students_id = :studentId
     )
-    GROUP BY gs.group_id, gs.student_list_id, u.full_name
+    GROUP BY gs.group_id, gs.students_id, u.full_name
 ),
      ranking AS (
          SELECT
@@ -205,8 +205,8 @@ ORDER BY r.rank_position;
         SELECT
             COALESCE(COUNT(DISTINCT p.student_id), 0) AS paid_students_count
         FROM groups g
-                 JOIN groups_student_list gu ON gu.group_id = g.id
-                 JOIN users s ON s.id = gu.student_list_id AND s.user_status = 'UQIYABDI'
+                 JOIN groups_students gu ON gu.group_id = g.id
+                 JOIN users s ON s.id = gu.students_id AND s.user_status = 'UQIYABDI'
                  JOIN payment p ON p.student_id = s.id AND p.payment_type = 'TUSHUM'
         WHERE g.teacher_id = :teacherId
           AND g.active = TRUE
@@ -215,16 +215,15 @@ ORDER BY r.rank_position;
     Integer countStudentByTeacherId(@Param("teacherId") Long teacherId);
 
     @Query(value = """
-            SELECT
-      g.name  as groupName,
-      COALESCE(COUNT(s.id), 0) AS studentCount
-  FROM groups g
-           JOIN groups_student_list gu ON gu.group_id = g.id
-           JOIN users s ON s.id = gu.student_list_id
-  WHERE g.teacher_id = :teacherId
+SELECT
+    g.name  as groupName,
+    COALESCE(COUNT(s.id), 0) AS studentCount
+FROM groups g
+    LEFT JOIN groups_students gu ON gu.group_id = g.id
+    LEFT JOIN users s ON s.id = gu.students_id AND s.user_status = 'UQIYABDI'
+WHERE g.teacher_id = :teacherId
     AND g.active = TRUE
-    AND s.user_status = 'UQIYABDI'
-  GROUP BY g.name
+GROUP BY g.name;
            """ , nativeQuery = true)
     List<ResStudentCount> findAllStudentsByTeacherId(@Param("teacherId") Long teacherId);
 
