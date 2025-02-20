@@ -107,11 +107,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 
 
-    @Query(value = "SELECT u.id, u.full_name, u.phone_number, g.id as groupId, u.created_at, u.age, u.user_status as status, u.parent_phone_number, " +
-            "CASE WHEN  extract(month from p.payment_date)  = EXTRACT(month from  current_date) THEN true ELSE false END AS hasPaid " +
+    @Query(value = "SELECT u.id, u.full_name, u.phone_number, g.name as groupName, " +
+            "u.created_at, u.age, u.user_status as status, u.parent_phone_number, " +
+            "CASE WHEN  extract(month from p.payment_date)  = " +
+            "EXTRACT(month from  current_date) THEN true ELSE false END AS hasPaid, " +
+            "coalesce( sum(h.ball) , 0) score "+
             "FROM users u " +
             "JOIN groups_students gsl ON u.id = gsl.students_id " +
             "JOIN groups g ON gsl.group_id = g.id " +
+            "LEFT JOIN homework h on u.id = h.student_id "+
             "LEFT JOIN payment p ON p.student_id = u.id " +
             "WHERE (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%'))) " +
             "AND (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%'))) " +
