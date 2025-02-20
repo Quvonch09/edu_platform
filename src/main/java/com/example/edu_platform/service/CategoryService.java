@@ -70,6 +70,16 @@ public class CategoryService {
     }
 
 
+    public ApiResponse getAllList(){
+        List<Category> allCategory = categoryRepository.findAll();
+        List<CategoryDTO> categoryDTOList = new ArrayList<>();
+        for (Category category : allCategory) {
+            categoryDTOList.add(convertCategoryToCategoryDTO(category));
+        }
+        return new ApiResponse(categoryDTOList);
+    }
+
+
 
     public ApiResponse updateCategory(Long categoryId, CategoryDTO categoryDTO) {
         Category category = categoryRepository.findById(categoryId).orElse(null);

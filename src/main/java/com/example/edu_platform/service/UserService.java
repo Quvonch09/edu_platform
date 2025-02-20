@@ -62,6 +62,7 @@ public class UserService {
                 .accountNonExpired(true)
                 .accountNonLocked(true)
                 .credentialsNonExpired(true)
+                .active(true)
                 .build();
         userRepository.save(teacher);
         return new ApiResponse("Teacher successfully saved");
@@ -147,7 +148,7 @@ public class UserService {
         if (user == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
         }
-        user.setEnabled(active);
+        user.setActive(active);
         userRepository.save(user);
         return new ApiResponse("Teacher successfully updated");
     }
@@ -168,7 +169,8 @@ public class UserService {
             }
         }
 
-        userRepository.delete(user);
+        user.setEnabled(false);
+        userRepository.save(user);
         return new ApiResponse("User successfully deleted");
     }
 
@@ -259,7 +261,7 @@ public class UserService {
                 .fullName(user.getFullName())
                 .phoneNumber(user.getPhoneNumber())
                 .categoryId(categoryIds)
-                .active(user.isEnabled())
+                .active(user.getActive())
                 .groupCount(groupRepository.countByTeacherId(user.getId()))
                 .fileId(user.getFile() != null ? user.getFile().getId() : null)
                 .build();

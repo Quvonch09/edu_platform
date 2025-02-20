@@ -46,6 +46,16 @@ public class RoomController {
 
 
     @PreAuthorize("hasAnyRole('ROLE_CEO', 'ROLE_ADMIN')")
+    @Operation(summary = "Admin roomni listini kurish")
+    @GetMapping("/list")
+    public ResponseEntity<ApiResponse> getRoom() {
+        ApiResponse roomById = roomService.getRoomsList();
+        return ResponseEntity.ok(roomById);
+    }
+
+
+
+    @PreAuthorize("hasAnyRole('ROLE_CEO', 'ROLE_ADMIN')")
     @Operation(summary = " Admin roomni update qilish")
     @PutMapping("/{roomId}")
     public ResponseEntity<ApiResponse> updateRoom(@PathVariable Long roomId, @RequestBody ReqRoom reqRoom){

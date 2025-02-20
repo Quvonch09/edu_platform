@@ -43,9 +43,11 @@ public class HomeworkController {
     public ResponseEntity<ApiResponse> getMyHomeworks(
             @CurrentUser User student,
             @RequestParam boolean isChecked,
-            @RequestParam Long taskId
+            @RequestParam Long taskId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ){
-        return ResponseEntity.ok(homeworkService.getMyHomeworks(isChecked, student, taskId));
+        return ResponseEntity.ok(homeworkService.getMyHomeworks(isChecked, student, taskId,page,size));
     }
 
     @GetMapping("/{id}")
@@ -54,9 +56,11 @@ public class HomeworkController {
     public ResponseEntity<ApiResponse> getHomework(
             @RequestParam boolean isChecked,
             @PathVariable Long id,
-            @RequestParam boolean byStudent
+            @RequestParam boolean byStudent,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ){
-        return ResponseEntity.ok(homeworkService.getHomeworks(isChecked, id, byStudent));
+        return ResponseEntity.ok(homeworkService.getHomeworks(isChecked, id, byStudent,page,size));
     }
 
     @GetMapping("/myStatistics")

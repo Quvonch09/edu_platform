@@ -84,6 +84,24 @@ public class RoomService {
     }
 
 
+    public ApiResponse getRoomsList(){
+        List<Room> all = roomRepository.findAll();
+        List<RoomDTO> resRooms = new ArrayList<>();
+        for (Room room : all) {
+            GraphicDay graphicDay = graphicDayRepository.findByRoomId(room.getId()).orElse(null);
+            RoomDTO roomDTO = RoomDTO.builder()
+                    .id(room.getId())
+                    .name(room.getName())
+                    .color(room.getColor())
+                    .startTime(graphicDay != null ? graphicDay.getStartTime() : null)
+                    .endTime(graphicDay != null ? graphicDay.getEndTime() : null)
+                    .build();
+            resRooms.add(roomDTO);
+        }
+        return new ApiResponse(resRooms);
+    }
+
+
     public ApiResponse getRoomById(Long roomId){
         Room room = roomRepository.findById(roomId).orElse(null);
         if (room == null){
@@ -96,8 +114,8 @@ public class RoomService {
                 .id(room.getId())
                 .name(room.getName())
                 .color(room.getColor())
-                .startTime(graphicDay.getStartTime())
-                .endTime(graphicDay.getEndTime())
+                .startTime(graphicDay != null ? graphicDay.getStartTime() : null)
+                .endTime(graphicDay != null ? graphicDay.getEndTime() : null)
                 .build();
         return new ApiResponse(roomDTO);
     }
