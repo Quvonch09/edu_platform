@@ -37,6 +37,7 @@ public class ModuleController {
 
     @GetMapping("/{moduleId}")
     @Operation(summary = "(TEACHER/ADMIN/CEO) id bo'yicha modulni olish")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN' , 'ROLE_CEO', 'ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> getById(
             @PathVariable Long moduleId
     ){
