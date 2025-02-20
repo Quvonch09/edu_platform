@@ -71,7 +71,9 @@ public class PaymentService {
 
     public ApiResponse search(String userName,PaymentStatusEnum paymentStatus, int page, int size){
         PageRequest pageRequest = PageRequest.of(page, size);
-        Page<Payment> payments = paymentRepository.searchPayments(userName,paymentStatus.name(),pageRequest);
+        Page<Payment> payments = paymentRepository.searchPayments(userName,paymentStatus != null
+                        ? paymentStatus.name() : null
+                ,pageRequest);
 
         List<PaymentDTO> paymentDTOList = new ArrayList<>();
         for (Payment payment : payments) {

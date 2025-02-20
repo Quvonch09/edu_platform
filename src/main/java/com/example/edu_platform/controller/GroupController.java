@@ -29,13 +29,15 @@ public class GroupController {
     @PreAuthorize("hasAnyRole('ROLE_CEO', 'ROLE_ADMIN', 'ROLE_TEACHER')")
     @Operation(summary = "ADMIN/CEO/TEACHER groupni search qilish")
     @GetMapping
-    public ResponseEntity<ApiResponse> searchGroup(@RequestParam(required = false, value = "name") String name,
-                                                   @RequestParam(required = false, value = "teacherName") String teacherName,
-                                                   @RequestParam(required = false) LocalDate startDate,
-                                                   @RequestParam(required = false) LocalDate endDate,
-                                                   @RequestParam(required = false, value = "categoryId") Long categoryId,
-                                                   @RequestParam(defaultValue = "0") int page,
-                                                   @RequestParam(defaultValue = "10") int size){
+    public ResponseEntity<ApiResponse> searchGroup(
+            @RequestParam(required = false, value = "name") String name,
+            @RequestParam(required = false, value = "teacherName") String teacherName,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false, value = "categoryId") Long categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
         ApiResponse search = groupService.search(name, teacherName, startDate, endDate, categoryId, page, size);
         return ResponseEntity.ok(search);
     }
@@ -45,7 +47,9 @@ public class GroupController {
     @PreAuthorize("hasAnyRole('ROLE_CEO', 'ROLE_ADMIN', 'ROLE_TEACHER')")
     @Operation(summary = "ADMIN/TEACHER/CEO bitta groupni kurish")
     @GetMapping("/{groupId}")
-    public ResponseEntity<ApiResponse> getGroup(@PathVariable Long groupId){
+    public ResponseEntity<ApiResponse> getGroup(
+            @PathVariable Long groupId
+    ){
         ApiResponse oneGroup = groupService.getOneGroup(groupId);
         return ResponseEntity.ok(oneGroup);
     }
@@ -64,7 +68,10 @@ public class GroupController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "ADMIN groupni update qilish")
     @PutMapping("/{groupId}")
-    public ResponseEntity<ApiResponse> updateGroup(@PathVariable Long groupId, @RequestBody ReqGroup reqGroup){
+    public ResponseEntity<ApiResponse> updateGroup(
+            @PathVariable Long groupId,
+            @RequestBody ReqGroup reqGroup
+    ){
         ApiResponse apiResponse = groupService.updateGroup(groupId, reqGroup);
         return ResponseEntity.ok(apiResponse);
     }
@@ -75,7 +82,9 @@ public class GroupController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "ADMIN groupni delete qilish")
     @DeleteMapping("/{groupId}")
-    public ResponseEntity<ApiResponse> deleteGroup(@PathVariable Long groupId){
+    public ResponseEntity<ApiResponse> deleteGroup(
+            @PathVariable Long groupId
+    ){
         ApiResponse apiResponse = groupService.deleteGroup(groupId);
         return ResponseEntity.ok(apiResponse);
     }

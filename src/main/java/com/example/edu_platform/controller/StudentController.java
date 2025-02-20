@@ -32,7 +32,7 @@ public class StudentController {
     @GetMapping
     public ResponseEntity<ApiResponse> getAllStudents(@RequestParam(required = false, value = "fullName") String fullName,
                                                       @RequestParam(required = false, value = "phoneNumber") String phoneNumber,
-                                                      @RequestParam(value = "status") UserStatus userStatus,
+                                                      @RequestParam(value = "status" , required = false) UserStatus userStatus,
                                                       @RequestParam(required = false, value = "groupName") String groupName,
                                                       @RequestParam(required = false, value = "teacherId") Long teacherId,
                                                       @RequestParam(required = false, value = "startAge") Integer startAge,

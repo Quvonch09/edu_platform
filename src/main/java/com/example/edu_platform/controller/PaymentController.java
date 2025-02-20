@@ -21,9 +21,11 @@ public class PaymentController {
     @PreAuthorize("hasRole('ROLE_CEO')")
     @Operation(summary = "CEO paymnet saqlash uchun", description = "Agar payType TUSHUM bulsa paymentStatus shartmas")
     @PostMapping
-    public ResponseEntity<ApiResponse> saveRipPayment(@RequestParam(required = false, value = "status")PaymentStatusEnum paymentStatus,
-                                                      @RequestParam PaymentEnum payType,
-                                                      @RequestBody ReqPayment reqPayment){
+    public ResponseEntity<ApiResponse> saveRipPayment(
+            @RequestParam(required = false, value = "status")PaymentStatusEnum paymentStatus,
+            @RequestParam PaymentEnum payType,
+            @RequestBody ReqPayment reqPayment
+    ){
         ApiResponse ripPayment = paymentService.createRipPayment(paymentStatus, payType, reqPayment);
         return ResponseEntity.ok(ripPayment);
     }
@@ -41,10 +43,12 @@ public class PaymentController {
     @PreAuthorize("hasRole('ROLE_CEO')")
     @Operation(summary = "CEO paymentni search qilish")
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse> searchPayment(@RequestParam(required = false, value = "fullName")String fullName,
-                                                     @RequestParam(value = "status") PaymentStatusEnum statusEnum,
-                                                     @RequestParam(defaultValue = "0") int page,
-                                                     @RequestParam(defaultValue = "10") int size){
+    public ResponseEntity<ApiResponse> searchPayment(
+            @RequestParam(required = false, value = "fullName")String fullName,
+            @RequestParam(value = "status" , required = false) PaymentStatusEnum statusEnum,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
         ApiResponse search = paymentService.search(fullName, statusEnum, page, size);
         return ResponseEntity.ok(search);
     }
@@ -53,10 +57,12 @@ public class PaymentController {
     @PreAuthorize("hasRole('ROLE_CEO')")
     @Operation(summary = "CEO paymentni update qilish")
     @PutMapping("/{paymentId}")
-    public ResponseEntity<ApiResponse> updatePayment(@PathVariable Long paymentId,
-                                                     @RequestParam(required = false, value = "status")PaymentStatusEnum paymentStatus,
-                                                     @RequestParam PaymentEnum payType,
-                                                     @RequestBody ReqPayment reqPayment){
+    public ResponseEntity<ApiResponse> updatePayment(
+            @PathVariable Long paymentId,
+            @RequestParam(required = false, value = "status")PaymentStatusEnum paymentStatus,
+            @RequestParam PaymentEnum payType,
+            @RequestBody ReqPayment reqPayment
+    ){
         return ResponseEntity.ok(paymentService.updatePayment(paymentId, paymentStatus, payType, reqPayment));
     }
 
@@ -65,7 +71,9 @@ public class PaymentController {
     @PreAuthorize("hasRole('ROLE_CEO')")
     @Operation(summary = "CEO paymentni delete qilish")
     @DeleteMapping("/{paymentId}")
-    public ResponseEntity<ApiResponse> deletePayment(@PathVariable Long paymentId){
+    public ResponseEntity<ApiResponse> deletePayment(
+            @PathVariable Long paymentId
+    ){
         ApiResponse apiResponse = paymentService.deletePayment(paymentId);
         return ResponseEntity.ok(apiResponse);
     }
