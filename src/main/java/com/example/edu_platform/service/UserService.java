@@ -113,7 +113,7 @@ public class UserService {
             return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
         }
         List<ResStudentCount> res = groupRepository.findAllStudentsByTeacherId(teacherId);
-        if (res == null) {
+        if (res.isEmpty()) {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
         return new ApiResponse(res);

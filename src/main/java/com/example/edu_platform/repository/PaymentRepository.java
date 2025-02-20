@@ -16,7 +16,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             "FROM Payment  p \n" +
             "WHERE p.paymentType = :paymentType and extract(month from p.paymentDate) " +
             " = extract(month from current_date ) ")
-    Double countPrice(@Param("paymentType") String paymentType);
+    Double countPrice(@Param("paymentType") PaymentEnum paymentType);
 
 
     @Query(value = "select p.* from payment p join users u on p.student_id = u.id where " +

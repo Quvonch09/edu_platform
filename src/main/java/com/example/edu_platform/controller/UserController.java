@@ -31,7 +31,7 @@ public class UserController {
 
 
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN' , 'ROLE_CEO')")
     @Operation(summary = "CEO/ADMIN teacher va adminlarni search qilish")
     @GetMapping("/searchUsers")
     public ResponseEntity<ApiResponse> searchUsers(@RequestParam(required = false, value = "fullName") String fullName,
