@@ -3,7 +3,6 @@ package com.example.edu_platform.repository;
 import com.example.edu_platform.entity.User;
 import com.example.edu_platform.entity.enums.Role;
 import com.example.edu_platform.payload.res.ResCEODiagram;
-import com.example.edu_platform.entity.enums.Role;
 import com.example.edu_platform.payload.res.ResStudent;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,11 +11,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-
-import java.util.List;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByPhoneNumber(String phoneNumber);
@@ -79,7 +73,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 """ , nativeQuery = true)
     List<ResCEODiagram> getLeaveStudent();
 
-    boolean existsByPhoneNumberAndFullNameAndRoleAndEnabledTrue(String phone, String fullName, Role role);
+    boolean existsByPhoneNumberAndRoleAndEnabledTrue(String phone, Role role);
 
 
     @Query(value = "select distinct u.* from users u  left join groups g on u.id = g.teacher_id where\n" +

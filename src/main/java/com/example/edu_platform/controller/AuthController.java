@@ -25,25 +25,4 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(authLogin));
     }
 
-
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse> register(@Valid @RequestBody AuthRegister authRegister){
-        return ResponseEntity.ok(authService.register(authRegister));
-    }
-
-    @Operation(summary = "Admin yangi userni ro'yxatdan o'tkazib guruhga qo'shadi")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping("/admin/save-user")
-    public ResponseEntity<ApiResponse> adminSaveUser(@Valid @RequestBody AuthRegister auth,
-                                                     @RequestParam Long groupId){
-        return ResponseEntity.ok(authService.adminSaveUser(auth, groupId));
-    }
-
-    @Operation(summary = "Admin yangi teacher qoshadi")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping("/admin/save-teacher")
-    public ResponseEntity<ApiResponse> adminSaveTeacher(@Valid @RequestBody AuthRegister auth){
-        return ResponseEntity.ok(authService.adminSaveTeacher(auth));
-    }
-
 }
