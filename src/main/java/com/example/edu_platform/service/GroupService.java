@@ -27,6 +27,7 @@ public class GroupService {
     private final RoomRepository roomRepository;
     private final DayOfWeekRepository dayOfWeekRepository;
     private final GraphicDayRepository graphicDayRepository;
+    private final LessonRepository lessonRepository;
 
     public ApiResponse saveGroup(ReqGroup reqGroup){
         boolean b = groupRepository.existsByName(reqGroup.getGroupName());
@@ -86,33 +87,21 @@ public class GroupService {
     }
 
 
+
     @Transactional
     public ApiResponse search(String groupName,String teacherName, LocalDate startDate,
                               LocalDate endDate,Long categoryId, int page, int size){
-        PageRequest pageRequest = PageRequest.of(page,size);
-        Page<Group> groups = groupRepository.searchGroup(groupName, teacherName, startDate, endDate, pageRequest);
-        List<GroupDTO> groupDTOList = new ArrayList<>();
-        for (Group group : groups) {
-            GroupDTO groupDTO = GroupDTO.builder()
-                    .id(group.getId())
-                    .name(group.getName())
-                    .categoryId(group.getCategory().getId())
-                    .teacherName(group.getTeacher().getFullName())
-                    .startDate(group.getStartDate())
-                    .endDate(group.getEndDate())
-                    .active(group.getActive())
-                    .studentCount(group.getStudents().size())
-                    .departureStudentCount(groupRepository.countGroup(group.getId()))
-                    .build();
-            groupDTOList.add(groupDTO);
-        }
 
+        Page<Group> groups = groupRepository.searchGroup(groupName, teacherName, startDate, endDate,categoryId,
+                PageRequest.of(page , size));
+
+        List<GroupDTO> list = groups.getContent().stream().map(this::convertGroupToGroupDTO).toList();
         ResPageable resPageable = ResPageable.builder()
                 .page(page)
                 .size(size)
                 .totalPage(groups.getTotalPages())
                 .totalElements(groups.getTotalElements())
-                .body(groupDTOList)
+                .body(list)
                 .build();
         return new ApiResponse(resPageable);
     }
@@ -125,18 +114,18 @@ public class GroupService {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
 
-        GroupDTO groupDTO = GroupDTO.builder()
-                .id(group.getId())
-                .name(group.getName())
-                .categoryId(group.getCategory().getId())
-                .teacherName(group.getTeacher().getFullName())
-                .startDate(group.getStartDate())
-                .endDate(group.getEndDate())
-                .active(group.getActive())
-                .studentCount(group.getStudents().size())
-                .departureStudentCount(groupRepository.countGroup(group.getId()))
-                .build();
-        return new ApiResponse(groupDTO);
+        return new ApiResponse(convertGroupToGroupDTO(group));
+    }
+
+
+    @Transactional
+    public ApiResponse getGroupsList(){
+        List<Group> all = groupRepository.findAll();
+        List<GroupDTO> groupDTOList = new ArrayList<>();
+        for (Group group : all) {
+            groupDTOList.add(convertGroupToGroupDTO(group));
+        }
+        return new ApiResponse(groupDTOList);
     }
 
 
@@ -186,5 +175,25 @@ public class GroupService {
         group.setActive(false);
         groupRepository.save(group);
         return new ApiResponse("Successfully deleted group");
+    }
+
+
+
+    private GroupDTO convertGroupToGroupDTO(Group group){
+
+        return GroupDTO.builder()
+                .id(group.getId())
+                .name(group.getName())
+                .categoryName(group.getCategory() != null ? group.getCategory().getName() : null)
+                .teacherName(group.getTeacher() != null ? group.getTeacher().getFullName() : null)
+                .startDate(group.getStartDate())
+                .endDate(group.getEndDate())
+                .active(group.getActive())
+                .studentCount(group.getStudents().size())
+                .countEndMonth(group.getEndDate().getMonthValue() - LocalDate.now().getMonthValue())
+                .countAllLessons(lessonRepository.countLessonsByCategoryId(group.getCategory().getId()))
+                .countGroupLessons(groupRepository.countGroupLessons(group.getId()))
+                .departureStudentCount(groupRepository.countGroup(group.getId()))
+                .build();
     }
 }

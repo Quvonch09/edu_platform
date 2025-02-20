@@ -24,7 +24,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -38,8 +37,8 @@ public class StudentService {
 
     @Transactional
     public ApiResponse saveStudent(ReqStudent reqStudent){
-        boolean b = userRepository.existsByPhoneNumberAndFullNameAndRoleAndEnabledTrue(
-                reqStudent.getPhoneNumber(), reqStudent.getFullName(), Role.ROLE_STUDENT);
+        boolean b = userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(
+                reqStudent.getPhoneNumber(), Role.ROLE_STUDENT);
 
         if(b){
             return new ApiResponse(ResponseError.ALREADY_EXIST("Student"));
@@ -118,6 +117,10 @@ public class StudentService {
 
 
     public ApiResponse updateStudent(Long studentId, ReqStudent reqStudent){
+        boolean b = userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(reqStudent.getPhoneNumber(), Role.ROLE_STUDENT);
+        if(b){
+            return new ApiResponse(ResponseError.ALREADY_EXIST("Student"));
+        }
         User user = userRepository.findById(studentId).orElse(null);
         if(user == null){
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
