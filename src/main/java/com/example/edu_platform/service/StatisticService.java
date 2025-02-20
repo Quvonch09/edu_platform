@@ -1,11 +1,13 @@
 package com.example.edu_platform.service;
 
 import com.example.edu_platform.entity.User;
+import com.example.edu_platform.entity.enums.PaymentEnum;
 import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.ResponseError;
 import com.example.edu_platform.payload.res.*;
 import com.example.edu_platform.repository.CategoryRepository;
 import com.example.edu_platform.repository.GroupRepository;
+import com.example.edu_platform.repository.PaymentRepository;
 import com.example.edu_platform.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ public class StatisticService {
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
     private final CategoryRepository categoryRepository;
+    private final PaymentRepository paymentRepository;
 
     public ApiResponse getCEOStatistics() {
 
@@ -31,6 +34,12 @@ public class StatisticService {
         statistic.setStudentCount(userRepository.countAllByStudent());
         statistic.setGroupCount(groupRepository.countAllByGroup());
         statistic.setCategoryCount(categoryRepository.countAllByCategory());
+        statistic.setInCome(paymentRepository.countPrice(PaymentEnum.CHIQIM.name()));
+        statistic.setOutCome(paymentRepository.countPrice(PaymentEnum.TUSHUM.name()));
+        statistic.setAvgMonPayment(paymentRepository.avgPayment());
+        statistic.setPaidAllCount(userRepository.countAllByStudent());
+        statistic.setPaidCount(userRepository.countStudentsHasPaid());
+
 
         return new ApiResponse(statistic);
 
@@ -44,6 +53,8 @@ public class StatisticService {
         statistic.setStudentCount(userRepository.countAllByStudent());
         statistic.setGroupCount(groupRepository.countAllByGroup());
         statistic.setCategoryCount(categoryRepository.countAllByCategory());
+        statistic.setPaidCount(userRepository.countStudentsHasPaid());
+        statistic.setPaidAllCount(userRepository.countAllByStudent());
 
         return new ApiResponse(statistic);
 
@@ -56,6 +67,8 @@ public class StatisticService {
 
         statistic.setStudentCount(userRepository.countAllByStudent(user.getId()));
         statistic.setGroupCount(groupRepository.countAllByGroup(user.getId()));
+        statistic.setPaidCount(groupRepository.countStudentByTeacherId(user.getId()));
+        statistic.setPaidAllCount(userRepository.countAllByStudent(user.getId()));
 
         return new ApiResponse(statistic);
 

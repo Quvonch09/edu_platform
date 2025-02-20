@@ -8,6 +8,7 @@ import com.example.edu_platform.payload.auth.ResponseLogin;
 import com.example.edu_platform.payload.req.ReqAdmin;
 import com.example.edu_platform.payload.req.ReqTeacher;
 import com.example.edu_platform.payload.res.ResPageable;
+import com.example.edu_platform.payload.res.ResStudentCount;
 import com.example.edu_platform.repository.CategoryRepository;
 import com.example.edu_platform.repository.FileRepository;
 import com.example.edu_platform.repository.GroupRepository;
@@ -91,19 +92,35 @@ public class UserService {
     }
 
 
-    @Transactional
+//    @Transactional
+//    public ApiResponse getOneTeacher(Long teacherId) {
+//        User user = userRepository.findById(teacherId).orElse(null);
+//        if (user == null) {
+//            return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
+//        }
+//        List<Long> categoryIds = new ArrayList<>();
+//        for (Category category : user.getCategories()) {
+//            categoryIds.add(category.getId());
+//        }
+//
+//        return new ApiResponse(convertUserToTeacherDTO(user,categoryIds));
+//    }
+
+
     public ApiResponse getOneTeacher(Long teacherId) {
         User user = userRepository.findById(teacherId).orElse(null);
         if (user == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
         }
-        List<Long> categoryIds = new ArrayList<>();
-        for (Category category : user.getCategories()) {
-            categoryIds.add(category.getId());
+        List<ResStudentCount> res = groupRepository.findAllStudentsByTeacherId(teacherId);
+        if (res == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
-
-        return new ApiResponse(convertUserToTeacherDTO(user,categoryIds));
+        return new ApiResponse(res);
     }
+
+
+
 
     public ApiResponse updateTeacher(Long teacherId, ReqTeacher reqTeacher) {
         User user = userRepository.findById(teacherId).orElse(null);
