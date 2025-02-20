@@ -57,8 +57,8 @@ public class PaymentService {
                 .countAllStudent(studentCount)
                 .tulovQilganStudent(countStudentsHasPaid)
                 .tulovQilmaganStudent(studentCount-countStudentsHasPaid)
-                .tushum(paymentRepository.countPrice(PaymentEnum.TUSHUM.name()))
-                .chiqim(paymentRepository.countPrice(PaymentEnum.CHIQIM.name()))
+                .tushum(paymentRepository.countPrice(PaymentEnum.TUSHUM))
+                .chiqim(paymentRepository.countPrice(PaymentEnum.CHIQIM))
                 .build();
         return new ApiResponse(resPayment);
     }

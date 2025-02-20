@@ -34,8 +34,8 @@ public class StatisticService {
         statistic.setStudentCount(userRepository.countAllByStudent());
         statistic.setGroupCount(groupRepository.countAllByGroup());
         statistic.setCategoryCount(categoryRepository.countAllByCategory());
-        statistic.setInCome(paymentRepository.countPrice(PaymentEnum.CHIQIM.name()));
-        statistic.setOutCome(paymentRepository.countPrice(PaymentEnum.TUSHUM.name()));
+        statistic.setInCome(paymentRepository.countPrice(PaymentEnum.CHIQIM));
+        statistic.setOutCome(paymentRepository.countPrice(PaymentEnum.TUSHUM));
         statistic.setAvgMonPayment(paymentRepository.avgPayment());
         statistic.setPaidAllCount(userRepository.countAllByStudent());
         statistic.setPaidCount(userRepository.countStudentsHasPaid());
