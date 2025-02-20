@@ -15,9 +15,12 @@ public class GroupDTO {
     private Integer studentCount;
     private Integer departureStudentCount;
     private String teacherName;
-    private Long categoryId;
+    private String categoryName;
     private LocalDate startDate;
     private LocalDate endDate;
+    private Integer countEndMonth;
+    private Integer countAllLessons;
+    private Integer countGroupLessons;
     private Boolean active;
 
 }

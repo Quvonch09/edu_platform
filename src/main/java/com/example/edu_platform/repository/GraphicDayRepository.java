@@ -12,6 +12,7 @@ public interface GraphicDayRepository extends JpaRepository<GraphicDay, Long> {
     boolean existsByRoomIdAndStartTimeBeforeAndEndTimeAfter(Long roomId, LocalTime startTime,
                                                                       LocalTime endTime);
 
+    @Query(value = "select gd.* from room r join graphic_day gd on gd.id = r.graphic_day_id", nativeQuery = true)
     Optional<GraphicDay> findByRoomId(Long roomId);
 
     @Query(value = "select gd.* from graphic_day gd join groups g on gd.id = g.days_id where g.id = ?1", nativeQuery = true)

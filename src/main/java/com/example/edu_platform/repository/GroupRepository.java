@@ -191,12 +191,16 @@ ORDER BY r.rank_position;
     @Query(value = "select g.* from groups g join users u on g.teacher_id = u.id  where\n" +
             "            (:name IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :name, '%')))\n" +
             "            and (:teacherName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :teacherName, '%')))\n" +
-            "            and (:startDate IS NULL OR g.start_date <= :startDate)\n" +
-            "            and (:endDate IS NULL OR g.end_date >= :endDate)", nativeQuery = true)
+            "            and ( coalesce(:startDate , null) IS NULL OR g.start_date <= CAST(:startDate AS DATE))\n" +
+            "            and (coalesce(:endDate ,null) IS NULL OR g.end_date >= CAST(:endDate AS DATE))\n" +
+            "            and (:categoryId IS NULL OR g.category_id = :categoryId )",
+            nativeQuery = true)
     Page<Group> searchGroup(@Param("name") String name,
                             @Param("teacherName") String teacherName,
-                            @Param("startDate") LocalDate startDate,
-                            @Param("endDate") LocalDate endDate, Pageable pageable);
+                            @Param("startDate")  LocalDate startDate,
+                            @Param("endDate") LocalDate endDate,
+                            @Param("categoryId") Long categoryId, Pageable pageable);
+
 
 
     @Query(value = "select count(*) from groups g join groups_students gs on g.id = gs.group_id join users u on gs.students_id = u.id\n" +
@@ -228,5 +232,8 @@ WHERE g.teacher_id = :teacherId
 GROUP BY g.name;
            """ , nativeQuery = true)
     List<ResStudentCount> findAllStudentsByTeacherId(@Param("teacherId") Long teacherId);
+
+    @Query(value = "select count(g.*) from groups g join lesson_tracking lt on g.id = lt.group_id", nativeQuery = true)
+    Integer countGroupLessons(Long groupId);
 
 }

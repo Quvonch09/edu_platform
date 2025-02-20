@@ -35,6 +35,11 @@ public class PaymentService {
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
 
+        if (paymentType.equals(PaymentEnum.CHIQIM)){
+            if (paymentStatus == null){
+                return new ApiResponse(ResponseError.DEFAULT_ERROR("Status null bulishi mumkin emas"));
+            }
+        }
 
 
         Payment payment = Payment.builder()

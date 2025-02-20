@@ -45,6 +45,15 @@ public class CategoryController {
     }
 
 
+    @PreAuthorize("hasAnyRole('ROLE_CEO','ROLE_ADMIN','ROLE_TEACHER','ROLE_STUDENT')")
+    @Operation(summary = "Barcha categoryni listini kurish")
+    @GetMapping("/list")
+    public ResponseEntity<ApiResponse> getCategoryList() {
+        ApiResponse categoryById = categoryService.getAllList();
+        return ResponseEntity.ok(categoryById);
+    }
+
+
 
     @PreAuthorize("hasAnyRole( 'ROLE_CEO')")
     @Operation(summary = "CEO categoryni update qilish")

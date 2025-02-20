@@ -38,7 +38,7 @@ public class UserService {
     //    Teacher CRUD
     public ApiResponse saveTeacher(ReqTeacher reqTeacher) {
         boolean b = userRepository
-                .existsByPhoneNumberAndFullNameAndRoleAndEnabledTrue(reqTeacher.getPhoneNumber(), reqTeacher.getFullName(), Role.ROLE_TEACHER);
+                .existsByPhoneNumberAndRoleAndEnabledTrue(reqTeacher.getPhoneNumber(), Role.ROLE_TEACHER);
         if (b) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu User"));
         }
@@ -123,6 +123,11 @@ public class UserService {
 
 
     public ApiResponse updateTeacher(Long teacherId, ReqTeacher reqTeacher) {
+        boolean b = userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(reqTeacher.getPhoneNumber(), Role.ROLE_TEACHER);
+        if (b) {
+            return new ApiResponse(ResponseError.ALREADY_EXIST("Bu User"));
+        }
+
         User user = userRepository.findById(teacherId).orElse(null);
         if (user == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
@@ -163,14 +168,15 @@ public class UserService {
             }
         }
 
-        userRepository.delete(user);
+        user.setEnabled(false);
+        userRepository.save(user);
         return new ApiResponse("User successfully deleted");
     }
 
 
 //    Admin CRUD
     public ApiResponse saveAdmin(ReqAdmin reqAdmin){
-        boolean b = userRepository.existsByPhoneNumberAndFullNameAndRoleAndEnabledTrue(reqAdmin.getPhoneNumber(), reqAdmin.getFullName(), Role.ROLE_ADMIN);
+        boolean b = userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(reqAdmin.getPhoneNumber(), Role.ROLE_ADMIN);
         if (b) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu Admin"));
         }
