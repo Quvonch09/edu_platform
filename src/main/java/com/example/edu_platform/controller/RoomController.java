@@ -24,7 +24,7 @@ public class RoomController {
         return ResponseEntity.ok(apiResponse);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_CEO', 'ROLE_ADMIN')")
     @Operation(summary = "Admin roomni search qilish")
     @GetMapping
     public ResponseEntity<ApiResponse> searchRoom(@RequestParam(required = false, value = "name") String name,
@@ -36,7 +36,7 @@ public class RoomController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_CEO', 'ROLE_ADMIN')")
     @Operation(summary = "Admin roomni bittasini kurish")
     @GetMapping("/{roomId}")
     public ResponseEntity<ApiResponse> getRoom(@PathVariable Long roomId){
@@ -45,7 +45,7 @@ public class RoomController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_CEO', 'ROLE_ADMIN')")
     @Operation(summary = " Admin roomni update qilish")
     @PutMapping("/{roomId}")
     public ResponseEntity<ApiResponse> updateRoom(@PathVariable Long roomId, @RequestBody ReqRoom reqRoom){
@@ -54,7 +54,7 @@ public class RoomController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_CEO', 'ROLE_ADMIN')")
     @Operation(summary = "Admin roomni uchirish")
     @DeleteMapping("/{roomId}")
     public ResponseEntity<ApiResponse> deleteRoom(@PathVariable Long roomId){
