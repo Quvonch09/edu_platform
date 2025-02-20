@@ -118,7 +118,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "AND (:teacherId IS NULL OR g.teacher_id = :teacherId) " +
             "AND (:startAge IS NULL OR u.age >= :startAge) " +
             "AND (:endAge IS NULL OR u.age <= :endAge) " +
-            "AND u.role = 'ROLE_STUDENT'",
+            "AND u.role = 'ROLE_STUDENT'" +
+            "GROUP BY " +
+            "    u.id, \n" +
+            "    u.full_name, \n" +
+            "    u.phone_number, \n" +
+            "    g.name, \n" +
+            "    u.created_at, \n" +
+            "    u.age, \n" +
+            "    u.user_status, \n" +
+            "    u.parent_phone_number, \n" +
+            "    p.payment_date",
             nativeQuery = true)
     Page<ResStudent> searchStudents(@Param("fullName") String fullName,
                                     @Param("phoneNumber") String phoneNumber,

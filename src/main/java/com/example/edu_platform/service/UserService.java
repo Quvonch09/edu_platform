@@ -7,6 +7,7 @@ import com.example.edu_platform.payload.*;
 import com.example.edu_platform.payload.auth.ResponseLogin;
 import com.example.edu_platform.payload.req.ReqAdmin;
 import com.example.edu_platform.payload.req.ReqTeacher;
+import com.example.edu_platform.payload.res.ResCategory;
 import com.example.edu_platform.payload.res.ResPageable;
 import com.example.edu_platform.payload.res.ResStudentCount;
 import com.example.edu_platform.repository.CategoryRepository;
@@ -74,11 +75,11 @@ public class UserService {
         Page<User> allTeachers = userRepository.searchUsers(fullName, phoneNumber, groupId, role.name(), pageRequest);
         List<TeacherDTO> teacherList = new ArrayList<>();
         for (User allTeacher : allTeachers) {
-            List<Long> categoryIds = new ArrayList<>();
+            List<ResCategory> categories = new ArrayList<>();
             for (Category category : allTeacher.getCategories()) {
-                categoryIds.add(category.getId());
+                categories.add(new ResCategory(category.getId(), category.getName()));
             }
-            teacherList.add(convertUserToTeacherDTO(allTeacher,categoryIds));
+            teacherList.add(convertUserToTeacherDTO(allTeacher,categories));
         }
 
         ResPageable resPageable = ResPageable.builder()
@@ -253,13 +254,13 @@ public class UserService {
 
 
 
-    private TeacherDTO convertUserToTeacherDTO(User user, List<Long> categoryIds) {
+    private TeacherDTO convertUserToTeacherDTO(User user, List<ResCategory> categoryIds) {
 
         return TeacherDTO.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
                 .phoneNumber(user.getPhoneNumber())
-                .categoryId(categoryIds)
+                .categories(categoryIds)
                 .active(user.isEnabled())
                 .groupCount(groupRepository.countByTeacherId(user.getId()))
                 .fileId(user.getFile() != null ? user.getFile().getId() : null)

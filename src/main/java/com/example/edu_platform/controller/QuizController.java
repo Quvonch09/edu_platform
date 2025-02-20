@@ -23,35 +23,46 @@ public class QuizController {
     @PostMapping("/create")
     @Operation(summary = "(TEACHER) Quiz yaratish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
-    public ResponseEntity<ApiResponse> createQuiz(@RequestBody ReqQuiz reqQuiz) {
+    public ResponseEntity<ApiResponse> createQuiz(
+            @RequestBody ReqQuiz reqQuiz
+    ) {
         return ResponseEntity.ok(quizService.createQuiz(reqQuiz));
     }
 
     @GetMapping("/{quizId}")
     @Operation(summary = "(TEACHER,ADMIN) Id bo'yicha quiz olish")
     @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse> getById(@PathVariable Long quizId) {
+    public ResponseEntity<ApiResponse> getById(
+            @PathVariable Long quizId
+    ) {
         return ResponseEntity.ok(quizService.getQuiz(quizId));
     }
 
     @GetMapping("/getByLesson/{lessonId}")
     @Operation(summary = "(TEACHER,ADMIN) Lesson bo'yicha quizlarni olish")
     @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse> getByLesson(@PathVariable Long lessonId) {
+    public ResponseEntity<ApiResponse> getByLesson(
+            @PathVariable Long lessonId
+    ) {
         return ResponseEntity.ok(quizService.getQuizByLesson(lessonId));
     }
 
     @PutMapping("/update/{quizId}")
     @Operation(summary = "(TEACHER) Quizni yangilash")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
-    public ResponseEntity<ApiResponse> updateQuiz(@PathVariable Long quizId, @RequestBody ReqQuiz reqQuiz) {
+    public ResponseEntity<ApiResponse> updateQuiz(
+            @PathVariable Long quizId,
+            @RequestBody ReqQuiz reqQuiz
+    ) {
         return ResponseEntity.ok(quizService.updateQuiz(quizId, reqQuiz));
     }
 
     @DeleteMapping("/{quizId}")
     @Operation(summary = "(TEACHER) Quizni o'chirish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
-    public ResponseEntity<ApiResponse> deleteQuiz(@PathVariable Long quizId) {
+    public ResponseEntity<ApiResponse> deleteQuiz(
+            @PathVariable Long quizId
+    ) {
         return ResponseEntity.ok(quizService.deleteQuiz(quizId));
     }
 

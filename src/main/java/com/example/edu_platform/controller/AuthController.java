@@ -21,7 +21,9 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse> logIn(@Valid @RequestBody AuthLogin authLogin){
+    public ResponseEntity<ApiResponse> logIn(
+            @Valid @RequestBody AuthLogin authLogin
+    ){
         return ResponseEntity.ok(authService.login(authLogin));
     }
 

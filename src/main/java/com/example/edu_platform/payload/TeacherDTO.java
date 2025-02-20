@@ -1,5 +1,6 @@
 package com.example.edu_platform.payload;
 
+import com.example.edu_platform.payload.res.ResCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -15,7 +16,7 @@ public class TeacherDTO {
     private String fullName;
     private String phoneNumber;
     @Schema(hidden = true)
-    private List<Long> categoryId;
+    private List<ResCategory> categories;
     @Schema(hidden = true)
     private Integer groupCount;
     private Long fileId;
