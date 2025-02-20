@@ -106,7 +106,7 @@ public class UserService {
 //        return new ApiResponse(convertUserToTeacherDTO(user,categoryIds));
 //    }
 
-    @Transactional
+
     public ApiResponse getOneTeacher(Long teacherId) {
         User user = userRepository.findById(teacherId).orElse(null);
         if (user == null) {
