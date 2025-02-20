@@ -2,6 +2,7 @@ package com.example.edu_platform.repository;
 
 import com.example.edu_platform.entity.Group;
 import com.example.edu_platform.payload.res.ResCEODiagram;
+import com.example.edu_platform.payload.res.ResStudentCount;
 import com.example.edu_platform.payload.res.ResStudentRank;
 import com.example.edu_platform.payload.res.ResStudentStatistic;
 import org.springframework.data.domain.Page;
@@ -212,4 +213,19 @@ ORDER BY r.rank_position;
           AND extract(month from p.payment_date) = extract(month from current_date)
 """ , nativeQuery = true)
     Integer countStudentByTeacherId(@Param("teacherId") Long teacherId);
+
+    @Query(value = """
+            SELECT
+      g.name  as groupName,
+      COALESCE(COUNT(s.id), 0) AS studentCount
+  FROM groups g
+           JOIN groups_student_list gu ON gu.group_id = g.id
+           JOIN users s ON s.id = gu.student_list_id
+  WHERE g.teacher_id = :teacherId
+    AND g.active = TRUE
+    AND s.user_status = 'UQIYABDI'
+  GROUP BY g.name
+           """ , nativeQuery = true)
+    List<ResStudentCount> findAllStudentsByTeacherId(@Param("teacherId") Long teacherId);
+
 }
