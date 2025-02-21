@@ -113,13 +113,18 @@ public class UserController {
     }
 
 
+
+
+
     @PreAuthorize("hasAnyRole('ROLE_STUDENT','ROLE_TEACHER', 'ROLE_ADMIN', 'ROLE_CEO')")
-    @Operation(summary = "Barcha uzini profilini kurish")
-    @GetMapping("/getMe")
-    public ResponseEntity<ApiResponse> getMe(@CurrentUser User user) {
-        ApiResponse apiResponse = userService.getMe(user);
+    @Operation(summary = "Barcha userlarni listini kurish")
+    @GetMapping("/list")
+    public ResponseEntity<ApiResponse> getUserList(@RequestParam Role role) {
+        ApiResponse apiResponse = userService.getUsersList(role);
         return ResponseEntity.ok(apiResponse);
     }
+
+
 
 
     @PreAuthorize("hasAnyRole('ROLE_STUDENT','ROLE_TEACHER', 'ROLE_ADMIN', 'ROLE_CEO')")
