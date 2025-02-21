@@ -39,6 +39,7 @@ public class RoomService {
                 .color(reqRoom.getColor())
                 .build();
 
+        //Parse qilishda xatolik
         LocalTime startTime = LocalTime.parse(reqRoom.getStartTime());
         LocalTime endTime = LocalTime.parse(reqRoom.getEndTime());
 

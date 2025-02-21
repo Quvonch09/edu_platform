@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class LessonController {
     private final LessonService lessonService;
 
-    @PostMapping("/create-lesson")
+    @PostMapping("/create")
     @Operation(summary = "O'qituvchi dars yaratish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> createLesson(
@@ -25,17 +25,26 @@ public class LessonController {
         return ResponseEntity.ok(lessonService.createLesson(lessonRequest));
     }
 
-    @GetMapping("/lesson-in-module/{moduleId}")
-    @Operation(summary = "Moduldagi darslarni ko'rish")
-    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_SUPER_ADMIN')")
+    @GetMapping("/get")
+    public ResponseEntity<ApiResponse> search(
+            @RequestParam(required = false, value = "name") String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        return ResponseEntity.ok(lessonService.search(name, size, page));
+    }
+
+    @GetMapping("/getByModule/{moduleId}")
+    @Operation(summary = "(TEACHER,ADMIN,CEO) Moduldagi darslarni ko'rish")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_CEO')")
     public ResponseEntity<ApiResponse> getLessons(
             @PathVariable Long moduleId
     ){
         return ResponseEntity.ok(lessonService.getLessonInModule(moduleId));
     }
 
-    @PutMapping("/update-lesson/{lessonId}")
-    @Operation(summary = "Darsni tahrirlash o'qituvchi uchun")
+    @PutMapping("/update/{lessonId}")
+    @Operation(summary = "(TEACHER) Darsni tahrirlash o'qituvchi uchun")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> update(
             @PathVariable Long lessonId,
@@ -45,15 +54,16 @@ public class LessonController {
     }
 
     @DeleteMapping("/delete/{lessonId}")
-    @Operation(summary = "Darsni o'chirish")
+    @Operation(summary = "(TEACHER) Darsni o'chirish")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> delete(
             @PathVariable Long lessonId
     ){
         return ResponseEntity.ok(lessonService.delete(lessonId));
     }
 
-    @PostMapping("/allow-lesson")
-    @Operation(summary = "Darsga ruxsat berish")
+    @PostMapping("/allowLesson")
+    @Operation(summary = "(TEACHER) Darsga ruxsat berish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> allowLesson(
             @RequestBody ReqLessonTracking reqLessonTracking
@@ -61,8 +71,8 @@ public class LessonController {
         return ResponseEntity.ok(lessonService.allowLesson(reqLessonTracking));
     }
 
-    @GetMapping("/open-lessons-for-group/{groupId}")
-    @Operation(summary = "Guruhdagi ochiq darslar")
+    @GetMapping("/getOpenByGroup/{groupId}")
+    @Operation(summary = "Guruhdagi ochiq darslarni ko'rish")
     public ResponseEntity<ApiResponse> openLessons(
             @PathVariable Long groupId
     ){
@@ -70,8 +80,8 @@ public class LessonController {
     }
 
     @GetMapping("/statistics")
-    @Operation(summary = "Dars statistikasini ko'rish")
-    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_SUPER_ADMIN')")
+    @Operation(summary = "(TEACHER,ADMIN,CEO) Dars statistikasini ko'rish")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_CEO')")
     public ResponseEntity<ApiResponse> getStatistics(){
         return ResponseEntity.ok(lessonService.getStatistics());
     }
