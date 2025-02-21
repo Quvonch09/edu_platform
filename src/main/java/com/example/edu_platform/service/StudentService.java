@@ -74,17 +74,17 @@ public class StudentService {
 
     public ApiResponse searchStudent(String fullName, String phoneNumber,
                                      UserStatus userStatus, String groupName,
-                                     Long teacherId, Integer startAge, Integer endAge,
+                                     Long teacherId, Integer startAge, Integer endAge, Boolean hasPaid,
                                      int page, int size){
         PageRequest pageRequest = PageRequest.of(page, size);
         Page<ResStudent> users = null;
         if (userStatus == null){
             users = userRepository.searchStudents(fullName, phoneNumber, null, groupName,
-                    teacherId, startAge, endAge, pageRequest);
+                    teacherId, startAge, hasPaid,endAge, pageRequest);
         }
         if (userStatus != null) {
             users = userRepository.searchStudents(fullName, phoneNumber, userStatus.name(), groupName,
-                    teacherId, startAge, endAge, pageRequest);
+                    teacherId, startAge, hasPaid,endAge, pageRequest);
         }
 
         ResPageable resPageable = ResPageable.builder()

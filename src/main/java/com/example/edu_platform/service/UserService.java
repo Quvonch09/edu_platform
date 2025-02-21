@@ -93,6 +93,23 @@ public class UserService {
     }
 
 
+    public ApiResponse getUsersList(Role role){
+        List<User> allByRole = userRepository.findAllByRole(role);
+        List<UserDTO> userDTOList = new ArrayList<>();
+        for (User user : allByRole) {
+            UserDTO userDTO = UserDTO.builder()
+                    .id(user.getId())
+                    .fullName(user.getFullName())
+                    .phoneNumber(user.getPhoneNumber())
+                    .role(user.getRole().name())
+                    .fileId(user.getFile() != null ? user.getFile().getId() : null)
+                    .build();
+            userDTOList.add(userDTO);
+        }
+        return new ApiResponse(userDTOList);
+    }
+
+
 //    @Transactional
 //    public ApiResponse getOneTeacher(Long teacherId) {
 //        User user = userRepository.findById(teacherId).orElse(null);

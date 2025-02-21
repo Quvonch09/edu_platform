@@ -37,9 +37,11 @@ public class StudentController {
                                                       @RequestParam(required = false, value = "teacherId") Long teacherId,
                                                       @RequestParam(required = false, value = "startAge") Integer startAge,
                                                       @RequestParam(required = false, value = "endAge") Integer endAge,
+                                                      @RequestParam(required = false, value = "hasPaid") Boolean hasPaid,
                                                       @RequestParam(defaultValue = "0") int page,
                                                       @RequestParam(defaultValue = "10") int size){
-        ApiResponse apiResponse = studentService.searchStudent(fullName, phoneNumber, userStatus, groupName, teacherId, startAge, endAge, page, size);
+        ApiResponse apiResponse = studentService.searchStudent(fullName, phoneNumber, userStatus, groupName, teacherId,
+                startAge, endAge,hasPaid, page, size);
         return ResponseEntity.ok(apiResponse);
     }
 

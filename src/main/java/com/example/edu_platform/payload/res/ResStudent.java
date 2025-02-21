@@ -7,6 +7,7 @@ public interface ResStudent {
     String getFullName();
     String getPhoneNumber();
     String getGroupName();
+    String getTeacherName();
     LocalDateTime getCreatedAt();
     Integer getAge();
     String getStatus();
