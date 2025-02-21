@@ -47,7 +47,7 @@ public class ModuleService {
         }
 
         PageRequest pageRequest = PageRequest.of(page, size);
-        Page<Module> modules = moduleRepository.findByCategoryId(categoryId, pageRequest);
+        Page<Module> modules = moduleRepository.findByCategoryIdAndDeletedFalse(categoryId, pageRequest);
 
         List<ModuleDTO> groupDTOList = modules.stream().map(module -> ModuleDTO.builder()
                 .id(module.getId())
@@ -75,7 +75,7 @@ public class ModuleService {
         if (name == null || name.trim().isEmpty()) {
             modules = moduleRepository.findAll(pageRequest);
         } else {
-            modules = moduleRepository.findByNameContainingIgnoreCase(name, pageRequest);
+            modules = moduleRepository.findByNameContainingIgnoreCaseAndDeletedFalse(name, pageRequest);
         }
 
         List<ModuleDTO> moduleDTOList = modules.stream()
@@ -100,7 +100,7 @@ public class ModuleService {
 
 
     public ApiResponse getModule(Long moduleId){
-        Module foundModule = moduleRepository.findById(moduleId).orElse(null);
+        Module foundModule = moduleRepository.findByIdAndDeletedFalse(moduleId).orElse(null);
         if (foundModule == null){
             return new ApiResponse(ResponseError.NOTFOUND("Modul"));
         }
@@ -108,7 +108,7 @@ public class ModuleService {
     }
 
     public ApiResponse update(Long moduleId,ModuleRequest moduleRequest){
-        Module module = moduleRepository.findById(moduleId).orElse(null);
+        Module module = moduleRepository.findByIdAndDeletedFalse(moduleId).orElse(null);
         Category category = categoryRepository.findById(moduleRequest.getCategoryId()).orElse(null);
         if (module == null){
             return new ApiResponse(ResponseError.NOTFOUND("Modul"));
@@ -124,7 +124,7 @@ public class ModuleService {
     }
 
     public ApiResponse delete(Long moduleId){
-        Module module = moduleRepository.findById(moduleId).orElse(null);
+        Module module = moduleRepository.findByIdAndDeletedFalse(moduleId).orElse(null);
         if (module == null){
             return new ApiResponse(ResponseError.NOTFOUND("Modul"));
         }

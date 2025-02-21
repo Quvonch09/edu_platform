@@ -4,7 +4,6 @@ import com.example.edu_platform.entity.*;
 import com.example.edu_platform.entity.Module;
 import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.LessonDTO;
-import com.example.edu_platform.payload.ModuleDTO;
 import com.example.edu_platform.payload.ResponseError;
 import com.example.edu_platform.payload.req.LessonRequest;
 import com.example.edu_platform.payload.req.ReqLessonTracking;
@@ -59,12 +58,12 @@ public class LessonService {
     @Transactional
     public ApiResponse getLessonInModule(Long moduleId) {
 
-        Module optionalModule = moduleRepository.findById(moduleId).orElse(null);
+        Module optionalModule = moduleRepository.findByIdAndDeletedFalse(moduleId).orElse(null);
         if (optionalModule == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Modul"));
         }
 
-        List<Lesson> foundLessons = lessonRepository.findByModuleId(moduleId);
+        List<Lesson> foundLessons = lessonRepository.findByModuleIdAndDeletedFalse(moduleId);
         List<LessonDTO> lessonDTOs = foundLessons.stream()
                 .map(this::lessonDTO)
                 .toList();
@@ -77,8 +76,8 @@ public class LessonService {
     }
 
     public ApiResponse update(Long lessonId,LessonRequest lessonRequest){
-        Lesson currentLesson = lessonRepository.findById(lessonId).orElse(null);
-        Module module = moduleRepository.findById(lessonRequest.getModuleId()).orElse(null);
+        Lesson currentLesson = lessonRepository.findByIdAndDeletedFalse(lessonId).orElse(null);
+        Module module = moduleRepository.findByIdAndDeletedFalse(lessonRequest.getModuleId()).orElse(null);
         if (currentLesson == null){
             return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
         } else if (module == null) {
@@ -102,7 +101,7 @@ public class LessonService {
     }
 
     public ApiResponse delete(Long lessonId){
-        Lesson lesson = lessonRepository.findById(lessonId).orElse(null);
+        Lesson lesson = lessonRepository.findByIdAndDeletedFalse(lessonId).orElse(null);
         if (lesson == null){
             return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
         }
@@ -135,7 +134,7 @@ public class LessonService {
         if (name == null || name.trim().isEmpty()) {
             lessons = lessonRepository.findAll(pageRequest);
         } else {
-            lessons = lessonRepository.findByName(name, pageRequest);
+            lessons = lessonRepository.findByNameAndDeletedFalse(name, pageRequest);
         }
 
         List<LessonDTO> lessonDTOS = lessons.stream()
