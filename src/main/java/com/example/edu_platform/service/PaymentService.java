@@ -4,6 +4,7 @@ import com.example.edu_platform.entity.Payment;
 import com.example.edu_platform.entity.User;
 import com.example.edu_platform.entity.enums.PaymentEnum;
 import com.example.edu_platform.entity.enums.PaymentStatusEnum;
+import com.example.edu_platform.entity.enums.Role;
 import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.PaymentDTO;
 import com.example.edu_platform.payload.res.ResPageable;
@@ -33,6 +34,12 @@ public class PaymentService {
         User user = userRepository.findById(reqPayment.getUserId()).orElse(null);
         if(user == null){
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
+        }
+
+        if (user.getRole().equals(Role.ROLE_STUDENT)){
+            if (paymentType.equals(PaymentEnum.CHIQIM)){
+                return new ApiResponse(ResponseError.DEFAULT_ERROR("Student faqat tulov qila oladi"));
+            }
         }
 
         if (paymentType.equals(PaymentEnum.CHIQIM)){

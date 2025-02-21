@@ -77,8 +77,16 @@ public class StudentService {
                                      Long teacherId, Integer startAge, Integer endAge,
                                      int page, int size){
         PageRequest pageRequest = PageRequest.of(page, size);
-        Page<ResStudent> users = userRepository.searchStudents(fullName, phoneNumber, userStatus.name(), groupName,
-                teacherId, startAge, endAge, pageRequest);
+        Page<ResStudent> users = null;
+        if (userStatus == null){
+            users = userRepository.searchStudents(fullName, phoneNumber, null, groupName,
+                    teacherId, startAge, endAge, pageRequest);
+        }
+        if (userStatus != null) {
+            users = userRepository.searchStudents(fullName, phoneNumber, userStatus.name(), groupName,
+                    teacherId, startAge, endAge, pageRequest);
+        }
+
         ResPageable resPageable = ResPageable.builder()
                 .page(page)
                 .size(size)
