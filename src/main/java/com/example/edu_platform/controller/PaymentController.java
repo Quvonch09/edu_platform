@@ -77,4 +77,13 @@ public class PaymentController {
         ApiResponse apiResponse = paymentService.deletePayment(paymentId);
         return ResponseEntity.ok(apiResponse);
     }
+
+
+    @PreAuthorize("hasRole('ROLE_CEO')")
+    @Operation(summary = " CEO ga oylik chart uchun tushum , chiqim , daromad")
+    @GetMapping("/chart")
+    public ResponseEntity<ApiResponse> getPaymentChart()
+    {
+        return ResponseEntity.ok(paymentService.getStatistic());
+    }
 }
