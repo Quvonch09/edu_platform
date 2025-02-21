@@ -137,4 +137,9 @@ public class PaymentService {
         paymentRepository.delete(payment);
         return new ApiResponse("Successfully deleted");
     }
+
+
+    public ApiResponse  getStatistic(){
+        return new ApiResponse(paymentRepository.getMonthlyFinanceReport());
+    }
 }
