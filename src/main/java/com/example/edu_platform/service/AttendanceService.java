@@ -5,6 +5,7 @@ import com.example.edu_platform.exception.NotFoundException;
 import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.AttendDto;
 import com.example.edu_platform.payload.AttendanceDto;
+import com.example.edu_platform.payload.ResponseError;
 import com.example.edu_platform.payload.res.ResAttend;
 import com.example.edu_platform.repository.AttendanceRepository;
 import com.example.edu_platform.repository.GroupRepository;
@@ -51,59 +52,35 @@ public class AttendanceService {
 
     public ApiResponse getAttendanceByGroupId(Long groupId, int year, int month) {
 
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NotFoundException("group not found"));
-
         LocalDate startOfMonth = LocalDate.of(year, Month.of(month), 1);
         LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
-
-        LocalDate groupMonthYear = group.getCreatedAt().toLocalDate().withDayOfMonth(1);
-
-        if (startOfMonth.isBefore(groupMonthYear)) {
-            return new ApiResponse("Attendance");
-        }
-
-        List<LocalDate> groupDays = getGroupDays(groupId, year, month);
-
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(
+                        ResponseError.NOTFOUND("group not found"))));
         List<ResAttend> resAttends = new ArrayList<>();
-
         List<User> users = userRepository.findAllByGroupId(group.getId());
-
         for (User user : users) {
             List<AttendDto> attendDtoList = new ArrayList<>();
-
-            for (LocalDate groupDay : groupDays) {
-                Attendance attendance = attendanceRepository.findByStudentAndDate(user, groupDay);
-
-                AttendDto attendDto;
-                if (attendance != null) {
-                    attendDto = AttendDto.builder()
-                            .id(attendance.getId())
-                            .attendance(attendance.getAttendance())
-                            .date(attendance.getDate())
-                            .build();
-                } else {
-                    attendDto = AttendDto.builder()
-                            .id(null)
-                            .attendance(null)
-                            .date(groupDay)
-                            .build();
-                }
-
+            List<Attendance> attendances =
+                    attendanceRepository.getAttendanceByStudentIdAndDateBetween(user.getId(), startOfMonth, endOfMonth);
+            for (Attendance attendance : attendances) {
+                AttendDto attendDto = AttendDto.builder()
+                        .id(attendance.getId())
+                        .attendance(attendance.getAttendance())
+                        .date(attendance.getDate())
+                        .build();
                 attendDtoList.add(attendDto);
             }
-
             ResAttend resAttend = ResAttend.builder()
                     .studentId(user.getId())
                     .fullName(user.getFullName())
                     .attendList(attendDtoList)
                     .build();
-
             resAttends.add(resAttend);
         }
-
         return new ApiResponse(resAttends);
     }
+
 
     public ApiResponse getAttendanceByStudent(User user, int month) {
         LocalDate startOfMonth = LocalDate.of(LocalDate.now().getYear(), Month.of(month), 1);
