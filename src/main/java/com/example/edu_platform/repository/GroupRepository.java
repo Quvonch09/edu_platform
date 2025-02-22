@@ -2,6 +2,11 @@ package com.example.edu_platform.repository;
 
 import com.example.edu_platform.entity.Group;
 import com.example.edu_platform.payload.res.ResCEODiagram;
+import com.example.edu_platform.payload.res.ResStudentCount;
+import com.example.edu_platform.payload.res.ResStudentRank;
+import com.example.edu_platform.payload.res.ResStudentStatistic;
+import jakarta.persistence.TemporalType;
+import com.example.edu_platform.payload.res.ResCEODiagram;
 import com.example.edu_platform.payload.res.ResStudentStatistic;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +14,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -81,7 +87,7 @@ WITH lessons_per_group AS (
          FROM groups g
                   LEFT JOIN lesson_tracking lt ON g.id = lt.group_id
          WHERE g.id IN (
-             SELECT group_id FROM groups_student_list WHERE student_list_id = :studentId
+             SELECT group_id FROM groups_students WHERE students_id = :studentId
          )
          GROUP BY g.id
      ),
@@ -132,7 +138,7 @@ FROM groups g
          LEFT JOIN ranking r ON r.student_id = :studentId
 WHERE g.active = TRUE
   AND g.id IN (
-    SELECT group_id FROM groups_student_list WHERE student_list_id = :studentId
+    SELECT group_id FROM groups_students WHERE students_id = :studentId
 )
 LIMIT 1;
 """, nativeQuery = true)
@@ -146,16 +152,16 @@ LIMIT 1;
 WITH student_scores AS (
     SELECT
         gs.group_id,
-        gs.student_list_id AS student_id,
+        gs.students_id AS student_id,
         u.full_name AS student_name,
         COALESCE(SUM(h.ball), 0) AS total_score
-    FROM groups_student_list gs
-             JOIN users u ON gs.student_list_id = u.id
+    FROM groups_students gs
+             JOIN users u ON gs.students_id = u.id
              LEFT JOIN homework h ON h.student_id = u.id AND h.checked = TRUE
     WHERE gs.group_id IN (
-        SELECT group_id FROM groups_student_list WHERE student_list_id = :studentId
+        SELECT group_id FROM groups_students WHERE students_id = :studentId
     )
-    GROUP BY gs.group_id, gs.student_list_id, u.full_name
+    GROUP BY gs.group_id, gs.students_id, u.full_name
 ),
      ranking AS (
          SELECT
@@ -187,15 +193,49 @@ ORDER BY r.rank_position;
     @Query(value = "select g.* from groups g join users u on g.teacher_id = u.id  where\n" +
             "            (:name IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :name, '%')))\n" +
             "            and (:teacherName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :teacherName, '%')))\n" +
-            "            and (:startDate IS NULL OR g.start_date <= :startDate)\n" +
-            "            and (:endDate IS NULL OR g.end_date >= :endDate)", nativeQuery = true)
+            "            and ( coalesce(:startDate , null) IS NULL OR g.start_date <= CAST(:startDate AS DATE))\n" +
+            "            and (coalesce(:endDate ,null) IS NULL OR g.end_date >= CAST(:endDate AS DATE))\n" +
+            "            and (:categoryId IS NULL OR g.category_id = :categoryId )",
+            nativeQuery = true)
     Page<Group> searchGroup(@Param("name") String name,
                             @Param("teacherName") String teacherName,
-                            @Param("startDate") LocalDate startDate,
-                            @Param("endDate") LocalDate endDate, Pageable pageable);
+                            @Param("startDate")  LocalDate startDate,
+                            @Param("endDate") LocalDate endDate,
+                            @Param("categoryId") Long categoryId, Pageable pageable);
+
 
 
     @Query(value = "select count(*) from groups g join groups_students gs on g.id = gs.group_id join users u on gs.students_id = u.id\n" +
             "            where u.user_status = 'CHIQIB_KETGAN'", nativeQuery = true)
     Integer countGroup(Long groupId);
+
+    @Query(value = """
+        SELECT
+            COALESCE(COUNT(DISTINCT p.student_id), 0) AS paid_students_count
+        FROM groups g
+                 JOIN groups_students gu ON gu.group_id = g.id
+                 JOIN users s ON s.id = gu.students_id AND s.user_status = 'UQIYABDI'
+                 JOIN payment p ON p.student_id = s.id AND p.payment_type = 'TUSHUM'
+        WHERE g.teacher_id = :teacherId
+          AND g.active = TRUE
+          AND extract(month from p.payment_date) = extract(month from current_date)
+""" , nativeQuery = true)
+    Integer countStudentByTeacherId(@Param("teacherId") Long teacherId);
+
+    @Query(value = """
+SELECT
+    g.name  as groupName,
+    COALESCE(COUNT(s.id), 0) AS studentCount
+FROM groups g
+    LEFT JOIN groups_students gu ON gu.group_id = g.id
+    LEFT JOIN users s ON s.id = gu.students_id AND s.user_status = 'UQIYABDI'
+WHERE g.teacher_id = :teacherId
+    AND g.active = TRUE
+GROUP BY g.name;
+           """ , nativeQuery = true)
+    List<ResStudentCount> findAllStudentsByTeacherId(@Param("teacherId") Long teacherId);
+
+    @Query(value = "select count(g.*) from groups g join lesson_tracking lt on g.id = lt.group_id", nativeQuery = true)
+    Integer countGroupLessons(Long groupId);
+
 }

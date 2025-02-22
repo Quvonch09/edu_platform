@@ -24,7 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -38,8 +38,8 @@ public class StudentService {
 
     @Transactional
     public ApiResponse saveStudent(ReqStudent reqStudent){
-        boolean b = userRepository.existsByPhoneNumberAndFullNameAndRoleAndEnabledTrue(
-                reqStudent.getPhoneNumber(), reqStudent.getFullName(), Role.ROLE_STUDENT);
+        boolean b = userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(
+                reqStudent.getPhoneNumber(), Role.ROLE_STUDENT);
 
         if(b){
             return new ApiResponse(ResponseError.ALREADY_EXIST("Student"));
@@ -75,11 +75,19 @@ public class StudentService {
 
     public ApiResponse searchStudent(String fullName, String phoneNumber,
                                      UserStatus userStatus, String groupName,
-                                     Long teacherId, Integer startAge, Integer endAge,
+                                     Long teacherId, Integer startAge, Integer endAge, Boolean hasPaid,
                                      int page, int size){
         PageRequest pageRequest = PageRequest.of(page, size);
-        Page<ResStudent> users = userRepository.searchStudents(fullName, phoneNumber, userStatus.name(), groupName,
-                teacherId, startAge, endAge, pageRequest);
+        Page<ResStudent> users = null;
+        if (userStatus == null){
+            users = userRepository.searchStudents(fullName, phoneNumber, null, groupName,
+                    teacherId, startAge, hasPaid,endAge, pageRequest);
+        }
+        if (userStatus != null) {
+            users = userRepository.searchStudents(fullName, phoneNumber, userStatus.name(), groupName,
+                    teacherId, startAge, hasPaid,endAge, pageRequest);
+        }
+
         ResPageable resPageable = ResPageable.builder()
                 .page(page)
                 .size(size)
@@ -118,6 +126,10 @@ public class StudentService {
 
 
     public ApiResponse updateStudent(Long studentId, ReqStudent reqStudent){
+        boolean b = userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(reqStudent.getPhoneNumber(), Role.ROLE_STUDENT);
+        if(b){
+            return new ApiResponse(ResponseError.ALREADY_EXIST("Student"));
+        }
         User user = userRepository.findById(studentId).orElse(null);
         if(user == null){
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
@@ -148,5 +160,32 @@ public class StudentService {
         user.setDeparture_date(departureDate);
         user.setDeparture_description(departureDescription);
         return new ApiResponse("Successfully deleted student");
+    }
+
+    @Transactional
+    public ApiResponse getStudentGroupBy(Long groupId){
+
+        Group group = groupRepository.findById(groupId).orElse(null);
+        if(group == null){
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
+
+        List<User> students = group.getStudents();
+        List<StudentDTO> list = students.stream().map(this::getDto).toList();
+        return new ApiResponse(list);
+
+    }
+
+    public StudentDTO getDto(User user){
+        return StudentDTO.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .phoneNumber(user.getPhoneNumber())
+                .parentPhoneNumber(user.getParentPhoneNumber())
+                .age(user.getAge())
+                .status(user.getUserStatus() != null ? user.getUserStatus().name() : null)
+                .score(homeworkRepository.countByBall(user.getId()))
+                .startStudyDate(user.getCreatedAt())
+                .build();
     }
 }

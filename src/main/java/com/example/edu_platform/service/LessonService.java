@@ -7,9 +7,12 @@ import com.example.edu_platform.payload.LessonDTO;
 import com.example.edu_platform.payload.ResponseError;
 import com.example.edu_platform.payload.req.LessonRequest;
 import com.example.edu_platform.payload.req.ReqLessonTracking;
+import com.example.edu_platform.payload.res.ResPageable;
 import com.example.edu_platform.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
@@ -55,12 +58,12 @@ public class LessonService {
     @Transactional
     public ApiResponse getLessonInModule(Long moduleId) {
 
-        Module optionalModule = moduleRepository.findById(moduleId).orElse(null);
+        Module optionalModule = moduleRepository.findByIdAndDeletedFalse(moduleId).orElse(null);
         if (optionalModule == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Modul"));
         }
 
-        List<Lesson> foundLessons = lessonRepository.findByModuleId(moduleId);
+        List<Lesson> foundLessons = lessonRepository.findByModuleIdAndDeletedFalse(moduleId);
         List<LessonDTO> lessonDTOs = foundLessons.stream()
                 .map(this::lessonDTO)
                 .toList();
@@ -73,8 +76,8 @@ public class LessonService {
     }
 
     public ApiResponse update(Long lessonId,LessonRequest lessonRequest){
-        Lesson currentLesson = lessonRepository.findById(lessonId).orElse(null);
-        Module module = moduleRepository.findById(lessonRequest.getModuleId()).orElse(null);
+        Lesson currentLesson = lessonRepository.findByIdAndDeletedFalse(lessonId).orElse(null);
+        Module module = moduleRepository.findByIdAndDeletedFalse(lessonRequest.getModuleId()).orElse(null);
         if (currentLesson == null){
             return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
         } else if (module == null) {
@@ -98,7 +101,7 @@ public class LessonService {
     }
 
     public ApiResponse delete(Long lessonId){
-        Lesson lesson = lessonRepository.findById(lessonId).orElse(null);
+        Lesson lesson = lessonRepository.findByIdAndDeletedFalse(lessonId).orElse(null);
         if (lesson == null){
             return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
         }
@@ -123,6 +126,38 @@ public class LessonService {
         lessonTrackingRepository.save(lessonTracking);
         return new ApiResponse("Lesson guruh uchun ochildi");
     }
+
+    public ApiResponse search(String name, int size, int page) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<Lesson> lessons;
+
+        if (name == null || name.trim().isEmpty()) {
+            lessons = lessonRepository.findAll(pageRequest);
+        } else {
+            lessons = lessonRepository.findByNameAndDeletedFalse(name, pageRequest);
+        }
+
+        List<LessonDTO> lessonDTOS = lessons.stream()
+                .map(lesson -> LessonDTO.builder()
+                        .lessonId(lesson.getId())
+                        .name(lesson.getName())
+                        .description(lesson.getDescription())
+                        .videoLink(lesson.getVideoLink())
+                        .createdAt(lesson.getCreatedAt())
+                        .build())
+                .toList();
+
+        ResPageable resPageable = ResPageable.builder()
+                .page(page)
+                .size(size)
+                .totalPage(lessons.getTotalPages())
+                .totalElements(lessons.getTotalElements())
+                .body(lessonDTOS)
+                .build();
+
+        return new ApiResponse(resPageable);
+    }
+
 
     @Transactional
     public ApiResponse getOpenLessonsInGroup(Long groupId) {

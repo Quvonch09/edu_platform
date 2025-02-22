@@ -3,7 +3,6 @@ package com.example.edu_platform.repository;
 import com.example.edu_platform.entity.User;
 import com.example.edu_platform.entity.enums.Role;
 import com.example.edu_platform.payload.res.ResCEODiagram;
-import com.example.edu_platform.entity.enums.Role;
 import com.example.edu_platform.payload.res.ResStudent;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,10 +11,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-
-import java.util.List;
-
-import java.time.LocalDateTime;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByPhoneNumber(String phoneNumber);
@@ -69,8 +64,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             COALESCE(COUNT(u.id), 0) AS count
         FROM months m
                  LEFT JOIN users u
-                           ON EXTRACT(MONTH FROM u.update_at) = EXTRACT(MONTH FROM m.month_start)
-                               AND EXTRACT(YEAR FROM u.update_at) = EXTRACT(YEAR FROM m.month_start)
+                           ON EXTRACT(MONTH FROM u.updated_at) = EXTRACT(MONTH FROM m.month_start)
+                               AND EXTRACT(YEAR FROM u.updated_at) = EXTRACT(YEAR FROM m.month_start)
                                AND u.role = 'ROLE_STUDENT'
                                AND u.user_status = 'CHIQIB_KETGAN'
         GROUP BY m.month_start
@@ -78,17 +73,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
 """ , nativeQuery = true)
     List<ResCEODiagram> getLeaveStudent();
 
-    boolean existsByPhoneNumberAndFullName(String phone, String fullName);
-    boolean existsByPhoneNumberAndFullNameAndRoleAndEnabledTrue(String phone, String fullName, Role role);
+    boolean existsByPhoneNumberAndRoleAndEnabledTrue(String phone, Role role);
 
 
-    @Query(value = "select u.* from users u join groups g on u.id = g.teacher_id where " +
-            "(:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%'))) " +
-            "and (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%'))) " +
-            "and (:groupId IS NULL OR g.id = :groupId) and role = 'ROLE_TEACHER'" , nativeQuery = true)
-    Page<User> searchTeachers(@Param("fullName") String fullName,
+    @Query(value = "select distinct u.* from users u  left join groups g on u.id = g.teacher_id where\n" +
+            "                                    (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%')))\n" +
+            "                                    and (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%')))\n" +
+            "                                    and (:groupId IS NULL OR g.id = :groupId) and u.role = :role " , nativeQuery = true)
+    Page<User> searchUsers(@Param("fullName") String fullName,
                               @Param("phoneNumber") String phoneNumber,
-                              @Param("groupId") Long groupId, Pageable pageable);
+                              @Param("groupId") Long groupId,
+                              @Param("role") String role, Pageable pageable);
 
 
     @Query(value = """
@@ -97,8 +92,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             COALESCE(COUNT(s.id), 0) AS student_count
         FROM groups g
                  JOIN users u ON g.teacher_id = u.id
-                 LEFT JOIN groups_student_list gu ON gu.group_id = g.id  -- group_user jadvali, bu yerda studentlar va guruhlar bog‘langan
-                 LEFT JOIN users s ON s.id = gu.student_list_id AND s.user_status = 'UQIYABDI'  -- Studentlarning statusi
+                 LEFT JOIN groups_students gu ON gu.group_id = g.id  -- group_user jadvali, bu yerda studentlar va guruhlar bog‘langan
+                 LEFT JOIN users s ON s.id = gu.students_id AND s.user_status = 'UQIYABDI'  -- Studentlarning statusi
         WHERE g.teacher_id = :teacherId
           AND g.active = TRUE """ , nativeQuery = true
     )
@@ -106,39 +101,62 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 
 
-
-
-    @Query(value = "select * from users u where " +
-            "(:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%'))) " +
-            "and (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%'))) " +
-            "and role = 'ROLE_ADMIN'", nativeQuery = true)
-    Page<User> searchAdmins(@Param("fullName") String fullName,
-                            @Param("phoneNumber") String phoneNumber, Pageable pageable);
-
-
-
-    @Query(value = "SELECT u.id, u.full_name, u.phone_number, g.id as groupId, u.created_at, u.age, u.user_status as status, u.parent_phone_number, " +
-            "CASE WHEN  extract(month from p.payment_date)  = EXTRACT(month from  current_date) THEN true ELSE false END AS hasPaid " +
-            "FROM users u " +
-            "JOIN groups_students gsl ON u.id = gsl.students_id " +
-            "JOIN groups g ON gsl.group_id = g.id " +
-            "LEFT JOIN payment p ON p.student_id = u.id " +
-            "WHERE (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%'))) " +
-            "AND (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%'))) " +
-            "AND (:userStatus IS NULL OR u.user_status = :userStatus) " +
-            "AND (:groupName IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :groupName, '%'))) " +
-            "AND (:teacherId IS NULL OR g.teacher_id = :teacherId) " +
-            "AND (:startAge IS NULL OR u.age >= :startAge) " +
-            "AND (:endAge IS NULL OR u.age <= :endAge) " +
-            "AND u.role = 'ROLE_STUDENT'",
-            nativeQuery = true)
+    @Query(value = "SELECT u.id, u.full_name, u.phone_number, g.name as groupName,\n" +
+            "       u.created_at, u.age, u.user_status as status, u.parent_phone_number,\n" +
+            "       u2.full_name as teacherName,\n" +
+            "       CASE\n" +
+            "           WHEN extract(month from p.payment_date) = EXTRACT(month from current_date)\n" +
+            "               THEN true ELSE false\n" +
+            "           END AS hasPaid,\n" +
+            "       coalesce(sum(h.ball), 0) score\n" +
+            "FROM users u\n" +
+            "         JOIN groups_students gsl ON u.id = gsl.students_id\n" +
+            "         JOIN groups g ON gsl.group_id = g.id\n" +
+            "         LEFT JOIN users u2 on u2.id = g.teacher_id\n" +
+            "         LEFT JOIN homework h ON u.id = h.student_id\n" +
+            "         LEFT JOIN payment p ON p.student_id = u.id\n" +
+            "WHERE (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%')))\n" +
+            "  AND (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%')))\n" +
+            "  AND (:userStatus IS NULL OR u.user_status = :userStatus)\n" +
+            "  AND (:groupName IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :groupName, '%')))\n" +
+            "  AND (:teacherId IS NULL OR g.teacher_id = :teacherId)\n" +
+            "  AND (:startAge IS NULL OR u.age >= :startAge)\n" +
+            "  AND (:endAge IS NULL OR u.age <= :endAge)\n" +
+            "  AND u.role = 'ROLE_STUDENT'\n" +
+            "GROUP BY\n" +
+            "    u.id,\n" +
+            "    u.full_name,\n" +
+            "    u.phone_number,\n" +
+            "    g.name,\n" +
+            "    u.created_at,\n" +
+            "    u.age,\n" +
+            "    u.user_status,\n" +
+            "    u.parent_phone_number,\n" +
+            "    u2.full_name,\n" +
+            "    p.payment_date\n" +
+            "HAVING (:hasPaid IS NULL OR\n" +
+            "        (CASE\n" +
+            "             WHEN extract(month from p.payment_date) = EXTRACT(month from current_date)\n" +
+            "                 THEN true ELSE false\n" +
+            "            END) = :hasPaid)",
+    nativeQuery = true)
     Page<ResStudent> searchStudents(@Param("fullName") String fullName,
                                     @Param("phoneNumber") String phoneNumber,
                                     @Param("userStatus") String userStatus,
                                     @Param("groupName") String groupName,
                                     @Param("teacherId") Long teacherId,
                                     @Param("startAge") Integer startAge,
-                                    @Param("endAge") Integer endAge,
-                                    Pageable pageable);
+                                    @Param("hasPaid") Boolean hasPaid,
+                                    @Param("endAge") Integer endAge, Pageable pageable);
+
+
+
+
+    @Query(value = "select coalesce(count(u.*) , 0) from users u join payment p on u.id = p.student_id and u.role = 'ROLE_STUDENT'" +
+            "and EXTRACT(month from p.payment_date) = EXTRACT(month from current_date)", nativeQuery = true)
+    Integer countStudentsHasPaid();
+
+
+    List<User> findAllByRole( Role role);
 
 }

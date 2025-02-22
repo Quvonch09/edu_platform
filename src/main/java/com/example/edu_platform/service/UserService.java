@@ -7,7 +7,9 @@ import com.example.edu_platform.payload.*;
 import com.example.edu_platform.payload.auth.ResponseLogin;
 import com.example.edu_platform.payload.req.ReqAdmin;
 import com.example.edu_platform.payload.req.ReqTeacher;
+import com.example.edu_platform.payload.res.ResCategory;
 import com.example.edu_platform.payload.res.ResPageable;
+import com.example.edu_platform.payload.res.ResStudentCount;
 import com.example.edu_platform.repository.CategoryRepository;
 import com.example.edu_platform.repository.FileRepository;
 import com.example.edu_platform.repository.GroupRepository;
@@ -37,7 +39,7 @@ public class UserService {
     //    Teacher CRUD
     public ApiResponse saveTeacher(ReqTeacher reqTeacher) {
         boolean b = userRepository
-                .existsByPhoneNumberAndFullNameAndRoleAndEnabledTrue(reqTeacher.getPhoneNumber(), reqTeacher.getFullName(), Role.ROLE_TEACHER);
+                .existsByPhoneNumberAndRoleAndEnabledTrue(reqTeacher.getPhoneNumber(), Role.ROLE_TEACHER);
         if (b) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu User"));
         }
@@ -68,16 +70,16 @@ public class UserService {
 
 
     @Transactional
-    public ApiResponse searchTeacher(String fullName, String phoneNumber, Long groupId, int page, int size){
+    public ApiResponse searchUsers(String fullName, String phoneNumber, Long groupId,Role role, int page, int size){
         PageRequest pageRequest = PageRequest.of(page, size);
-        Page<User> allTeachers = userRepository.searchTeachers(fullName, phoneNumber, groupId, pageRequest);
+        Page<User> allTeachers = userRepository.searchUsers(fullName, phoneNumber, groupId, role.name(), pageRequest);
         List<TeacherDTO> teacherList = new ArrayList<>();
         for (User allTeacher : allTeachers) {
-            List<Long> categoryIds = new ArrayList<>();
+            List<ResCategory> categories = new ArrayList<>();
             for (Category category : allTeacher.getCategories()) {
-                categoryIds.add(category.getId());
+                categories.add(new ResCategory(category.getId(), category.getName()));
             }
-            teacherList.add(convertUserToTeacherDTO(allTeacher,categoryIds));
+            teacherList.add(convertUserToTeacherDTO(allTeacher,categories));
         }
 
         ResPageable resPageable = ResPageable.builder()
@@ -91,21 +93,59 @@ public class UserService {
     }
 
 
-    @Transactional
+    public ApiResponse getUsersList(Role role){
+        List<User> allByRole = userRepository.findAllByRole(role);
+        List<UserDTO> userDTOList = new ArrayList<>();
+        for (User user : allByRole) {
+            UserDTO userDTO = UserDTO.builder()
+                    .id(user.getId())
+                    .fullName(user.getFullName())
+                    .phoneNumber(user.getPhoneNumber())
+                    .role(user.getRole().name())
+                    .fileId(user.getFile() != null ? user.getFile().getId() : null)
+                    .build();
+            userDTOList.add(userDTO);
+        }
+        return new ApiResponse(userDTOList);
+    }
+
+
+//    @Transactional
+//    public ApiResponse getOneTeacher(Long teacherId) {
+//        User user = userRepository.findById(teacherId).orElse(null);
+//        if (user == null) {
+//            return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
+//        }
+//        List<Long> categoryIds = new ArrayList<>();
+//        for (Category category : user.getCategories()) {
+//            categoryIds.add(category.getId());
+//        }
+//
+//        return new ApiResponse(convertUserToTeacherDTO(user,categoryIds));
+//    }
+
+
     public ApiResponse getOneTeacher(Long teacherId) {
         User user = userRepository.findById(teacherId).orElse(null);
         if (user == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
         }
-        List<Long> categoryIds = new ArrayList<>();
-        for (Category category : user.getCategories()) {
-            categoryIds.add(category.getId());
+        List<ResStudentCount> res = groupRepository.findAllStudentsByTeacherId(teacherId);
+        if (res.isEmpty()) {
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
-
-        return new ApiResponse(convertUserToTeacherDTO(user,categoryIds));
+        return new ApiResponse(res);
     }
 
+
+
+
     public ApiResponse updateTeacher(Long teacherId, ReqTeacher reqTeacher) {
+        boolean b = userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(reqTeacher.getPhoneNumber(), Role.ROLE_TEACHER);
+        if (b) {
+            return new ApiResponse(ResponseError.ALREADY_EXIST("Bu User"));
+        }
+
         User user = userRepository.findById(teacherId).orElse(null);
         if (user == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
@@ -146,14 +186,15 @@ public class UserService {
             }
         }
 
-        userRepository.delete(user);
+        user.setEnabled(false);
+        userRepository.save(user);
         return new ApiResponse("User successfully deleted");
     }
 
 
 //    Admin CRUD
     public ApiResponse saveAdmin(ReqAdmin reqAdmin){
-        boolean b = userRepository.existsByPhoneNumberAndFullNameAndRoleAndEnabledTrue(reqAdmin.getPhoneNumber(), reqAdmin.getFullName(), Role.ROLE_ADMIN);
+        boolean b = userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(reqAdmin.getPhoneNumber(), Role.ROLE_ADMIN);
         if (b) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu Admin"));
         }
@@ -204,30 +245,6 @@ public class UserService {
     }
 
 
-    public ApiResponse searchAdmin(String fullName, String phoneNumber, int page, int size){
-        PageRequest pageRequest = PageRequest.of(page, size);
-        Page<User> users = userRepository.searchAdmins(fullName, phoneNumber, pageRequest);
-        List<AdminDTO> userList = new ArrayList<>();
-        for (User user : users) {
-            AdminDTO adminDTO = AdminDTO.builder()
-                    .id(user.getId())
-                    .fullName(user.getFullName())
-                    .phoneNumber(user.getPhoneNumber())
-                    .fileId(user.getFile() != null ? user.getFile().getId() : null)
-                    .build();
-            userList.add(adminDTO);
-        }
-        ResPageable resPageable = ResPageable.builder()
-                .page(page)
-                .size(size)
-                .totalPage(users.getTotalPages())
-                .totalElements(users.getTotalElements())
-                .body(userList)
-                .build();
-        return new ApiResponse(resPageable);
-    }
-
-
     public ApiResponse getMe(User user){
         UserDTO userDTO = UserDTO.builder()
                 .id(user.getId())
@@ -254,12 +271,13 @@ public class UserService {
 
 
 
-    private TeacherDTO convertUserToTeacherDTO(User user, List<Long> categoryIds) {
+    private TeacherDTO convertUserToTeacherDTO(User user, List<ResCategory> categoryIds) {
 
         return TeacherDTO.builder()
+                .id(user.getId())
                 .fullName(user.getFullName())
                 .phoneNumber(user.getPhoneNumber())
-                .categoryId(categoryIds)
+                .categories(categoryIds)
                 .active(user.isEnabled())
                 .groupCount(groupRepository.countByTeacherId(user.getId()))
                 .fileId(user.getFile() != null ? user.getFile().getId() : null)

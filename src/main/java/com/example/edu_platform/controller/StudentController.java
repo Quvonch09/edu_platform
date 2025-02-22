@@ -27,19 +27,21 @@ public class StudentController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO','ROLE_TEACHER')")
     @Operation(summary = "Student search")
     @GetMapping
     public ResponseEntity<ApiResponse> getAllStudents(@RequestParam(required = false, value = "fullName") String fullName,
                                                       @RequestParam(required = false, value = "phoneNumber") String phoneNumber,
-                                                      @RequestParam(value = "status") UserStatus userStatus,
+                                                      @RequestParam(value = "status" , required = false) UserStatus userStatus,
                                                       @RequestParam(required = false, value = "groupName") String groupName,
                                                       @RequestParam(required = false, value = "teacherId") Long teacherId,
                                                       @RequestParam(required = false, value = "startAge") Integer startAge,
                                                       @RequestParam(required = false, value = "endAge") Integer endAge,
+                                                      @RequestParam(required = false, value = "hasPaid") Boolean hasPaid,
                                                       @RequestParam(defaultValue = "0") int page,
                                                       @RequestParam(defaultValue = "10") int size){
-        ApiResponse apiResponse = studentService.searchStudent(fullName, phoneNumber, userStatus, groupName, teacherId, startAge, endAge, page, size);
+        ApiResponse apiResponse = studentService.searchStudent(fullName, phoneNumber, userStatus, groupName, teacherId,
+                startAge, endAge,hasPaid, page, size);
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -71,4 +73,15 @@ public class StudentController {
         ApiResponse apiResponse = studentService.deleteStudent(studentId,date,description);
         return ResponseEntity.ok(apiResponse);
     }
+
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_TEACHER','ROLE_CEO')")
+    @Operation(summary = "Admin/Ceo/Teacher studentni group buyicha listi")
+    @GetMapping("/groupBy/{groupId}")
+    public ResponseEntity<ApiResponse> getStudent(@PathVariable Long groupId){
+        ApiResponse apiResponse = studentService.getStudentGroupBy(groupId);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+
 }

@@ -6,10 +6,12 @@ public interface ResStudent {
     Long getId();
     String getFullName();
     String getPhoneNumber();
-    Long getGroupId();
+    String getGroupName();
+    String getTeacherName();
     LocalDateTime getCreatedAt();
     Integer getAge();
     String getStatus();
     String getParentPhoneNumber();
     Boolean getHasPaid();
+    Double getScore();
 }

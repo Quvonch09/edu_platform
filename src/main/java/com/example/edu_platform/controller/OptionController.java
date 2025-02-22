@@ -17,7 +17,7 @@ public class OptionController {
     private final OptionService optionService;
 
     @PostMapping("/save")
-    @Operation(summary = "Javob saqlash")
+    @Operation(summary = "(TEACHER) Javob saqlash")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> saveOption(
             @RequestBody ReqOption reqOption,
@@ -27,7 +27,7 @@ public class OptionController {
     }
 
     @PutMapping("/update/{optionId}")
-    @Operation(summary = "Javobni yangilash")
+    @Operation(summary = "(TEACHER) Javobni yangilash")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> updateOption(
             @RequestBody ReqOption reqOption,
@@ -38,7 +38,7 @@ public class OptionController {
     }
 
     @DeleteMapping("/delete/{optionId}")
-    @Operation(summary = "Javobni o'chirish")
+    @Operation(summary = "(TEACHER) Javobni o'chirish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> deleteOption(
             @PathVariable Long optionId

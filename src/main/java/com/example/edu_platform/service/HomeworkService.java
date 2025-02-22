@@ -5,8 +5,11 @@ import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.HomeworkDTO;
 import com.example.edu_platform.payload.ResponseError;
 import com.example.edu_platform.payload.req.ReqHomework;
+import com.example.edu_platform.payload.res.ResPageable;
 import com.example.edu_platform.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -49,24 +52,11 @@ public class HomeworkService {
         return new ApiResponse("Homework tekshirildi");
     }
 
-    public ApiResponse getMyHomeworks(boolean isChecked, User student, Long taskId) {
-        List<Homework> homeworks = (taskId == 0)
-                ? homeworkRepository.findByCheckedAndStudentId(isChecked, student.getId())
-                : homeworkRepository.findByCheckedAndTaskId(isChecked, taskId);
-        if (homeworks.isEmpty()) {
-            return new ApiResponse(ResponseError.NOTFOUND("Homeworklar"));
-        }
-        List<HomeworkDTO> homeworkDTOS = homeworks.stream()
-                .map(this::homeworkDTO)
-                .toList();
-
-        return new ApiResponse(homeworkDTOS);
-    }
-
-    public ApiResponse getHomeworks(boolean isChecked, Long id, boolean byStudent) {
-        List<Homework> homeworks = byStudent
-                ? homeworkRepository.findByCheckedAndStudentId(isChecked, id)
-                : homeworkRepository.findByCheckedAndTaskId(isChecked, id);
+    public ApiResponse getMyHomeworks(boolean isChecked, User student, Long taskId, int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<Homework> homeworks = (taskId == 0)
+                ? homeworkRepository.findByCheckedAndStudentId(isChecked, student.getId(), pageRequest)
+                : homeworkRepository.findByCheckedAndTaskId(isChecked, taskId, pageRequest);
 
         if (homeworks.isEmpty()) {
             return new ApiResponse(ResponseError.NOTFOUND("Homeworklar"));
@@ -76,8 +66,43 @@ public class HomeworkService {
                 .map(this::homeworkDTO)
                 .toList();
 
-        return new ApiResponse(homeworkDTOS);
+        ResPageable resPageable = ResPageable.builder()
+                .page(page)
+                .size(size)
+                .totalPage(homeworks.getTotalPages())
+                .totalElements(homeworks.getTotalElements())
+                .body(homeworkDTOS)
+                .build();
+
+        return new ApiResponse(resPageable);
     }
+
+
+    public ApiResponse getHomeworks(boolean isChecked, Long id, boolean byStudent, int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<Homework> homeworks = byStudent
+                ? homeworkRepository.findByCheckedAndStudentId(isChecked, id, pageRequest)
+                : homeworkRepository.findByCheckedAndTaskId(isChecked, id, pageRequest);
+
+        if (homeworks.isEmpty()) {
+            return new ApiResponse(ResponseError.NOTFOUND("Homeworklar"));
+        }
+
+        List<HomeworkDTO> homeworkDTOS = homeworks.stream()
+                .map(this::homeworkDTO)
+                .toList();
+
+        ResPageable resPageable = ResPageable.builder()
+                .page(page)
+                .size(size)
+                .totalPage(homeworks.getTotalPages())
+                .totalElements(homeworks.getTotalElements())
+                .body(homeworkDTOS)
+                .build();
+
+        return new ApiResponse(resPageable);
+    }
+
 
     public ApiResponse userStatistics(User student) {
         long totalTasks = taskRepository.count();

@@ -16,7 +16,7 @@ public class QuizSettingsController {
     private final QuizSettingsService quizSettingsService;
 
     @PutMapping("/update/{settingId}")
-    @Operation(summary = "parametrlarni yangilash")
+    @Operation(summary = "(TEACHER) parametrlarni yangilash")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> updateSettings(
             @PathVariable Long settingId,
@@ -25,7 +25,7 @@ public class QuizSettingsController {
         return ResponseEntity.ok(quizSettingsService.updateSettings(settingId, reqQuizSettings));
     }
 
-    @GetMapping("/get/{quizId}")
+    @GetMapping("/getByQuiz/{quizId}")
     @Operation(summary = "Parametrlarni ko'rish quiz bo'yicha")
     public ResponseEntity<ApiResponse> getSettings(
             @PathVariable Long quizId
