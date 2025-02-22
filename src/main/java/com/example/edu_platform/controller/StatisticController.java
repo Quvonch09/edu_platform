@@ -9,9 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/statistic")
@@ -86,6 +84,16 @@ public class StatisticController {
     @GetMapping("/student-rank")
     public ResponseEntity<ApiResponse> getStudentGroupRank(@CurrentUser User user){
         return ResponseEntity.ok(statisticService.getStudentRank(user));
+    }
+
+
+
+
+    @Operation(summary =" Student guruhidagi reyting jadvali  ")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER',)")
+    @GetMapping("/studentRank/byGroup/{groupId}")
+    public ResponseEntity<ApiResponse> getStudentRankByGroup(@PathVariable Long groupId){
+        return ResponseEntity.ok(statisticService.getStudentStatisticByGroup(groupId));
     }
 
 
