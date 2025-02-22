@@ -739,3 +739,156 @@
 2025-02-22T11:38:58.625+05:00  INFO 84816 --- [Edu_platform] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
 2025-02-22T11:38:58.625+05:00  INFO 84816 --- [Edu_platform] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
 2025-02-22T11:38:58.625+05:00  INFO 84816 --- [Edu_platform] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-02-22T14:04:04.574+05:00  INFO 8540 --- [Edu_platform] [main] c.e.edu_platform.EduPlatformApplication  : Starting EduPlatformApplication using Java 21.0.5 with PID 8540 (C:\Users\User\Desktop\edu\edu_platform\target\classes started by User in C:\Users\User\Desktop\edu\edu_platform)
+2025-02-22T14:04:04.576+05:00  INFO 8540 --- [Edu_platform] [main] c.e.edu_platform.EduPlatformApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-02-22T14:04:05.574+05:00  INFO 8540 --- [Edu_platform] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-02-22T14:04:05.673+05:00  INFO 8540 --- [Edu_platform] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 91 ms. Found 21 JPA repository interfaces.
+2025-02-22T14:04:06.440+05:00  INFO 8540 --- [Edu_platform] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-02-22T14:04:06.475+05:00  INFO 8540 --- [Edu_platform] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-02-22T14:04:06.475+05:00  INFO 8540 --- [Edu_platform] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.34]
+2025-02-22T14:04:06.536+05:00  INFO 8540 --- [Edu_platform] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-02-22T14:04:06.536+05:00  INFO 8540 --- [Edu_platform] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1920 ms
+2025-02-22T14:04:06.680+05:00  INFO 8540 --- [Edu_platform] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-02-22T14:04:06.761+05:00  INFO 8540 --- [Edu_platform] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.5.Final
+2025-02-22T14:04:06.800+05:00  INFO 8540 --- [Edu_platform] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-02-22T14:04:07.105+05:00  INFO 8540 --- [Edu_platform] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-02-22T14:04:07.134+05:00  INFO 8540 --- [Edu_platform] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-02-22T14:04:07.288+05:00  INFO 8540 --- [Edu_platform] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7f030c72
+2025-02-22T14:04:07.290+05:00  INFO 8540 --- [Edu_platform] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-02-22T14:04:07.374+05:00  INFO 8540 --- [Edu_platform] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 16.6
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-02-22T14:04:08.748+05:00  INFO 8540 --- [Edu_platform] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-02-22T14:04:08.855+05:00  WARN 8540 --- [Edu_platform] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2025-02-22T14:04:08.855+05:00  WARN 8540 --- [Edu_platform] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : ограничение "ukslj3klbpwqndeiedlmvc8fqxe" в таблице "quiz_settings" не существует, пропускается
+2025-02-22T14:04:10.531+05:00  INFO 8540 --- [Edu_platform] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-02-22T14:04:10.833+05:00  INFO 8540 --- [Edu_platform] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-02-22T14:04:12.468+05:00  INFO 8540 --- [Edu_platform] [main] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-02-22T14:04:12.469+05:00  WARN 8540 --- [Edu_platform] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2025-02-22T14:04:13.397+05:00  INFO 8540 --- [Edu_platform] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-02-22T14:04:13.403+05:00  INFO 8540 --- [Edu_platform] [main] c.e.edu_platform.EduPlatformApplication  : Started EduPlatformApplication in 9.242 seconds (process running for 9.847)
+2025-02-22T14:09:37.696+05:00  INFO 8540 --- [Edu_platform] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-02-22T14:09:37.696+05:00  INFO 8540 --- [Edu_platform] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-02-22T14:09:37.697+05:00  INFO 8540 --- [Edu_platform] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-02-22T14:09:38.749+05:00  INFO 8540 --- [Edu_platform] [http-nio-8080-exec-8] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 766 ms
+2025-02-22T14:25:54.294+05:00  INFO 8540 --- [Edu_platform] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-02-22T14:25:54.298+05:00  INFO 8540 --- [Edu_platform] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-02-22T14:25:54.304+05:00  INFO 8540 --- [Edu_platform] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-02-22T14:25:54.306+05:00  INFO 8540 --- [Edu_platform] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-02-22T14:25:54.310+05:00  INFO 8540 --- [Edu_platform] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-02-22T14:26:21.682+05:00  INFO 980 --- [Edu_platform] [main] c.e.edu_platform.EduPlatformApplication  : Starting EduPlatformApplication using Java 21.0.5 with PID 980 (C:\Users\User\Desktop\edu\edu_platform\target\classes started by User in C:\Users\User\Desktop\edu\edu_platform)
+2025-02-22T14:26:21.684+05:00  INFO 980 --- [Edu_platform] [main] c.e.edu_platform.EduPlatformApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-02-22T14:26:22.511+05:00  INFO 980 --- [Edu_platform] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-02-22T14:26:22.604+05:00  INFO 980 --- [Edu_platform] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 85 ms. Found 21 JPA repository interfaces.
+2025-02-22T14:26:23.269+05:00  INFO 980 --- [Edu_platform] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-02-22T14:26:23.282+05:00  INFO 980 --- [Edu_platform] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-02-22T14:26:23.282+05:00  INFO 980 --- [Edu_platform] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.34]
+2025-02-22T14:26:23.332+05:00  INFO 980 --- [Edu_platform] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-02-22T14:26:23.332+05:00  INFO 980 --- [Edu_platform] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1613 ms
+2025-02-22T14:26:23.456+05:00  INFO 980 --- [Edu_platform] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-02-22T14:26:23.508+05:00  INFO 980 --- [Edu_platform] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.5.Final
+2025-02-22T14:26:23.541+05:00  INFO 980 --- [Edu_platform] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-02-22T14:26:23.783+05:00  INFO 980 --- [Edu_platform] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-02-22T14:26:23.808+05:00  INFO 980 --- [Edu_platform] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-02-22T14:26:23.958+05:00  INFO 980 --- [Edu_platform] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@516c20de
+2025-02-22T14:26:23.960+05:00  INFO 980 --- [Edu_platform] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-02-22T14:26:24.020+05:00  INFO 980 --- [Edu_platform] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 16.6
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-02-22T14:26:25.291+05:00  INFO 980 --- [Edu_platform] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-02-22T14:26:27.152+05:00  INFO 980 --- [Edu_platform] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-02-22T14:26:27.368+05:00  INFO 980 --- [Edu_platform] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-02-22T14:26:28.955+05:00  INFO 980 --- [Edu_platform] [main] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-02-22T14:26:28.955+05:00  WARN 980 --- [Edu_platform] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2025-02-22T14:26:29.875+05:00  INFO 980 --- [Edu_platform] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-02-22T14:26:29.882+05:00  INFO 980 --- [Edu_platform] [main] c.e.edu_platform.EduPlatformApplication  : Started EduPlatformApplication in 8.577 seconds (process running for 9.092)
+2025-02-22T14:26:45.624+05:00  INFO 980 --- [Edu_platform] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-02-22T14:26:45.627+05:00  INFO 980 --- [Edu_platform] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-02-22T14:26:45.634+05:00  INFO 980 --- [Edu_platform] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-02-22T14:26:45.636+05:00  INFO 980 --- [Edu_platform] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-02-22T14:26:45.639+05:00  INFO 980 --- [Edu_platform] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-02-22T14:27:42.993+05:00  INFO 5948 --- [Edu_platform] [main] c.e.edu_platform.EduPlatformApplication  : Starting EduPlatformApplication using Java 21.0.5 with PID 5948 (C:\Users\User\Desktop\edu\edu_platform\target\classes started by User in C:\Users\User\Desktop\edu\edu_platform)
+2025-02-22T14:27:42.995+05:00  INFO 5948 --- [Edu_platform] [main] c.e.edu_platform.EduPlatformApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-02-22T14:27:43.838+05:00  INFO 5948 --- [Edu_platform] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-02-22T14:27:43.922+05:00  INFO 5948 --- [Edu_platform] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 77 ms. Found 21 JPA repository interfaces.
+2025-02-22T14:27:44.495+05:00  INFO 5948 --- [Edu_platform] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-02-22T14:27:44.508+05:00  INFO 5948 --- [Edu_platform] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-02-22T14:27:44.508+05:00  INFO 5948 --- [Edu_platform] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.34]
+2025-02-22T14:27:44.554+05:00  INFO 5948 --- [Edu_platform] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-02-22T14:27:44.555+05:00  INFO 5948 --- [Edu_platform] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1525 ms
+2025-02-22T14:27:44.671+05:00  INFO 5948 --- [Edu_platform] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-02-22T14:27:44.723+05:00  INFO 5948 --- [Edu_platform] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.5.Final
+2025-02-22T14:27:44.760+05:00  INFO 5948 --- [Edu_platform] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-02-22T14:27:44.992+05:00  INFO 5948 --- [Edu_platform] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-02-22T14:27:45.016+05:00  INFO 5948 --- [Edu_platform] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-02-22T14:27:45.160+05:00  INFO 5948 --- [Edu_platform] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@75b363c3
+2025-02-22T14:27:45.162+05:00  INFO 5948 --- [Edu_platform] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-02-22T14:27:45.222+05:00  INFO 5948 --- [Edu_platform] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 16.6
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-02-22T14:27:46.429+05:00  INFO 5948 --- [Edu_platform] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-02-22T14:27:48.230+05:00  INFO 5948 --- [Edu_platform] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-02-22T14:27:48.433+05:00  INFO 5948 --- [Edu_platform] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-02-22T14:27:49.972+05:00  INFO 5948 --- [Edu_platform] [main] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-02-22T14:27:49.972+05:00  WARN 5948 --- [Edu_platform] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2025-02-22T14:27:50.801+05:00  INFO 5948 --- [Edu_platform] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-02-22T14:27:50.809+05:00  INFO 5948 --- [Edu_platform] [main] c.e.edu_platform.EduPlatformApplication  : Started EduPlatformApplication in 8.198 seconds (process running for 8.745)
+2025-02-22T14:27:54.091+05:00  INFO 5948 --- [Edu_platform] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-02-22T14:27:54.092+05:00  INFO 5948 --- [Edu_platform] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-02-22T14:27:54.093+05:00  INFO 5948 --- [Edu_platform] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-02-22T14:31:17.102+05:00  INFO 5948 --- [Edu_platform] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-02-22T14:31:17.106+05:00  INFO 5948 --- [Edu_platform] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-02-22T14:31:17.113+05:00  INFO 5948 --- [Edu_platform] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-02-22T14:31:17.115+05:00  INFO 5948 --- [Edu_platform] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-02-22T14:31:17.118+05:00  INFO 5948 --- [Edu_platform] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-02-22T14:31:19.566+05:00  INFO 2344 --- [Edu_platform] [main] c.e.edu_platform.EduPlatformApplication  : Starting EduPlatformApplication using Java 21.0.5 with PID 2344 (C:\Users\User\Desktop\edu\edu_platform\target\classes started by User in C:\Users\User\Desktop\edu\edu_platform)
+2025-02-22T14:31:19.568+05:00  INFO 2344 --- [Edu_platform] [main] c.e.edu_platform.EduPlatformApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-02-22T14:31:20.390+05:00  INFO 2344 --- [Edu_platform] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-02-22T14:31:20.500+05:00  INFO 2344 --- [Edu_platform] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 93 ms. Found 21 JPA repository interfaces.
+2025-02-22T14:31:21.111+05:00  INFO 2344 --- [Edu_platform] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-02-22T14:31:21.125+05:00  INFO 2344 --- [Edu_platform] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-02-22T14:31:21.125+05:00  INFO 2344 --- [Edu_platform] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.34]
+2025-02-22T14:31:21.178+05:00  INFO 2344 --- [Edu_platform] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-02-22T14:31:21.178+05:00  INFO 2344 --- [Edu_platform] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1575 ms
+2025-02-22T14:31:21.309+05:00  INFO 2344 --- [Edu_platform] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-02-22T14:31:21.364+05:00  INFO 2344 --- [Edu_platform] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.5.Final
+2025-02-22T14:31:21.398+05:00  INFO 2344 --- [Edu_platform] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-02-22T14:31:21.650+05:00  INFO 2344 --- [Edu_platform] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-02-22T14:31:21.676+05:00  INFO 2344 --- [Edu_platform] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-02-22T14:31:21.815+05:00  INFO 2344 --- [Edu_platform] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@43445fc6
+2025-02-22T14:31:21.817+05:00  INFO 2344 --- [Edu_platform] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-02-22T14:31:21.874+05:00  INFO 2344 --- [Edu_platform] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 16.6
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-02-22T14:31:23.087+05:00  INFO 2344 --- [Edu_platform] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-02-22T14:31:23.467+05:00  INFO 2344 --- [Edu_platform] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-02-22T14:31:23.718+05:00  INFO 2344 --- [Edu_platform] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-02-22T14:31:25.234+05:00  INFO 2344 --- [Edu_platform] [main] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-02-22T14:31:25.235+05:00  WARN 2344 --- [Edu_platform] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2025-02-22T14:31:26.078+05:00  INFO 2344 --- [Edu_platform] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-02-22T14:31:26.084+05:00  INFO 2344 --- [Edu_platform] [main] c.e.edu_platform.EduPlatformApplication  : Started EduPlatformApplication in 6.924 seconds (process running for 7.453)
+2025-02-22T14:31:36.640+05:00  INFO 2344 --- [Edu_platform] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-02-22T14:31:36.644+05:00  INFO 2344 --- [Edu_platform] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-02-22T14:31:36.652+05:00  INFO 2344 --- [Edu_platform] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-02-22T14:31:36.653+05:00  INFO 2344 --- [Edu_platform] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-02-22T14:31:36.656+05:00  INFO 2344 --- [Edu_platform] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

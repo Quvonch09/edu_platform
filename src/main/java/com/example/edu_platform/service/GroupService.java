@@ -77,7 +77,7 @@ public class GroupService {
                 .name(reqGroup.getGroupName())
                 .category(category)
                 .teacher(teacher)
-                .days(graphicDay)
+                .day(graphicDay)
                 .active(true)
                 .endDate(reqGroup.getStartDate().plusDays(category.getDuration()))
                 .startDate(reqGroup.getStartDate())
@@ -160,7 +160,7 @@ public class GroupService {
         group.setCategory(categoryRepository.findById(reqGroup.getCategoryId()).orElse(null));
         group.setTeacher(userRepository.findById(reqGroup.getTeacherId()).orElse(null));
         group.setStartDate(reqGroup.getStartDate());
-        group.setDays(graphicDay);
+        group.setDay(graphicDay);
         groupRepository.save(group);
         return new ApiResponse("Successfully updated group");
     }

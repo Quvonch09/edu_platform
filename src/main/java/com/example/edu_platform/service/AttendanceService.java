@@ -140,7 +140,7 @@ public class AttendanceService {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException("group not found"));
 
-        GraphicDay days = group.getDays();
+        GraphicDay graphicDay = group.getDay();
 
         LocalDate startOfMonth = LocalDate.of(year, Month.of(month), 1);
         LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
@@ -148,7 +148,7 @@ public class AttendanceService {
         List<LocalDate> classDates = new ArrayList<>();
 
         for (LocalDate date = startOfMonth; !date.isAfter(endOfMonth); date = date.plusDays(1)) {
-            for (DayOfWeek day : days.getWeekDay()) {
+            for (DayOfWeek day : graphicDay.getWeekDay()) {
                 if (date.getDayOfWeek().name().equalsIgnoreCase(day.toString())) {
                     classDates.add(date);
                     break;
