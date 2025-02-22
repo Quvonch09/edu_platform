@@ -16,9 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -148,6 +147,14 @@ public class AttendanceService {
                 .orElseThrow(() -> new NotFoundException("group not found"));
 
         GraphicDay days = group.getDays();
+        if (days == null || days.getWeekDay() == null || days.getWeekDay().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // Hafta kunlarini to‘plamga o‘tkazish
+        Set<DayOfWeek> weekDays = new HashSet<>(days.getWeekDay());
+
+        System.out.println(weekDays);
 
         LocalDate startOfMonth = LocalDate.of(year, Month.of(month), 1);
         LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
@@ -155,14 +162,12 @@ public class AttendanceService {
         List<LocalDate> classDates = new ArrayList<>();
 
         for (LocalDate date = startOfMonth; !date.isAfter(endOfMonth); date = date.plusDays(1)) {
-            for (DayOfWeek day : days.getWeekDay()) {
-                if (date.getDayOfWeek().name().equalsIgnoreCase(day.toString())) {
+            for (DayOfWeek day : weekDays) {
+                if (day.getDayOfWeek().name().equals(date.getDayOfWeek().name())) {
                     classDates.add(date);
-                    break;
                 }
             }
         }
-
         return classDates;
     }
 }
