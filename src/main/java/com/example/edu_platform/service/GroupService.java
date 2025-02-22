@@ -5,6 +5,7 @@ import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.GroupDTO;
 import com.example.edu_platform.payload.ResponseError;
 import com.example.edu_platform.payload.req.ReqGroup;
+import com.example.edu_platform.payload.res.ResGroup;
 import com.example.edu_platform.payload.res.ResPageable;
 import com.example.edu_platform.repository.*;
 import jakarta.transaction.Transactional;
@@ -114,7 +115,27 @@ public class GroupService {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
 
-        return new ApiResponse(convertGroupToGroupDTO(group));
+        List<String> days = new ArrayList<>();
+        for (DayOfWeek dayOfWeek : group.getDays().getWeekDay()) {
+            days.add(dayOfWeek.getDayOfWeek().name());
+        }
+        ResGroup resGroup = ResGroup.builder()
+                .id(group.getId())
+                .name(group.getName())
+                .categoryName(group.getCategory() != null ? group.getCategory().getName() : null)
+                .teacherName(group.getTeacher() != null ? group.getTeacher().getFullName() : null)
+                .startDate(group.getStartDate())
+                .endDate(group.getEndDate())
+                .active(group.getActive())
+                .studentCount(group.getStudents().size())
+                .countEndMonth(group.getEndDate().getMonthValue() - LocalDate.now().getMonthValue())
+                .countAllLessons(lessonRepository.countLessonsByCategoryId(group.getCategory().getId()))
+                .countGroupLessons(groupRepository.countGroupLessons(group.getId()))
+                .departureStudentCount(groupRepository.countGroup(group.getId()))
+                .days(days)
+                .build();
+
+        return new ApiResponse(resGroup);
     }
 
 
