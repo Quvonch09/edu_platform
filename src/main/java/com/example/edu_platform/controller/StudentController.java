@@ -3,7 +3,6 @@ package com.example.edu_platform.controller;
 import com.example.edu_platform.entity.enums.UserStatus;
 import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.req.ReqStudent;
-import com.example.edu_platform.service.GroupService;
 import com.example.edu_platform.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
