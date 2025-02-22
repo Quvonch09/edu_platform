@@ -1,6 +1,7 @@
 package com.example.edu_platform.service;
 
 import com.example.edu_platform.entity.Category;
+import com.example.edu_platform.entity.Group;
 import com.example.edu_platform.entity.User;
 import com.example.edu_platform.entity.enums.Role;
 import com.example.edu_platform.payload.*;
@@ -272,6 +273,7 @@ public class UserService {
 
 
     private TeacherDTO convertUserToTeacherDTO(User user, List<ResCategory> categoryIds) {
+        Group group = groupRepository.findGroup(user.getId());
 
         return TeacherDTO.builder()
                 .id(user.getId())
@@ -280,6 +282,8 @@ public class UserService {
                 .categories(categoryIds)
                 .active(user.isEnabled())
                 .groupCount(groupRepository.countByTeacherId(user.getId()))
+                .groupId(group != null ? group.getId() : null)
+                .groupName(group != null ? group.getName() : null)
                 .fileId(user.getFile() != null ? user.getFile().getId() : null)
                 .build();
     }
