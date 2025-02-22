@@ -19,6 +19,8 @@ public class TeacherDTO {
     private List<ResCategory> categories;
     @Schema(hidden = true)
     private Integer groupCount;
+    private Long groupId;
+    private String groupName;
     private Long fileId;
     private Boolean active;
 }

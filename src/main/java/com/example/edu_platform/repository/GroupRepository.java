@@ -236,4 +236,8 @@ GROUP BY g.name;
     @Query(value = "select count(g.*) from groups g join lesson_tracking lt on g.id = lt.group_id", nativeQuery = true)
     Integer countGroupLessons(Long groupId);
 
+
+    @Query(value = "select g.* from groups g join groups_students gs on gs.group_id = g.id where g.teacher_id = ?1 or gs.students_id = ?1", nativeQuery = true)
+    Group findGroup(Long userId);
+
 }
