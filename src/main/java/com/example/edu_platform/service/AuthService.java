@@ -35,6 +35,10 @@ public class AuthService {
             return new ApiResponse(ResponseError.NOTFOUND("User"));
         }
 
+        if (!user.isEnabled()){
+            return new ApiResponse(ResponseError.ACCESS_DENIED());
+        }
+
         if (passwordEncoder.matches(authLogin.getPassword(), user.getPassword())) {
             String token = jwtProvider.generateToken(authLogin.getPhoneNumber());
             ResponseLogin responseLogin = new ResponseLogin(token, user.getRole().name(), user.getId());
