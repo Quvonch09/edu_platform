@@ -25,6 +25,6 @@ public class Group extends AbsEntity {
     private List<User> students;
     private LocalDate startDate;
     private LocalDate endDate;
-    @ManyToOne
+    @OneToOne
     private GraphicDay days;
 }
