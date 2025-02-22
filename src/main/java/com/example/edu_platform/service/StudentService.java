@@ -24,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -159,5 +160,32 @@ public class StudentService {
         user.setDeparture_date(departureDate);
         user.setDeparture_description(departureDescription);
         return new ApiResponse("Successfully deleted student");
+    }
+
+    @Transactional
+    public ApiResponse getStudentGroupBy(Long groupId){
+
+        Group group = groupRepository.findById(groupId).orElse(null);
+        if(group == null){
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
+
+        List<User> students = group.getStudents();
+        List<StudentDTO> list = students.stream().map(this::getDto).toList();
+        return new ApiResponse(list);
+
+    }
+
+    public StudentDTO getDto(User user){
+        return StudentDTO.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .phoneNumber(user.getPhoneNumber())
+                .parentPhoneNumber(user.getParentPhoneNumber())
+                .age(user.getAge())
+                .status(user.getUserStatus() != null ? user.getUserStatus().name() : null)
+                .score(homeworkRepository.countByBall(user.getId()))
+                .startStudyDate(user.getCreatedAt())
+                .build();
     }
 }

@@ -3,6 +3,7 @@ package com.example.edu_platform.controller;
 import com.example.edu_platform.entity.enums.UserStatus;
 import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.req.ReqStudent;
+import com.example.edu_platform.service.GroupService;
 import com.example.edu_platform.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class StudentController {
     private final StudentService studentService;
+    private final GroupService groupService;
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
     @Operation(summary = "ADMIN/TEACHER student qushish")
@@ -27,7 +29,7 @@ public class StudentController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO','ROLE_TEACHER')")
     @Operation(summary = "Student search")
     @GetMapping
     public ResponseEntity<ApiResponse> getAllStudents(@RequestParam(required = false, value = "fullName") String fullName,
@@ -73,4 +75,15 @@ public class StudentController {
         ApiResponse apiResponse = studentService.deleteStudent(studentId,date,description);
         return ResponseEntity.ok(apiResponse);
     }
+
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_TEACHER','ROLE_CEO')")
+    @Operation(summary = "Admin/Ceo/Teacher studentni group buyicha listi")
+    @GetMapping("/groupBy/{groupId}")
+    public ResponseEntity<ApiResponse> getStudent(@PathVariable Long groupId){
+        ApiResponse apiResponse = studentService.getStudentGroupBy(groupId);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+
 }
