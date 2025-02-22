@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -211,10 +212,26 @@ public class GroupService {
                 .endDate(group.getEndDate())
                 .active(group.getActive())
                 .studentCount(group.getStudents().size())
-                .countEndMonth(group.getEndDate().getMonthValue() - LocalDate.now().getMonthValue())
+                .countEndMonth(calculateCountEndMonth(group.getEndDate()))
                 .countAllLessons(lessonRepository.countLessonsByCategoryId(group.getCategory().getId()))
                 .countGroupLessons(groupRepository.countGroupLessons(group.getId()))
                 .departureStudentCount(groupRepository.countGroup(group.getId()))
                 .build();
     }
+
+
+
+    private int calculateCountEndMonth(LocalDate endDate) {
+        LocalDate now = LocalDate.now();
+        long countDate = ChronoUnit.DAYS.between(now, endDate);
+
+        if (countDate <= 32) {
+            return 1;
+        } else if (countDate <= 64) {
+            return 2;
+        } else {
+            return 3;
+        }
+    }
+
 }
