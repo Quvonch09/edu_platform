@@ -27,7 +27,7 @@ public class StudentController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO','ROLE_TEACHER')")
     @Operation(summary = "Student search")
     @GetMapping
     public ResponseEntity<ApiResponse> getAllStudents(@RequestParam(required = false, value = "fullName") String fullName,
@@ -73,4 +73,15 @@ public class StudentController {
         ApiResponse apiResponse = studentService.deleteStudent(studentId,date,description);
         return ResponseEntity.ok(apiResponse);
     }
+
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_TEACHER','ROLE_CEO')")
+    @Operation(summary = "Admin/Ceo/Teacher studentni group buyicha listi")
+    @GetMapping("/groupBy/{groupId}")
+    public ResponseEntity<ApiResponse> getStudent(@PathVariable Long groupId){
+        ApiResponse apiResponse = studentService.getStudentGroupBy(groupId);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+
 }
