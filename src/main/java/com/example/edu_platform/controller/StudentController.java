@@ -18,7 +18,6 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class StudentController {
     private final StudentService studentService;
-    private final GroupService groupService;
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
     @Operation(summary = "ADMIN/TEACHER student qushish")
