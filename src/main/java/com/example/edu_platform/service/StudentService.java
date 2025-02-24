@@ -125,15 +125,20 @@ public class StudentService {
     }
 
 
+    @Transactional
     public ApiResponse updateStudent(Long studentId, ReqStudent reqStudent){
-        boolean b = userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(reqStudent.getPhoneNumber(), Role.ROLE_STUDENT);
-        if(b){
-            return new ApiResponse(ResponseError.ALREADY_EXIST("Student"));
-        }
         User user = userRepository.findById(studentId).orElse(null);
         if(user == null){
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
+
+        Group group1 = groupRepository.findById(reqStudent.getGroupId()).orElse(null);
+        if(group1 == null){
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
+
+        Group group = groupRepository.findGroup(user.getId());
+        group.getStudents().remove(user);
 
         user.setFullName(reqStudent.getFullName());
         user.setPhoneNumber(reqStudent.getPhoneNumber());
@@ -141,6 +146,8 @@ public class StudentService {
         user.setAge(reqStudent.getAge());
         user.setFile(fileRepository.findById(reqStudent.getFileId()).orElse(null));
         user.setPassword(passwordEncoder.encode(reqStudent.getPassword()));
+        group1.getStudents().add(user);
+        groupRepository.save(group);
         userRepository.save(user);
         String token = jwtProvider.generateToken(user.getPhoneNumber());
         ResponseLogin responseLogin = new ResponseLogin(token,user.getRole().name(), user.getId());

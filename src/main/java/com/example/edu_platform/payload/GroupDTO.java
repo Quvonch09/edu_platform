@@ -18,7 +18,9 @@ public class GroupDTO {
     private Integer studentCount;
     private Integer departureStudentCount;
     private String teacherName;
+    private Long teacherId;
     private String categoryName;
+    private Long categoryId;
     private LocalDate startDate;
     private LocalDate endDate;
     private Integer countEndMonth;
@@ -26,6 +28,7 @@ public class GroupDTO {
     private Integer countGroupLessons;
     private Boolean active;
     private String roomName;
+    private Long roomId;
     private LocalTime startTime;
     private LocalTime endTime;
     private List<String> weekDays;

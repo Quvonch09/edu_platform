@@ -20,6 +20,7 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -186,16 +187,19 @@ public class GroupService {
         LocalTime startDate = LocalTime.parse(reqGroup.getStartTime());
         LocalTime endDate = LocalTime.parse(reqGroup.getEndTime());
 
-        boolean b1 = graphicDayRepository.existsByGraphicDayInGroup(reqGroup.getRoomId(), startDate, endDate);
-        if (b1){
-            return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
+        if (!Objects.equals(reqGroup.getRoomId(), Objects.requireNonNull(graphicDay).getRoom().getId())){
+            boolean b1 = graphicDayRepository.existsByGraphicDayInGroup(reqGroup.getRoomId(), startDate, endDate);
+            if (b1){
+                return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
+            }
+            if (graphicDay != null) {
+                graphicDay.setWeekDay(dayOfWeekList);
+                graphicDay.setStartTime(startDate);
+                graphicDay.setEndTime(endDate);
+                graphicDayRepository.save(graphicDay);
+            }
         }
-        if (graphicDay != null) {
-            graphicDay.setWeekDay(dayOfWeekList);
-            graphicDay.setStartTime(startDate);
-            graphicDay.setEndTime(endDate);
-            graphicDayRepository.save(graphicDay);
-        }
+
 
         group.setName(reqGroup.getGroupName());
         group.setCategory(categoryRepository.findById(reqGroup.getCategoryId()).orElse(null));
@@ -226,7 +230,9 @@ public class GroupService {
                 .id(group.getId())
                 .name(group.getName())
                 .categoryName(group.getCategory() != null ? group.getCategory().getName() : null)
+                .categoryId(group.getCategory() != null ? group.getCategory().getId() : null)
                 .teacherName(group.getTeacher() != null ? group.getTeacher().getFullName() : null)
+                .teacherId(group.getTeacher() != null ? group.getTeacher().getId() : null)
                 .startDate(group.getStartDate())
                 .endDate(group.getEndDate())
                 .active(group.getActive())
@@ -237,6 +243,7 @@ public class GroupService {
                 .departureStudentCount(groupRepository.countGroup(group.getId()))
                 .weekDays(weekDays)
                 .roomName(graphicDay.getRoom().getName())
+                .roomId(graphicDay.getRoom().getId())
                 .startTime(graphicDay.getStartTime())
                 .endTime(graphicDay.getEndTime())
                 .build();
