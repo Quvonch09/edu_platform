@@ -39,6 +39,10 @@ public class UserService {
 
     //    Teacher CRUD
     public ApiResponse saveTeacher(ReqTeacher reqTeacher) {
+        if (reqTeacher == null || reqTeacher.getFullName() == null){
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Iltimos ma'lumot kiriting"));
+        }
+
         boolean b = userRepository
                 .existsByPhoneNumberAndRoleAndEnabledTrue(reqTeacher.getPhoneNumber(), Role.ROLE_TEACHER);
         if (b) {
