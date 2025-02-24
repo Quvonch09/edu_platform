@@ -24,8 +24,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(" select  coalesce(count (u) ,0)  from User u  where  u.role = 'ROLE_TEACHER' and u.enabled = true ")
     Integer countAllByTeacher();
 
-    @Query("select coalesce(count (u),0) from User  u where u.role = 'ROLE_STUDENT' " +
-            "and u.enabled = true  and u.userStatus = 'UQIYABDI' " )
+    @Query(value = "select count(*) from users where role = 'ROLE_STUDENT' and enabled = true and user_status = 'UQIYAPDI'", nativeQuery = true )
     Integer countAllByStudent();
 
 

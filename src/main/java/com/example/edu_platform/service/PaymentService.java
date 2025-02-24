@@ -61,19 +61,26 @@ public class PaymentService {
     }
 
 
-    public ApiResponse getPaymentCount(){
+    public ApiResponse getPaymentCount() {
         Integer studentCount = userRepository.countAllByStudent();
         Integer countStudentsHasPaid = userRepository.countStudentsHasPaid();
+
+        studentCount = (studentCount != null) ? studentCount : 0;
+        countStudentsHasPaid = (countStudentsHasPaid != null) ? countStudentsHasPaid : 0;
+
+        int countStudentsNotPaid = Math.max(studentCount - countStudentsHasPaid, 0);
 
         ResPayment resPayment = ResPayment.builder()
                 .countAllStudent(studentCount)
                 .tulovQilganStudent(countStudentsHasPaid)
-                .tulovQilmaganStudent(studentCount-countStudentsHasPaid)
+                .tulovQilmaganStudent(countStudentsNotPaid)
                 .tushum(paymentRepository.countPrice(PaymentEnum.TUSHUM))
                 .chiqim(paymentRepository.countPrice(PaymentEnum.CHIQIM))
                 .build();
+
         return new ApiResponse(resPayment);
     }
+
 
 
     public ApiResponse search(String userName,PaymentStatusEnum paymentStatus, int page, int size){
