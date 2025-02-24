@@ -1,8 +1,11 @@
 package com.example.edu_platform.payload;
 
+import com.example.edu_platform.entity.enums.WeekDay;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -22,5 +25,9 @@ public class GroupDTO {
     private Integer countAllLessons;
     private Integer countGroupLessons;
     private Boolean active;
+    private String roomName;
+    private LocalTime startTime;
+    private LocalTime endTime;
+    private List<String> weekDays;
 
 }
