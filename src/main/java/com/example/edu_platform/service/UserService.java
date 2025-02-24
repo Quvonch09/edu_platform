@@ -39,7 +39,7 @@ public class UserService {
 
     //    Teacher CRUD
     public ApiResponse saveTeacher(ReqTeacher reqTeacher) {
-        if (reqTeacher == null || reqTeacher.getFullName() == null){
+        if (reqTeacher == null || reqTeacher.getFullName().isEmpty()){
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Iltimos ma'lumot kiriting"));
         }
 
