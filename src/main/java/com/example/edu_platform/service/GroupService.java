@@ -22,6 +22,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class GroupService {
+
     private final GroupRepository groupRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
@@ -116,7 +117,7 @@ public class GroupService {
         }
 
         List<String> days = new ArrayList<>();
-        for (DayOfWeek dayOfWeek : group.getDays().getWeekDay()) {
+        for (DayOfWeek dayOfWeek : group.getDay().getWeekDay()) {
             days.add(dayOfWeek.getDayOfWeek().name());
         }
         ResGroup resGroup = ResGroup.builder()
@@ -187,7 +188,6 @@ public class GroupService {
     }
 
 
-
     public ApiResponse deleteGroup(Long groupId){
         Group group = groupRepository.findById(groupId).orElse(null);
         if(group == null){
@@ -197,7 +197,6 @@ public class GroupService {
         groupRepository.save(group);
         return new ApiResponse("Successfully deleted group");
     }
-
 
 
     private GroupDTO convertGroupToGroupDTO(Group group){

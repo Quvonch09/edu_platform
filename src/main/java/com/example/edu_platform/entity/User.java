@@ -1,5 +1,6 @@
 package com.example.edu_platform.entity;
 
+import com.example.edu_platform.entity.enums.ChatStatus;
 import com.example.edu_platform.entity.enums.Role;
 import com.example.edu_platform.entity.enums.UserStatus;
 import com.example.edu_platform.entity.template.AbsEntity;
@@ -37,7 +38,8 @@ public class User extends AbsEntity implements UserDetails {
     private Role role;
     @OneToOne
     private File file;
-
+    @Enumerated(EnumType.STRING)
+    private ChatStatus chatStatus;
 
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
