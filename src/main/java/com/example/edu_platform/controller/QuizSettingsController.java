@@ -15,15 +15,15 @@ import org.springframework.web.bind.annotation.*;
 public class QuizSettingsController {
     private final QuizSettingsService quizSettingsService;
 
-    @PutMapping("/update/{settingId}")
-    @Operation(summary = "(TEACHER) parametrlarni yangilash")
-    @PreAuthorize("hasRole('ROLE_TEACHER')")
-    public ResponseEntity<ApiResponse> updateSettings(
-            @PathVariable Long settingId,
-            @RequestBody ReqQuizSettings reqQuizSettings
-    ){
-        return ResponseEntity.ok(quizSettingsService.updateSettings(settingId, reqQuizSettings));
-    }
+//    @PutMapping("/update/{settingId}")
+//    @Operation(summary = "(TEACHER) parametrlarni yangilash")
+//    @PreAuthorize("hasRole('ROLE_TEACHER')")
+//    public ResponseEntity<ApiResponse> updateSettings(
+//            @PathVariable Long settingId,
+//            @RequestBody ReqQuizSettings reqQuizSettings
+//    ){
+//        return ResponseEntity.ok(quizSettingsService.updateSettings(settingId, reqQuizSettings));
+//    }
 
     @GetMapping("/getByQuiz/{quizId}")
     @Operation(summary = "Parametrlarni ko'rish quiz bo'yicha")
