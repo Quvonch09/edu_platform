@@ -3,6 +3,7 @@ package com.example.edu_platform.service;
 import com.example.edu_platform.entity.Group;
 import com.example.edu_platform.entity.User;
 import com.example.edu_platform.entity.enums.PaymentEnum;
+import com.example.edu_platform.entity.enums.Role;
 import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.ResponseError;
 import com.example.edu_platform.payload.StudentStatisticDTO;
@@ -90,8 +91,14 @@ public class StatisticService {
 
 
     @Transactional
-    public ApiResponse getStudentStatisticByGroup(Long groupId) {
-        Group group = groupRepository.findById(groupId).orElse(null);
+    public ApiResponse getStudentStatisticByGroup(Long groupId, User user) {
+        Group group;
+        if (user.getRole().equals(Role.ROLE_STUDENT)){
+           group = groupRepository.findByStudentId(user.getId()).orElse(null);
+        }else {
+            group = groupRepository.findById(groupId).orElse(null);
+        }
+
         if (group == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }

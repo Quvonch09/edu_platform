@@ -110,6 +110,7 @@ WITH lessons_per_group AS (
      )
 SELECT
     g.name AS groupName,
+    g.id AS groupId,
     t.full_name AS teacherName,
 
     -- ✅ Guruhning tugash foizi (progress)
