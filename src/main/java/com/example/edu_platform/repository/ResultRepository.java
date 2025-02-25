@@ -12,4 +12,6 @@ import java.util.List;
 public interface ResultRepository extends JpaRepository<Result, Long> {
     List<Result> findByUserId(Long userId);
     Page<Result> findByUserId(Long userId, Pageable pageable);
+    Page<Result> findByQuizIdIn(List<Long> quizIds, Pageable pageable);
+
 }
