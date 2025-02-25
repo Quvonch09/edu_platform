@@ -1,6 +1,7 @@
 package com.example.edu_platform.service;
 
 import com.example.edu_platform.entity.Category;
+import com.example.edu_platform.entity.Group;
 import com.example.edu_platform.entity.User;
 import com.example.edu_platform.entity.enums.ChatStatus;
 import com.example.edu_platform.entity.enums.Role;
@@ -40,6 +41,10 @@ public class UserService {
 
     //    Teacher CRUD
     public ApiResponse saveTeacher(ReqTeacher reqTeacher) {
+        if (reqTeacher == null || reqTeacher.getFullName().isEmpty()){
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Iltimos ma'lumot kiriting"));
+        }
+
         boolean b = userRepository
                 .existsByPhoneNumberAndRoleAndEnabledTrue(reqTeacher.getPhoneNumber(), Role.ROLE_TEACHER);
         if (b) {
@@ -286,6 +291,7 @@ public class UserService {
     }
 
     private TeacherDTO convertUserToTeacherDTO(User user, List<ResCategory> categoryIds) {
+        Group group = groupRepository.findGroup(user.getId());
 
         return TeacherDTO.builder()
                 .id(user.getId())
@@ -294,6 +300,8 @@ public class UserService {
                 .categories(categoryIds)
                 .active(user.isEnabled())
                 .groupCount(groupRepository.countByTeacherId(user.getId()))
+                .groupId(group != null ? group.getId() : null)
+                .groupName(group != null ? group.getName() : null)
                 .fileId(user.getFile() != null ? user.getFile().getId() : null)
                 .build();
     }

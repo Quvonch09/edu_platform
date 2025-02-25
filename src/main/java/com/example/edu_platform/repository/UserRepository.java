@@ -24,8 +24,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(" select  coalesce(count (u) ,0)  from User u  where  u.role = 'ROLE_TEACHER' and u.enabled = true ")
     Integer countAllByTeacher();
 
-    @Query("select coalesce(count (u),0) from User  u where u.role = 'ROLE_STUDENT' " +
-            "and u.enabled = true  and u.userStatus = 'UQIYABDI' " )
+    @Query(value = "select count(*) from users where role = 'ROLE_STUDENT' and enabled = true and user_status = 'UQIYAPDI'", nativeQuery = true )
     Integer countAllByStudent();
 
 
@@ -101,7 +100,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 
 
-    @Query(value = "SELECT u.id, u.full_name, u.phone_number, g.name as groupName,\n" +
+    @Query(value = "SELECT u.id, u.full_name, u.phone_number, g.name as groupName, g.id as groupId, \n" +
             "       u.created_at, u.age, u.user_status as status, u.parent_phone_number,\n" +
             "       u2.full_name as teacherName,\n" +
             "       CASE\n" +
@@ -128,6 +127,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "    u.full_name,\n" +
             "    u.phone_number,\n" +
             "    g.name,\n" +
+            "    g.id,\n" +
             "    u.created_at,\n" +
             "    u.age,\n" +
             "    u.user_status,\n" +

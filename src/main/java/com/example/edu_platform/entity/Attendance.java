@@ -22,4 +22,5 @@ public class Attendance extends AbsEntity {
     private Group group;
     @ManyToOne
     private User student;
+
 }

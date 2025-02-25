@@ -26,5 +26,5 @@ public class Group extends AbsEntity {
     private LocalDate startDate;
     private LocalDate endDate;
     @OneToOne
-    private GraphicDay day;
+    private GraphicDay days;
 }

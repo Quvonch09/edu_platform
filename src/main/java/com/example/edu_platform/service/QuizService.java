@@ -195,6 +195,8 @@ public class QuizService {
                 .id(quiz.getId())
                 .title(quiz.getTitle())
                 .lessonId(quiz.getLesson().getId())
+                .questionCount(quizSettingsRepository.findByQuizId(quiz.getId()).getQuestionCount())
+                .duration(quizSettingsRepository.findByQuizId(quiz.getId()).getDuration())
                 .build();
     }
 }

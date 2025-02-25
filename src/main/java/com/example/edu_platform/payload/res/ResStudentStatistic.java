@@ -5,6 +5,7 @@ public interface ResStudentStatistic {
 
 
     String getGroupName();
+    Long getGroupId();
     String getTeacherName();
     Double getCategoryPercentage();
     String getLessonsProgress();

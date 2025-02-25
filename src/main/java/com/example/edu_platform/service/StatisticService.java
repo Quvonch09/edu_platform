@@ -1,19 +1,24 @@
 package com.example.edu_platform.service;
 
+import com.example.edu_platform.entity.Group;
 import com.example.edu_platform.entity.User;
 import com.example.edu_platform.entity.enums.PaymentEnum;
+import com.example.edu_platform.entity.enums.Role;
 import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.ResponseError;
+import com.example.edu_platform.payload.StudentStatisticDTO;
 import com.example.edu_platform.payload.res.*;
 import com.example.edu_platform.repository.CategoryRepository;
 import com.example.edu_platform.repository.GroupRepository;
 import com.example.edu_platform.repository.PaymentRepository;
 import com.example.edu_platform.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -82,6 +87,28 @@ public class StatisticService {
             return new ApiResponse(ResponseError.NOTFOUND("Statistic not found"));
         }
         return new ApiResponse(statistic);
+    }
+
+
+    @Transactional
+    public ApiResponse getStudentStatisticByGroup(Long groupId, User user) {
+        Group group;
+        if (user.getRole().equals(Role.ROLE_STUDENT)){
+           group = groupRepository.findByStudentId(user.getId()).orElse(null);
+        }else {
+            group = groupRepository.findById(groupId).orElse(null);
+        }
+
+        if (group == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
+
+        List<ResStudentRank> allByStudentRank = new ArrayList<>();
+        for (User student : group.getStudents()) {
+            allByStudentRank.addAll(groupRepository.findAllByStudentRank(student.getId()));
+        }
+
+        return new ApiResponse(allByStudentRank);
     }
 
 

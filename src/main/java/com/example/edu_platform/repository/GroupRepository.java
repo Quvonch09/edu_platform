@@ -112,6 +112,7 @@ WITH lessons_per_group AS (
      )
 SELECT
     g.name AS groupName,
+    g.id AS groupId,
     t.full_name AS teacherName,
 
     -- ✅ Guruhning tugash foizi (progress)
@@ -184,7 +185,7 @@ ORDER BY r.rank_position;
 
 
 
-    @Query(value = "select * from groups g join groups_students gsl on gsl.students_id = ?1", nativeQuery = true)
+    @Query(value = "select distinct g.* from groups g join groups_students gsl on gsl.students_id = ?1 and gsl.group_id = g.id", nativeQuery = true)
     Optional<Group> findByStudentId(Long studentId);
 
     boolean existsByName(String name);
@@ -237,5 +238,9 @@ GROUP BY g.name;
 
     @Query(value = "select count(g.*) from groups g join lesson_tracking lt on g.id = lt.group_id", nativeQuery = true)
     Integer countGroupLessons(Long groupId);
+
+
+    @Query(value = "select g.* from groups g join groups_students gs on gs.group_id = g.id where g.teacher_id = ?1 or gs.students_id = ?1", nativeQuery = true)
+    Group findGroup(Long userId);
 
 }
