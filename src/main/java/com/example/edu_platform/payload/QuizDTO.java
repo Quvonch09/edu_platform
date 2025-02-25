@@ -13,4 +13,6 @@ public class QuizDTO {
     private Long id;
     private String title;
     private Long lessonId;
+    private Integer questionCount;
+    private Integer duration;
 }
