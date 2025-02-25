@@ -166,6 +166,9 @@ public class LessonService {
             return new ApiResponse(ResponseError.NOTFOUND("Ochiq darslar"));
         }
 
+        Group group = groupRepository.findById(groupId).orElse(null);
+
+
         List<LessonDTO> lessonDTOs = lessonTrackings.stream()
                 .map(LessonTracking::getLesson)
                 .filter(lesson -> !lesson.isDeleted())
@@ -177,7 +180,7 @@ public class LessonService {
         }
 
         Map<String, Object> response = new HashMap<>();
-        response.put("lessonCount", lessonDTOs.size());
+        response.put("lessonCount", lessonDTOs.size() +"/" +lessonRepository.countLessonsByCategoryId(group != null ? group.getCategory().getId() : 0));
         response.put("lessons", lessonDTOs);
 
         return new ApiResponse(response);
