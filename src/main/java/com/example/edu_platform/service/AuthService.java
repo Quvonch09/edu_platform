@@ -25,7 +25,6 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
     private final PasswordEncoder passwordEncoder;
-    private final GroupRepository groupRepository;
 
 
     public ApiResponse login(AuthLogin authLogin)
