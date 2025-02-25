@@ -110,6 +110,7 @@ WITH lessons_per_group AS (
      )
 SELECT
     g.name AS groupName,
+    g.id AS groupId,
     t.full_name AS teacherName,
 
     -- ✅ Guruhning tugash foizi (progress)
@@ -182,7 +183,7 @@ ORDER BY r.rank_position;
 
 
 
-    @Query(value = "select * from groups g join groups_students gsl on gsl.students_id = ?1", nativeQuery = true)
+    @Query(value = "select distinct g.* from groups g join groups_students gsl on gsl.students_id = ?1 and gsl.group_id = g.id", nativeQuery = true)
     Optional<Group> findByStudentId(Long studentId);
 
     boolean existsByName(String name);

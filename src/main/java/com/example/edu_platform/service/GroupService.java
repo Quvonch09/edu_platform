@@ -3,6 +3,7 @@ package com.example.edu_platform.service;
 import com.example.edu_platform.entity.*;
 import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.GroupDTO;
+import com.example.edu_platform.payload.GroupListDTO;
 import com.example.edu_platform.payload.ResponseError;
 import com.example.edu_platform.payload.req.ReqGroup;
 import com.example.edu_platform.payload.res.ResGroup;
@@ -16,8 +17,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -96,7 +99,17 @@ public class GroupService {
         Page<Group> groups = groupRepository.searchGroup(groupName, teacherName, startDate, endDate,categoryId,
                 PageRequest.of(page , size));
 
-        List<GroupDTO> list = groups.getContent().stream().map(this::convertGroupToGroupDTO).toList();
+        List<GroupDTO> list = new ArrayList<>();
+        for (Group group : groups) {
+            GraphicDay graphicDay = graphicDayRepository.findGraphicDay(group.getId()).orElse(null);
+
+            List<String> days = new ArrayList<>();
+            for (DayOfWeek dayOfWeek : group.getDays().getWeekDay()) {
+                days.add(dayOfWeek.getDayOfWeek().name());
+            }
+
+            list.add(convertGroupToGroupDTO(group,days, graphicDay != null ? graphicDay : null));
+        }
         ResPageable resPageable = ResPageable.builder()
                 .page(page)
                 .size(size)
@@ -142,9 +155,17 @@ public class GroupService {
     @Transactional
     public ApiResponse getGroupsList(){
         List<Group> all = groupRepository.findAll();
-        List<GroupDTO> groupDTOList = new ArrayList<>();
+        List<GroupListDTO> groupDTOList = new ArrayList<>();
         for (Group group : all) {
-            groupDTOList.add(convertGroupToGroupDTO(group));
+            GroupListDTO groupListDTO = GroupListDTO.builder()
+                    .id(group.getId())
+                    .name(group.getName())
+                    .categoryName(group.getCategory() != null ? group.getCategory().getName() : null)
+                    .teacherName(group.getTeacher() != null ? group.getTeacher().getFullName() : null)
+                    .startDate(group.getStartDate())
+                    .endDate(group.getEndDate())
+                    .build();
+            groupDTOList.add(groupListDTO);
         }
         return new ApiResponse(groupDTOList);
     }
@@ -166,16 +187,19 @@ public class GroupService {
         LocalTime startDate = LocalTime.parse(reqGroup.getStartTime());
         LocalTime endDate = LocalTime.parse(reqGroup.getEndTime());
 
-        boolean b1 = graphicDayRepository.existsByGraphicDayInGroup(reqGroup.getRoomId(), startDate, endDate);
-        if (b1){
-            return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
+        if (!Objects.equals(reqGroup.getRoomId(), Objects.requireNonNull(graphicDay).getRoom().getId())){
+            boolean b1 = graphicDayRepository.existsByGraphicDayInGroup(reqGroup.getRoomId(), startDate, endDate);
+            if (b1){
+                return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
+            }
+            if (graphicDay != null) {
+                graphicDay.setWeekDay(dayOfWeekList);
+                graphicDay.setStartTime(startDate);
+                graphicDay.setEndTime(endDate);
+                graphicDayRepository.save(graphicDay);
+            }
         }
-        if (graphicDay != null) {
-            graphicDay.setWeekDay(dayOfWeekList);
-            graphicDay.setStartTime(startDate);
-            graphicDay.setEndTime(endDate);
-            graphicDayRepository.save(graphicDay);
-        }
+
 
         group.setName(reqGroup.getGroupName());
         group.setCategory(categoryRepository.findById(reqGroup.getCategoryId()).orElse(null));
@@ -200,21 +224,44 @@ public class GroupService {
 
 
 
-    private GroupDTO convertGroupToGroupDTO(Group group){
+    private GroupDTO convertGroupToGroupDTO(Group group, List<String> weekDays,GraphicDay graphicDay){
 
         return GroupDTO.builder()
                 .id(group.getId())
                 .name(group.getName())
                 .categoryName(group.getCategory() != null ? group.getCategory().getName() : null)
+                .categoryId(group.getCategory() != null ? group.getCategory().getId() : null)
                 .teacherName(group.getTeacher() != null ? group.getTeacher().getFullName() : null)
+                .teacherId(group.getTeacher() != null ? group.getTeacher().getId() : null)
                 .startDate(group.getStartDate())
                 .endDate(group.getEndDate())
                 .active(group.getActive())
                 .studentCount(group.getStudents().size())
-                .countEndMonth(group.getEndDate().getMonthValue() - LocalDate.now().getMonthValue())
+                .countEndMonth(calculateCountEndMonth(group.getEndDate()))
                 .countAllLessons(lessonRepository.countLessonsByCategoryId(group.getCategory().getId()))
                 .countGroupLessons(groupRepository.countGroupLessons(group.getId()))
                 .departureStudentCount(groupRepository.countGroup(group.getId()))
+                .weekDays(weekDays)
+                .roomName(graphicDay.getRoom().getName())
+                .roomId(graphicDay.getRoom().getId())
+                .startTime(graphicDay.getStartTime())
+                .endTime(graphicDay.getEndTime())
                 .build();
     }
+
+
+
+    private int calculateCountEndMonth(LocalDate endDate) {
+        LocalDate now = LocalDate.now();
+        long countDate = ChronoUnit.DAYS.between(now, endDate);
+
+        if (countDate <= 32) {
+            return 1;
+        } else if (countDate <= 64) {
+            return 2;
+        } else {
+            return 3;
+        }
+    }
+
 }

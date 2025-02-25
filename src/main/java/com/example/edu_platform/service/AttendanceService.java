@@ -10,14 +10,14 @@ import com.example.edu_platform.payload.res.ResAttend;
 import com.example.edu_platform.repository.AttendanceRepository;
 import com.example.edu_platform.repository.GroupRepository;
 import com.example.edu_platform.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,36 +50,65 @@ public class AttendanceService {
         return new ApiResponse("Attendance successfully saved");
     }
 
+
+    @Transactional
     public ApiResponse getAttendanceByGroupId(Long groupId, int year, int month) {
 
-        LocalDate startOfMonth = LocalDate.of(year, Month.of(month), 1);
-        LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException(new ApiResponse(
                         ResponseError.NOTFOUND("group not found"))));
+
+        LocalDate startOfMonth = LocalDate.of(year, Month.of(month), 1);
+        LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
+
+        LocalDate groupMonthYear = group.getStartDate().withDayOfMonth(1);
+
+        if (startOfMonth.isBefore(groupMonthYear)) {
+            return new ApiResponse(ResponseError.NOTFOUND("Attendance"));
+        }
+
+        List<LocalDate> groupDays = getGroupDays(groupId, year, month);
+
         List<ResAttend> resAttends = new ArrayList<>();
+
         List<User> users = userRepository.findAllByGroupId(group.getId());
+
         for (User user : users) {
             List<AttendDto> attendDtoList = new ArrayList<>();
-            List<Attendance> attendances =
-                    attendanceRepository.getAttendanceByStudentIdAndDateBetween(user.getId(), startOfMonth, endOfMonth);
-            for (Attendance attendance : attendances) {
-                AttendDto attendDto = AttendDto.builder()
-                        .id(attendance.getId())
-                        .attendance(attendance.getAttendance())
-                        .date(attendance.getDate())
-                        .build();
+
+            for (LocalDate groupDay : groupDays) {
+                Attendance attendance = attendanceRepository.findByStudentAndDate(user, groupDay);
+
+                AttendDto attendDto;
+                if (attendance != null) {
+                    attendDto = AttendDto.builder()
+                            .id(attendance.getId())
+                            .attendance(attendance.getAttendance())
+                            .date(attendance.getDate())
+                            .build();
+                } else {
+                    attendDto = AttendDto.builder()
+                            .id(null)
+                            .attendance(null)
+                            .date(groupDay)
+                            .build();
+                }
+
                 attendDtoList.add(attendDto);
             }
+
             ResAttend resAttend = ResAttend.builder()
                     .studentId(user.getId())
                     .fullName(user.getFullName())
                     .attendList(attendDtoList)
                     .build();
+
             resAttends.add(resAttend);
         }
+
         return new ApiResponse(resAttends);
     }
+
 
 
     public ApiResponse getAttendanceByStudent(User user, int month) {
@@ -118,6 +147,14 @@ public class AttendanceService {
                 .orElseThrow(() -> new NotFoundException("group not found"));
 
         GraphicDay days = group.getDays();
+        if (days == null || days.getWeekDay() == null || days.getWeekDay().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // Hafta kunlarini to‘plamga o‘tkazish
+        Set<DayOfWeek> weekDays = new HashSet<>(days.getWeekDay());
+
+        System.out.println(weekDays);
 
         LocalDate startOfMonth = LocalDate.of(year, Month.of(month), 1);
         LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
@@ -125,14 +162,12 @@ public class AttendanceService {
         List<LocalDate> classDates = new ArrayList<>();
 
         for (LocalDate date = startOfMonth; !date.isAfter(endOfMonth); date = date.plusDays(1)) {
-            for (DayOfWeek day : days.getWeekDay()) {
-                if (date.getDayOfWeek().name().equalsIgnoreCase(day.toString())) {
+            for (DayOfWeek day : weekDays) {
+                if (day.getDayOfWeek().name().equals(date.getDayOfWeek().name())) {
                     classDates.add(date);
-                    break;
                 }
             }
         }
-
         return classDates;
     }
 }
