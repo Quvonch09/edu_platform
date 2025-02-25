@@ -19,7 +19,7 @@ public class GraphicDay {
     private Long id;
     private LocalTime startTime;
     private LocalTime endTime;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<DayOfWeek> weekDay;
     @ManyToOne
     private Room room;

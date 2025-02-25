@@ -32,11 +32,21 @@ public class AttendanceController {
         return ResponseEntity.ok(apiResponse);
     }
 
+//    @PreAuthorize("hasRole('ROLE_STUDENT')")
+//    @Operation(summary = "student o'zini davomatini ko'rishi")
+//    @GetMapping("/myAttendance")
+//    public ResponseEntity<ApiResponse> getAttendanceByStudent(@CurrentUser User user, @RequestParam int month){
+//        ApiResponse attendanceByStudent = attendanceService.getAttendanceByStudent(user, month);
+//        return ResponseEntity.ok(attendanceByStudent);
+//    }
+
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     @Operation(summary = "student o'zini davomatini ko'rishi")
     @GetMapping("/myAttendance")
-    public ResponseEntity<ApiResponse> getAttendanceByStudent(@CurrentUser User user, @RequestParam int month){
-        ApiResponse attendanceByStudent = attendanceService.getAttendanceByStudent(user, month);
+    public ResponseEntity<ApiResponse> getAttendanceByStudent(@CurrentUser User user,
+                                                               @RequestParam int year,
+                                                               @RequestParam int month){
+        ApiResponse attendanceByStudent = attendanceService.getAttendanceByUser(user, year, month);
         return ResponseEntity.ok(attendanceByStudent);
     }
 
