@@ -130,6 +130,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
             AND (:startAge IS NULL OR u.age >= :startAge)
             AND (:endAge IS NULL OR u.age <= :endAge)
             AND u.role = 'ROLE_STUDENT'
+            AND (:hasPaid IS NULL OR :hasPaid = BOOL_OR(
+              EXTRACT(MONTH FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(MONTH FROM CURRENT_DATE)
+                 AND
+                EXTRACT(YEAR FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(YEAR FROM CURRENT_DATE))
+                )
         GROUP BY
             u.id,
             u.full_name,
@@ -142,13 +147,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             u.parent_phone_number,
             u2.full_name,
             p.payment_date
-       HAVING
-           (:hasPaid IS NULL OR
-            (:hasPaid = TRUE AND
-             EXTRACT(MONTH FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(MONTH FROM CURRENT_DATE)
-             AND
-             EXTRACT(YEAR FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(YEAR FROM CURRENT_DATE)))
-       
 """,
     nativeQuery = true)
     Page<ResStudent> searchStudents(@Param("fullName") String fullName,
