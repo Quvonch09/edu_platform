@@ -29,7 +29,7 @@ public class StudentController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO','ROLE_TEACHER')")
     @Operation(summary = "Student search")
-    @GetMapping
+    @GetMapping("/search")
     public ResponseEntity<ApiResponse> getAllStudents(@RequestParam(required = false, value = "fullName") String fullName,
                                                       @RequestParam(required = false, value = "phoneNumber") String phoneNumber,
                                                       @RequestParam(value = "status" , required = false) UserStatus userStatus,
