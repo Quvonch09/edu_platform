@@ -103,10 +103,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "SELECT u.id, u.full_name, u.phone_number, g.name as groupName, g.id as groupId, \n" +
             "       u.created_at, u.age, u.user_status as status, u.parent_phone_number,\n" +
             "       u2.full_name as teacherName,\n" +
-            "       CASE\n" +
+            "       (CASE\n" +
             "           WHEN extract(month from p.payment_date) = EXTRACT(month from current_date)\n" +
             "               THEN true ELSE false\n" +
-            "           END AS hasPaid,\n" +
+            "           END) AS hasPaid,\n" +
             "       coalesce(sum(h.ball), 0) score\n" +
             "FROM users u\n" +
             "         JOIN groups_students gsl ON u.id = gsl.students_id\n" +
