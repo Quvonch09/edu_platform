@@ -91,7 +91,7 @@ public class StatisticController {
 
     @Operation(summary =" Student guruhidagi reyting jadvali  ")
     @PreAuthorize("hasAnyRole('ROLE_TEACHER', 'ROLE_STUDENT')")
-    @GetMapping("/studentRank/byGroup/{groupId}")
+    @GetMapping("/studentRank/byGroup")
     public ResponseEntity<ApiResponse> getStudentRankByGroup(@RequestParam(required = false) Long groupId, @CurrentUser User student){
         return ResponseEntity.ok(statisticService.getStudentStatisticByGroup(groupId,student));
     }
