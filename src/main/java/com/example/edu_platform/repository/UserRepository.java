@@ -100,45 +100,56 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 
 
-    @Query(value = "SELECT u.id, u.full_name, u.phone_number, g.name as groupName, g.id as groupId, \n" +
-            "       u.created_at, u.age, u.user_status as status, u.parent_phone_number,\n" +
-            "       u2.full_name as teacherName,\n" +
-            "       (CASE\n" +
-            "           WHEN extract(month from p.payment_date) = EXTRACT(month from current_date)\n" +
-            "               THEN true ELSE false\n" +
-            "           END) AS hasPaid,\n" +
-            "       coalesce(sum(h.ball), 0) score\n" +
-            "FROM users u\n" +
-            "         JOIN groups_students gsl ON u.id = gsl.students_id\n" +
-            "         JOIN groups g ON gsl.group_id = g.id\n" +
-            "         LEFT JOIN users u2 on u2.id = g.teacher_id\n" +
-            "         LEFT JOIN homework h ON u.id = h.student_id\n" +
-            "         LEFT JOIN payment p ON p.student_id = u.id\n" +
-            "WHERE (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%')))\n" +
-            "  AND (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%')))\n" +
-            "  AND (:userStatus IS NULL OR u.user_status = :userStatus)\n" +
-            "  AND (:groupName IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :groupName, '%')))\n" +
-            "  AND (:teacherId IS NULL OR g.teacher_id = :teacherId)\n" +
-            "  AND (:startAge IS NULL OR u.age >= :startAge)\n" +
-            "  AND (:endAge IS NULL OR u.age <= :endAge)\n" +
-            "  AND u.role = 'ROLE_STUDENT'\n" +
-            "GROUP BY\n" +
-            "    u.id,\n" +
-            "    u.full_name,\n" +
-            "    u.phone_number,\n" +
-            "    g.name,\n" +
-            "    g.id,\n" +
-            "    u.created_at,\n" +
-            "    u.age,\n" +
-            "    u.user_status,\n" +
-            "    u.parent_phone_number,\n" +
-            "    u2.full_name,\n" +
-            "    p.payment_date\n" +
-            "HAVING (:hasPaid IS NULL OR\n" +
-            "        (CASE\n" +
-            "             WHEN extract(month from p.payment_date) = EXTRACT(month from current_date)\n" +
-            "                 THEN true ELSE false\n" +
-            "            END) = :hasPaid)",
+    @Query(value = """
+        SELECT
+            u.id,
+            u.full_name,
+            u.phone_number,
+            g.name AS groupName,
+            g.id AS groupId,
+            u.created_at,
+            u.age,
+            u.user_status AS status,
+            u.parent_phone_number,
+            u2.full_name AS teacherName,
+             BOOL_OR(EXTRACT(MONTH FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(MONTH FROM CURRENT_DATE)
+                    AND EXTRACT(YEAR FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(YEAR FROM CURRENT_DATE)) AS hasPaid,
+            COALESCE(SUM(h.ball), 0) AS score
+        FROM users u
+        JOIN groups_students gsl ON u.id = gsl.students_id
+        JOIN groups g ON gsl.group_id = g.id
+        LEFT JOIN users u2 ON u2.id = g.teacher_id
+        LEFT JOIN homework h ON u.id = h.student_id
+        LEFT JOIN payment p ON p.student_id = u.id
+        WHERE
+            (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%')))
+            AND (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%')))
+            AND (:userStatus IS NULL OR u.user_status = :userStatus)
+            AND (:groupName IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :groupName, '%')))
+            AND (:teacherId IS NULL OR g.teacher_id = :teacherId)
+            AND (:startAge IS NULL OR u.age >= :startAge)
+            AND (:endAge IS NULL OR u.age <= :endAge)
+            AND u.role = 'ROLE_STUDENT'
+        GROUP BY
+            u.id,
+            u.full_name,
+            u.phone_number,
+            g.name,
+            g.id,
+            u.created_at,
+            u.age,
+            u.user_status,
+            u.parent_phone_number,
+            u2.full_name,
+            p.payment_date
+       HAVING
+           (:hasPaid IS NULL OR
+            (:hasPaid = TRUE AND
+             EXTRACT(MONTH FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(MONTH FROM CURRENT_DATE)
+             AND
+             EXTRACT(YEAR FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(YEAR FROM CURRENT_DATE)))
+       
+""",
     nativeQuery = true)
     Page<ResStudent> searchStudents(@Param("fullName") String fullName,
                                     @Param("phoneNumber") String phoneNumber,
