@@ -49,7 +49,7 @@ jobs:
 
       - name: Service qayta ishga tushirish
         run: |
-          ssh -i private_key -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} << EOF
+          ssh -i private_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << EOF
             sudo systemctl stop edu.service
             sudo systemctl start edu.service
           EOF
