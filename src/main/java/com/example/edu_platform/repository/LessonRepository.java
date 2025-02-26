@@ -19,8 +19,8 @@ public interface LessonRepository extends JpaRepository<Lesson,Long> {
     Optional<Lesson> findByIdAndDeletedFalse(Long id);
 
 
-    @Query(value = "select count(l.*) from lesson l join module m on l.module_id = m.id " +
-            " join category c on c.id = m.category_id", nativeQuery = true)
+    @Query(value = "select coalesce(count(l.*) , 0) from lesson l join module m on l.module_id = m.id " +
+            " where m.category_id = :categoryId ", nativeQuery = true)
     Integer countLessonsByCategoryId(Long categoryId);
 
 }
