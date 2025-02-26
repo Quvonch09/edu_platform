@@ -6,6 +6,8 @@ import com.example.edu_platform.payload.res.ResStudentCount;
 import com.example.edu_platform.payload.res.ResStudentRank;
 import com.example.edu_platform.payload.res.ResStudentStatistic;
 import jakarta.persistence.TemporalType;
+import com.example.edu_platform.payload.res.ResCEODiagram;
+import com.example.edu_platform.payload.res.ResStudentStatistic;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
