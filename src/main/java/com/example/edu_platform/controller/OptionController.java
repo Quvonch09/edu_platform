@@ -10,20 +10,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/option")
 public class OptionController {
     private final OptionService optionService;
 
-    @PostMapping("/save")
+    @PostMapping("/save/{questionId}")
     @Operation(summary = "(TEACHER) Javob saqlash")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> saveOption(
-            @RequestBody ReqOption reqOption,
-            @RequestParam boolean isCorrect
+            @RequestBody List<ReqOption> reqOption,
+            @PathVariable Long questionId
     ){
-        return ResponseEntity.ok(optionService.saveOption(isCorrect, reqOption));
+        return ResponseEntity.ok(optionService.saveOption(questionId,reqOption));
     }
 
     @PutMapping("/update/{optionId}")
@@ -31,10 +33,17 @@ public class OptionController {
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> updateOption(
             @RequestBody ReqOption reqOption,
-            @PathVariable Long optionId,
-            @RequestParam boolean isCorrect
+            @PathVariable Long optionId
     ){
-        return ResponseEntity.ok(optionService.updateOption(optionId, isCorrect, reqOption));
+        return ResponseEntity.ok(optionService.updateOption(optionId, reqOption));
+    }
+
+    @GetMapping("/getByQuestion/{questionId}")
+    @Operation(summary = "Question bo'yicha optionlarni ko'rish")
+    public ResponseEntity<ApiResponse> getByQuestion(
+            @PathVariable Long questionId
+    ){
+        return ResponseEntity.ok(optionService.getByQuestion(questionId));
     }
 
     @DeleteMapping("/delete/{optionId}")
