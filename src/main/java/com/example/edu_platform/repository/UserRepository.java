@@ -99,76 +99,75 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Integer countAllByStudent(Long teacherId);
 
 
-
     @Query(value = """
-        SELECT
-            u.id,
-            u.full_name,
-            u.phone_number,
-            g.name AS groupName,
-            g.id AS groupId,
-            u.created_at,
-            u.age,
-            u.user_status AS status,
-            u.parent_phone_number,
-            u2.full_name AS teacherName,
-            CASE
-                WHEN COUNT(p.payment_date) FILTER (
-                    WHERE EXTRACT(MONTH FROM p.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
-                     AND EXTRACT(YEAR FROM p.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
-                 ) > 0 THEN TRUE
-                ELSE FALSE
-                END AS hasPaid ,
-            COALESCE(SUM(h.ball), 0) AS score
-        FROM users u
-        JOIN groups_students gsl ON u.id = gsl.students_id
-        JOIN groups g ON gsl.group_id = g.id
-        LEFT JOIN users u2 ON u2.id = g.teacher_id
-        LEFT JOIN homework h ON u.id = h.student_id
-        LEFT JOIN payment p ON p.student_id = u.id
-        WHERE
-            (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%')))
-            AND (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%')))
-            AND (:userStatus IS NULL OR u.user_status = :userStatus)
-            AND (:groupName IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :groupName, '%')))
-            AND (:teacherId IS NULL OR g.teacher_id = :teacherId)
-            AND (:startAge IS NULL OR u.age >= :startAge)
-            AND (:endAge IS NULL OR u.age <= :endAge)
-            AND u.role = 'ROLE_STUDENT'
-           AND (:hasPaid IS NULL OR (
-                       CASE
-                           WHEN :hasPaid = TRUE THEN
-                               EXISTS (
-                                   SELECT 1 FROM payment p2
-                                   WHERE p2.student_id = u.id
-                                   AND EXTRACT(MONTH FROM p2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
-                                   AND EXTRACT(YEAR FROM p2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
-                               )
-                           WHEN :hasPaid = FALSE THEN
-                               NOT EXISTS (
-                                   SELECT 1 FROM payment p2
-                                   WHERE p2.student_id = u.id
-                                   AND EXTRACT(MONTH FROM p2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
-                                   AND EXTRACT(YEAR FROM p2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
-                               )
-                           ELSE TRUE
-                       END
-                 ))
-                 
-        GROUP BY
-            u.id,
-            u.full_name,
-            u.phone_number,
-            g.name,
-            g.id,
-            u.created_at,
-            u.age,
-            u.user_status,
-            u.parent_phone_number,
-            u2.full_name,
-            p.payment_date
+    SELECT
+        u.id,
+        u.full_name,
+        u.phone_number,
+        g.name AS groupName,
+        g.id AS groupId,
+        u.created_at,
+        u.age,
+        u.user_status AS status,
+        u.parent_phone_number,
+        u2.full_name AS teacherName,
+        CASE 
+            WHEN COUNT(p.id) FILTER (
+                WHERE EXTRACT(MONTH FROM p.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+                AND EXTRACT(YEAR FROM p.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+            ) > 0 THEN TRUE
+            ELSE FALSE
+        END AS hasPaid,
+        COALESCE(SUM(h.ball), 0) AS score
+    FROM users u
+    JOIN groups_students gsl ON u.id = gsl.students_id
+    JOIN groups g ON gsl.group_id = g.id
+    LEFT JOIN users u2 ON u2.id = g.teacher_id
+    LEFT JOIN homework h ON u.id = h.student_id
+    LEFT JOIN payment p ON p.student_id = u.id
+    WHERE
+        (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%')) )
+        AND (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%')))
+        AND (:userStatus IS NULL OR u.user_status = :userStatus)
+        AND (:groupName IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :groupName, '%')))
+        AND (:teacherId IS NULL OR g.teacher_id = :teacherId)
+        AND (:startAge IS NULL OR u.age >= :startAge)
+        AND (:endAge IS NULL OR u.age <= :endAge)
+        AND u.role = 'ROLE_STUDENT'
+        AND (
+            :hasPaid IS NULL 
+            OR (
+                :hasPaid = TRUE 
+                AND EXISTS (
+                    SELECT 1 FROM payment p2
+                    WHERE p2.student_id = u.id
+                    AND EXTRACT(MONTH FROM p2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+                    AND EXTRACT(YEAR FROM p2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+                )
+            ) 
+            OR (
+                :hasPaid = FALSE 
+                AND NOT EXISTS (
+                    SELECT 1 FROM payment p2
+                    WHERE p2.student_id = u.id
+                    AND EXTRACT(MONTH FROM p2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+                    AND EXTRACT(YEAR FROM p2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+                )
+            )
+        )
+    GROUP BY
+        u.id,
+        u.full_name,
+        u.phone_number,
+        g.name,
+        g.id,
+        u.created_at,
+        u.age,
+        u.user_status,
+        u.parent_phone_number,
+        u2.full_name
 """,
-    nativeQuery = true)
+            nativeQuery = true)
     Page<ResStudent> searchStudents(@Param("fullName") String fullName,
                                     @Param("phoneNumber") String phoneNumber,
                                     @Param("userStatus") String userStatus,
@@ -177,6 +176,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                                     @Param("startAge") Integer startAge,
                                     @Param("hasPaid") Boolean hasPaid,
                                     @Param("endAge") Integer endAge, Pageable pageable);
+
 
 
 
