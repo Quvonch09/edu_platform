@@ -1,13 +1,17 @@
 package com.example.edu_platform.service;
 
 import com.example.edu_platform.entity.Category;
+import com.example.edu_platform.entity.Group;
 import com.example.edu_platform.entity.Module;
+import com.example.edu_platform.entity.User;
+import com.example.edu_platform.entity.enums.Role;
 import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.ModuleDTO;
 import com.example.edu_platform.payload.ResponseError;
 import com.example.edu_platform.payload.req.ModuleRequest;
 import com.example.edu_platform.payload.res.ResPageable;
 import com.example.edu_platform.repository.CategoryRepository;
+import com.example.edu_platform.repository.GroupRepository;
 import com.example.edu_platform.repository.ModuleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +26,7 @@ import java.util.List;
 public class ModuleService {
     private final ModuleRepository moduleRepository;
     private final CategoryRepository categoryRepository;
+    private final GroupRepository groupRepository;
 
     public ApiResponse createModule(ModuleRequest moduleRequest){
         Category category = categoryRepository.findById(moduleRequest.getCategoryId()).orElse(null);
@@ -40,8 +45,17 @@ public class ModuleService {
     }
 
     @Transactional
-    public ApiResponse getByCategory(Long categoryId, int page, int size) {
-        Category category = categoryRepository.findById(categoryId).orElse(null);
+    public ApiResponse getByCategory(Long categoryId, User user, int page, int size) {
+        Category category;
+        if (user.getRole().equals(Role.ROLE_STUDENT)){
+            Group group = groupRepository.findGroup(user.getId());
+            category = categoryRepository.findById(group != null ? group.getCategory().getId() : null).orElse(null);
+        } else {
+            if (categoryId == null){
+                return new ApiResponse(ResponseError.DEFAULT_ERROR("CategoryId kiritish kerak"));
+            }
+            category = categoryRepository.findById(categoryId).orElse(null);
+        }
         if (category == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Kategoriya"));
         }
@@ -68,7 +82,7 @@ public class ModuleService {
     }
 
     @Transactional
-    public ApiResponse searchModule(String name, int size, int page) {
+    public ApiResponse searchModule(String name, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
         Page<Module> modules;
 
