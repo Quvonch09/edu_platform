@@ -1,7 +1,9 @@
 package com.example.edu_platform.controller;
 
+import com.example.edu_platform.entity.User;
 import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.req.ModuleRequest;
+import com.example.edu_platform.security.CurrentUser;
 import com.example.edu_platform.service.ModuleService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -44,14 +46,15 @@ public class ModuleController {
         return ResponseEntity.ok(moduleService.getModule(moduleId));
     }
 
-    @GetMapping("getByCategory/{categoryId}")
+    @GetMapping("getByCategory")
     @Operation(summary = "(TEACHER/ADMIN/CEO) Categorydagi modullarni ko'rish")
-    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_CEO', 'ROLE_STUDENT')")
     public ResponseEntity<ApiResponse> getByCategory(
-            @PathVariable Long categoryId,
+            @RequestParam(required = false) Long categoryId,
+            @CurrentUser User user,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(moduleService.getByCategory(categoryId, page, size));
+        return ResponseEntity.ok(moduleService.getByCategory(categoryId, user, page, size));
     }
 
     @PutMapping("/update/{moduleId}")

@@ -11,40 +11,55 @@ import com.example.edu_platform.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class OptionService {
     private final OptionRepository optionRepository;
     private final QuestionRepository questionRepository;
 
-    public ApiResponse saveOption(boolean isCorrect,ReqOption reqOption){
-        Question question = questionRepository.findById(reqOption.getQuestionId()).orElse(null);
+    public ApiResponse saveOption(Long questionId,List<ReqOption> reqOption){
+        Question question = questionRepository.findById(questionId).orElse(null);
         if (question == null){
             return new ApiResponse(ResponseError.NOTFOUND("Question"));
         }
-        Option option = Option.builder()
-                .name(reqOption.getText())
-                .question(question)
-                .correct(isCorrect)
-                .build();
-        optionRepository.save(option);
-        return new ApiResponse("Option saqlandi");
+        for (ReqOption option : reqOption) {
+            Option option1 = Option.builder()
+                    .name(option.getText())
+                    .correct(option.isCorrect())
+                    .question(question)
+                    .build();
+            optionRepository.save(option1);
+        }
+        return new ApiResponse("Optionlar saqlandi");
     }
 
-    public ApiResponse updateOption(Long optionId,boolean isCorrect,ReqOption reqOption){
+    public ApiResponse updateOption(Long optionId,ReqOption reqOption){
         Option option = optionRepository.findById(optionId).orElse(null);
-        Question question = questionRepository.findById(reqOption.getQuestionId()).orElse(null);
         if (option == null){
             return new ApiResponse(ResponseError.NOTFOUND("Option"));
-        } else if (question == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Question"));
         }
         option.setName(reqOption.getText());
-        option.setCorrect(isCorrect);
-        option.setQuestion(question);
+        option.setCorrect(reqOption.isCorrect());
         optionRepository.save(option);
 
         return new ApiResponse("Option yangilandi");
+    }
+
+    public ApiResponse getByQuestion(Long questionId){
+        Question question = questionRepository.findById(questionId).orElse(null);
+        if (question == null){
+            return new ApiResponse(ResponseError.NOTFOUND("Question"));
+        }
+        List<Option> optionList = optionRepository.findByQuestionId(questionId);
+        if (optionList.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Optionlar"));
+        }
+        List<OptionDTO> optionDTOS = optionList.stream()
+                .map(this::optionDTO)
+                .toList();
+        return new ApiResponse(optionDTOS);
     }
 
     public ApiResponse deleteOption(Long optionId){

@@ -206,7 +206,8 @@ ORDER BY r.rank_position;
 
 
 
-    @Query(value = "select count(*) from groups g join groups_students gs on g.id = gs.group_id join users u on gs.students_id = u.id\n" +
+    @Query(value = "select coalesce(count(*) ,0) from groups g join groups_students gs on g.id = gs.group_id " +
+            "join users u on gs.students_id = u.id\n" +
             "            where u.user_status = 'CHIQIB_KETGAN'", nativeQuery = true)
     Integer countGroup(Long groupId);
 
@@ -236,7 +237,7 @@ GROUP BY g.name;
            """ , nativeQuery = true)
     List<ResStudentCount> findAllStudentsByTeacherId(@Param("teacherId") Long teacherId);
 
-    @Query(value = "select count(g.*) from groups g join lesson_tracking lt on g.id = lt.group_id", nativeQuery = true)
+    @Query(value = "select coalesce(count(g.*) , 0) from groups g join lesson_tracking lt on g.id = lt.group_id", nativeQuery = true)
     Integer countGroupLessons(Long groupId);
 
 

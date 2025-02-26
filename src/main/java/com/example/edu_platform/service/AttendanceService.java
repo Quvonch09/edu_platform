@@ -1,6 +1,7 @@
 package com.example.edu_platform.service;
 
 import com.example.edu_platform.entity.*;
+import com.example.edu_platform.entity.enums.WeekDay;
 import com.example.edu_platform.exception.NotFoundException;
 import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.AttendDto;
@@ -109,18 +110,57 @@ public class AttendanceService {
         return new ApiResponse(resAttends);
     }
 
+    @Transactional
+    public ApiResponse getAttendanceByUser(User user, int year, int month) {
+        Group group = groupRepository.findGroup(user.getId());
+        if (group == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Attendance not found"));
+        }
 
+        LocalDate startOfMonth = LocalDate.of(year, month, 1);
+        LocalDate groupMonthYear = group.getStartDate().withDayOfMonth(1);
 
-    public ApiResponse getAttendanceByStudent(User user, int month) {
-        LocalDate startOfMonth = LocalDate.of(LocalDate.now().getYear(), Month.of(month), 1);
-        LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
-        User user1 = userRepository.findById(user.getId())
-                .orElseThrow(() -> new NotFoundException("user not found"));
-        List<Attendance> attendance = attendanceRepository
-                .getAttendanceByStudentIdAndDateBetween(user1.getId(), startOfMonth, endOfMonth);
-        List<AttendanceDto> attendanceDtos = attendanceDtoList(attendance);
-        return new ApiResponse(attendanceDtos);
+        if (startOfMonth.isBefore(groupMonthYear)) {
+            return new ApiResponse(ResponseError.NOTFOUND("Attendance"));
+        }
+
+        List<LocalDate> groupDays = getGroupDays(group.getId(), year, month);
+
+        List<AttendDto> attendDtoList = groupDays.stream()
+                .map(groupDay -> mapAttendance(user, groupDay))
+                .collect(Collectors.toList());
+
+        ResAttend resAttend = ResAttend.builder()
+                .studentId(user.getId())
+                .fullName(user.getFullName())
+                .attendList(attendDtoList)
+                .build();
+
+        return new ApiResponse(Collections.singletonList(resAttend));
     }
+
+    private AttendDto mapAttendance(User user, LocalDate date) {
+        Attendance attendance = attendanceRepository.findByStudentAndDate(user, date);
+        return AttendDto.builder()
+                .id(attendance != null ? attendance.getId() : null)
+                .attendance(attendance != null ? attendance.getAttendance() : null)
+                .date(date)
+                .build();
+    }
+
+
+
+
+//    public ApiResponse getAttendanceByStudent(User user, int month) {
+//        LocalDate startOfMonth = LocalDate.of(LocalDate.now().getYear(), Month.of(month), 1);
+//        LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
+//        User user1 = userRepository.findById(user.getId())
+//                .orElseThrow(() -> new NotFoundException("user not found"));
+//        List<Attendance> attendance = attendanceRepository
+//                .getAttendanceByStudentIdAndDateBetween(user1.getId(), startOfMonth, endOfMonth);
+//        List<AttendanceDto> attendanceDtos = attendanceDtoList(attendance);
+//        return new ApiResponse(attendanceDtos);
+//    }
 
 
     public ApiResponse updateAttendance(AttendanceDto attendanceDto, Long attendanceId, User user) {
@@ -132,42 +172,67 @@ public class AttendanceService {
     }
 
 
-    private List<AttendanceDto> attendanceDtoList(List<Attendance> attendances) {
-        return attendances.stream().map(attendance1 ->
-                AttendanceDto.builder()
-                        .id(attendance1.getId())
-                        .fullName(attendance1.getStudent().getFullName())
-                        .attendance(attendance1.getAttendance())
-                        .date(attendance1.getDate())
-                        .build()).toList();
-    }
+//    private List<AttendanceDto> attendanceDtoList(List<Attendance> attendances) {
+//        return attendances.stream().map(attendance1 ->
+//                AttendanceDto.builder()
+//                        .id(attendance1.getId())
+//                        .fullName(attendance1.getStudent().getFullName())
+//                        .attendance(attendance1.getAttendance())
+//                        .date(attendance1.getDate())
+//                        .build()).toList();
+//    }
+
+//    public List<LocalDate> getGroupDays(Long groupId, int year, int month) {
+//        Group group = groupRepository.findById(groupId)
+//                .orElseThrow(() -> new NotFoundException("group not found"));
+//
+//        GraphicDay days = group.getDays();
+//        if (days == null || days.getWeekDay() == null || days.getWeekDay().isEmpty()) {
+//            return new ArrayList<>();
+//        }
+//
+//        // Hafta kunlarini to‘plamga o‘tkazish
+//        Set<DayOfWeek> weekDays = new HashSet<>(days.getWeekDay());
+//
+//        System.out.println(weekDays);
+//
+//        LocalDate startOfMonth = LocalDate.of(year, Month.of(month), 1);
+//        LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
+//
+//        List<LocalDate> classDates = new ArrayList<>();
+//
+//        for (LocalDate date = startOfMonth; !date.isAfter(endOfMonth); date = date.plusDays(1)) {
+//            for (DayOfWeek day : weekDays) {
+//                if (day.getDayOfWeek().name().equals(date.getDayOfWeek().name())) {
+//                    classDates.add(date);
+//                }
+//            }
+//        }
+//        return classDates;
+//    }
 
     public List<LocalDate> getGroupDays(Long groupId, int year, int month) {
         Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NotFoundException("group not found"));
+                .orElseThrow(() -> new NotFoundException("Group not found"));
 
-        GraphicDay days = group.getDays();
-        if (days == null || days.getWeekDay() == null || days.getWeekDay().isEmpty()) {
-            return new ArrayList<>();
-        }
+        // WeekDay enum qiymatlarini olish
+        Set<WeekDay> weekDays = Optional.ofNullable(group.getDays())
+                .map(GraphicDay::getWeekDay)
+                .filter(list -> !list.isEmpty())
+                .map(list -> list.stream()
+                        .map(DayOfWeek::getDayOfWeek) // DayOfWeek obyektidan enumni olish
+                        .collect(Collectors.toSet()))
+                .orElse(Collections.emptySet());
 
-        // Hafta kunlarini to‘plamga o‘tkazish
-        Set<DayOfWeek> weekDays = new HashSet<>(days.getWeekDay());
+        if (weekDays.isEmpty()) return Collections.emptyList();
 
-        System.out.println(weekDays);
-
-        LocalDate startOfMonth = LocalDate.of(year, Month.of(month), 1);
+        LocalDate startOfMonth = LocalDate.of(year, month, 1);
         LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
 
-        List<LocalDate> classDates = new ArrayList<>();
-
-        for (LocalDate date = startOfMonth; !date.isAfter(endOfMonth); date = date.plusDays(1)) {
-            for (DayOfWeek day : weekDays) {
-                if (day.getDayOfWeek().name().equals(date.getDayOfWeek().name())) {
-                    classDates.add(date);
-                }
-            }
-        }
-        return classDates;
+        return startOfMonth.datesUntil(endOfMonth.plusDays(1))
+                .filter(date -> weekDays.contains(WeekDay.valueOf(date.getDayOfWeek().name()))) // Java DayOfWeek ni WeekDay ga moslashtiramiz
+                .collect(Collectors.toList());
     }
+
+
 }
