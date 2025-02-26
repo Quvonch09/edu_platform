@@ -1,0 +1,55 @@
+name: Deploy EDU PLATFORM
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Kodni klonlash
+        uses: actions/checkout@v3
+
+      - name: JDK 17 o‘rnatish
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Maven bilan loyihani build qilish
+        run: mvn clean package -DskipTests
+
+      - name: Serverni known_hosts ga qo‘shish
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+
+      - name: Handle SSH Key
+        id: ssh-key
+        run: |
+          echo "${{ secrets.SSH_KEY }}" > private_key
+          chmod 600 private_key
+
+
+      - name: Fayllarni serverga yuklash
+        run: |
+          scp -i private_key -o StrictHostKeyChecking=no target/edu.jar ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/root/backend/
+
+
+      - name: Faylni katalogga ko'chirish
+        run: |
+          ssh -i private_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << EOF
+             sudo mv /root/backend/edu.jar /srv/back/
+          EOF
+
+
+      - name: Service qayta ishga tushirish
+        run: |
+          ssh -i private_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << EOF
+            sudo systemctl stop edu.service
+            sudo systemctl start edu.service
+          EOF
