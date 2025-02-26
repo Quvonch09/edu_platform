@@ -112,8 +112,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             u.user_status AS status,
             u.parent_phone_number,
             u2.full_name AS teacherName,
-            (EXTRACT(MONTH FROM coalesce(p.payment_date , '1920-05-15')) = EXTRACT(MONTH FROM CURRENT_DATE)
-                AND EXTRACT(YEAR FROM COALESCE(p.payment_date , '1920-05-15')) = EXTRACT(YEAR FROM CURRENT_DATE)) AS hasPaid,
+             BOOL_OR(EXTRACT(MONTH FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(MONTH FROM CURRENT_DATE)
+                    AND EXTRACT(YEAR FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(YEAR FROM CURRENT_DATE)) AS hasPaid,
             COALESCE(SUM(h.ball), 0) AS score
         FROM users u
         JOIN groups_students gsl ON u.id = gsl.students_id
@@ -142,10 +142,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
             u.parent_phone_number,
             u2.full_name,
             p.payment_date
-        HAVING
-            (:hasPaid IS NULL OR
-             ( EXTRACT(MONTH FROM COALESCE(p.payment_date , '1920-05-15')) = EXTRACT(MONTH FROM CURRENT_DATE) and 
-               EXTRACT(YEAR FROM COALESCE(p.payment_date , '1920-05-15')) = EXTRACT(YEAR FROM CURRENT_DATE)) = :hasPaid)
+       HAVING
+           (:hasPaid IS NULL OR
+            (:hasPaid = TRUE AND
+             EXTRACT(MONTH FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(MONTH FROM CURRENT_DATE)
+             AND
+             EXTRACT(YEAR FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(YEAR FROM CURRENT_DATE)))
+       
 """,
     nativeQuery = true)
     Page<ResStudent> searchStudents(@Param("fullName") String fullName,
