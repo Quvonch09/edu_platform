@@ -112,8 +112,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
             u.user_status AS status,
             u.parent_phone_number,
             u2.full_name AS teacherName,
-             BOOL_OR(EXTRACT(MONTH FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(MONTH FROM CURRENT_DATE)
-                    AND EXTRACT(YEAR FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(YEAR FROM CURRENT_DATE)) AS hasPaid,
+            CASE
+                WHEN COUNT(p.payment_date) FILTER (
+                    WHERE EXTRACT(MONTH FROM p.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+                     AND EXTRACT(YEAR FROM p.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+                 ) > 0 THEN TRUE
+                ELSE FALSE
+                END AS hasPaid ,
             COALESCE(SUM(h.ball), 0) AS score
         FROM users u
         JOIN groups_students gsl ON u.id = gsl.students_id
@@ -130,11 +135,26 @@ public interface UserRepository extends JpaRepository<User, Long> {
             AND (:startAge IS NULL OR u.age >= :startAge)
             AND (:endAge IS NULL OR u.age <= :endAge)
             AND u.role = 'ROLE_STUDENT'
-            AND (:hasPaid IS NULL OR :hasPaid = BOOL_OR(
-              EXTRACT(MONTH FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(MONTH FROM CURRENT_DATE)
-                 AND
-                EXTRACT(YEAR FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(YEAR FROM CURRENT_DATE))
-                )
+           AND (:hasPaid IS NULL OR (
+                       CASE
+                           WHEN :hasPaid = TRUE THEN
+                               EXISTS (
+                                   SELECT 1 FROM payment p2
+                                   WHERE p2.student_id = u.id
+                                   AND EXTRACT(MONTH FROM p2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+                                   AND EXTRACT(YEAR FROM p2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+                               )
+                           WHEN :hasPaid = FALSE THEN
+                               NOT EXISTS (
+                                   SELECT 1 FROM payment p2
+                                   WHERE p2.student_id = u.id
+                                   AND EXTRACT(MONTH FROM p2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+                                   AND EXTRACT(YEAR FROM p2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+                               )
+                           ELSE TRUE
+                       END
+                 ))
+                 
         GROUP BY
             u.id,
             u.full_name,
