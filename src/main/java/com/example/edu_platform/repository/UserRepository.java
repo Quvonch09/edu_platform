@@ -112,10 +112,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
         u.parent_phone_number,
         u2.full_name AS teacherName,
         CASE 
-            WHEN COUNT(p.id) FILTER (
+            WHEN COALESCE(COUNT(p.id) FILTER (
                 WHERE EXTRACT(MONTH FROM p.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
                 AND EXTRACT(YEAR FROM p.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
-            ) > 0 THEN TRUE
+            ), 0) > 0 THEN TRUE
             ELSE FALSE
         END AS hasPaid,
         COALESCE(SUM(h.ball), 0) AS score
@@ -126,46 +126,33 @@ public interface UserRepository extends JpaRepository<User, Long> {
     LEFT JOIN homework h ON u.id = h.student_id
     LEFT JOIN payment p ON p.student_id = u.id
     WHERE
-        (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%')) )
-        AND (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%')))
+        (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', COALESCE(:fullName, ''), '%')))
+        AND (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', COALESCE(:phoneNumber, ''), '%')) )
         AND (:userStatus IS NULL OR u.user_status = :userStatus)
-        AND (:groupName IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :groupName, '%')))
+        AND (:groupName IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', COALESCE(:groupName, ''), '%')) )
         AND (:teacherId IS NULL OR g.teacher_id = :teacherId)
         AND (:startAge IS NULL OR u.age >= :startAge)
         AND (:endAge IS NULL OR u.age <= :endAge)
         AND u.role = 'ROLE_STUDENT'
         AND (
             :hasPaid IS NULL 
-            OR (
-                :hasPaid = TRUE 
-                AND EXISTS (
-                    SELECT 1 FROM payment p2
-                    WHERE p2.student_id = u.id
-                    AND EXTRACT(MONTH FROM p2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
-                    AND EXTRACT(YEAR FROM p2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
-                )
-            ) 
-            OR (
-                :hasPaid = FALSE 
-                AND NOT EXISTS (
-                    SELECT 1 FROM payment p2
-                    WHERE p2.student_id = u.id
-                    AND EXTRACT(MONTH FROM p2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
-                    AND EXTRACT(YEAR FROM p2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
-                )
-            )
+            OR (:hasPaid = TRUE AND EXISTS (
+                SELECT 1 FROM payment p2
+                WHERE p2.student_id = u.id
+                AND EXTRACT(MONTH FROM p2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+                AND EXTRACT(YEAR FROM p2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+            ))
+            OR (:hasPaid = FALSE AND NOT EXISTS (
+                SELECT 1 FROM payment p2
+                WHERE p2.student_id = u.id
+                AND EXTRACT(MONTH FROM p2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+                AND EXTRACT(YEAR FROM p2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+            ))
+            OR TRUE
         )
     GROUP BY
-        u.id,
-        u.full_name,
-        u.phone_number,
-        g.name,
-        g.id,
-        u.created_at,
-        u.age,
-        u.user_status,
-        u.parent_phone_number,
-        u2.full_name
+        u.id, u.full_name, u.phone_number, g.name, g.id, 
+        u.created_at, u.age, u.user_status, u.parent_phone_number, u2.full_name
 """,
             nativeQuery = true)
     Page<ResStudent> searchStudents(@Param("fullName") String fullName,
@@ -176,6 +163,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                                     @Param("startAge") Integer startAge,
                                     @Param("hasPaid") Boolean hasPaid,
                                     @Param("endAge") Integer endAge, Pageable pageable);
+
 
 
 
