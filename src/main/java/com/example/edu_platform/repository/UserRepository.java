@@ -167,4 +167,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findAllByRole( Role role);
 
+    @Query("select u from User u where (u.fullName like :fullName or u.phoneNumber = :phone) and u.role = :roleName")
+    List<User> searchForChat(@Param("fullName") String fullName,
+                             @Param("phone") String phone,
+                             @Param("roleName") String roleName);
 }

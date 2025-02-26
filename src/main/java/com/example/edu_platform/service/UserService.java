@@ -3,6 +3,7 @@ package com.example.edu_platform.service;
 import com.example.edu_platform.entity.Category;
 import com.example.edu_platform.entity.Group;
 import com.example.edu_platform.entity.User;
+import com.example.edu_platform.entity.enums.ChatStatus;
 import com.example.edu_platform.entity.enums.Role;
 import com.example.edu_platform.payload.*;
 import com.example.edu_platform.payload.auth.ResponseLogin;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -273,8 +275,20 @@ public class UserService {
     }
 
 
+    public User getUser(Long id) {
+        return userRepository.findById(id).orElse(null);
+    }
 
 
+    public void onlineOffline(User user, boolean isActive) {
+        user.setChatStatus(isActive ? ChatStatus.ONLINE : ChatStatus.OFFLINE);
+        userRepository.save(user);
+    }
+
+
+    public List<User> searchForChat(String fullName, String phone, String roleName) {
+        return userRepository.searchForChat(fullName, phone, roleName);
+    }
 
     private TeacherDTO convertUserToTeacherDTO(User user, List<ResCategory> categoryIds) {
         Group group = groupRepository.findGroup(user.getId());
