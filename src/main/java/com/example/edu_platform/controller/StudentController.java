@@ -29,17 +29,17 @@ public class StudentController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO','ROLE_TEACHER')")
     @Operation(summary = "Student search")
-    @GetMapping
-    public ResponseEntity<ApiResponse> getAllStudents(@RequestParam(required = false, value = "fullName") String fullName,
-                                                      @RequestParam(required = false, value = "phoneNumber") String phoneNumber,
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse> getAllStudents(@RequestParam(required = false) String fullName,
+                                                      @RequestParam(required = false) String phoneNumber,
                                                       @RequestParam(value = "status" , required = false) UserStatus userStatus,
-                                                      @RequestParam(required = false, value = "groupName") String groupName,
-                                                      @RequestParam(required = false, value = "teacherId") Long teacherId,
-                                                      @RequestParam(required = false, value = "startAge") Integer startAge,
-                                                      @RequestParam(required = false, value = "endAge") Integer endAge,
-                                                      @RequestParam(required = false, value = "hasPaid") Boolean hasPaid,
-                                                      @RequestParam(defaultValue = "0") int page,
-                                                      @RequestParam(defaultValue = "10") int size){
+                                                      @RequestParam(required = false) String groupName,
+                                                      @RequestParam(required = false) Long teacherId,
+                                                      @RequestParam(required = false) Integer startAge,
+                                                      @RequestParam(required = false) Integer endAge,
+                                                      @RequestParam(required = false) Boolean hasPaid,
+                                                      @RequestParam(  value = "page", defaultValue = "0") int page,
+                                                      @RequestParam( value = "size",defaultValue = "10") int size){
         ApiResponse apiResponse = studentService.searchStudent(fullName, phoneNumber, userStatus, groupName, teacherId,
                 startAge, endAge,hasPaid, page, size);
         return ResponseEntity.ok(apiResponse);
