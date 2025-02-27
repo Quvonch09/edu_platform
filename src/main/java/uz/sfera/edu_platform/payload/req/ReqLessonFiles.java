@@ -7,8 +7,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class ReqQuestion {
-    private String questionText;
-    private Long quizId;
-    private List<ReqOption> reqOptionList;
+public class ReqLessonFiles {
+    private Long lessonId;
+    private List<Long> fileIds;
 }

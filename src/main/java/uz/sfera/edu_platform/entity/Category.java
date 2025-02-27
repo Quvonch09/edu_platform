@@ -18,6 +18,8 @@ public class Category extends AbsEntity {
     private Integer duration;
     private Boolean active;
 
+    private Boolean deleted;
+  
     @OneToOne
     private File file;
 
