@@ -46,8 +46,7 @@ public class RoomService {
                 .name(reqRoom.getName())
                 .color(reqRoom.getColor())
                 .build();
-        roomRepository.save(room);
-
+        Room save = roomRepository.save(room);
 
 
         List<DayOfWeek> dayOfWeeks = new ArrayList<>();
@@ -63,11 +62,11 @@ public class RoomService {
                 .startTime(startTime)
                 .endTime(endTime)
                 .weekDay(dayOfWeeks)
-                .room(room)
+                .room(save)
                 .build();
-        graphicDayRepository.save(graphicDay);
-        room.setGraphicDayId(graphicDay.getId());
-        roomRepository.save(room);
+        GraphicDay day = graphicDayRepository.save(graphicDay);
+        save.setGraphicDayId(day.getId());
+        roomRepository.save(save);
 
 
         return new ApiResponse("Successfully saved");
