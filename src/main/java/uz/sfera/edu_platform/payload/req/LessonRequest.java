@@ -15,5 +15,4 @@ public class LessonRequest {
     private String description;
     private Long moduleId;
     private String videoLink;
-    private List<Long> fileIds;
 }

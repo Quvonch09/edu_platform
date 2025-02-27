@@ -6,6 +6,7 @@ import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.LessonDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.req.LessonRequest;
+import uz.sfera.edu_platform.payload.req.ReqLessonFiles;
 import uz.sfera.edu_platform.payload.req.ReqLessonTracking;
 import uz.sfera.edu_platform.payload.res.ResPageable;
 import jakarta.transaction.Transactional;
@@ -15,10 +16,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.repository.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,17 +39,12 @@ public class LessonService {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu modulga lesson qushish mumkin emas"));
         }
 
-        List<File> fileList = new ArrayList<>();
-        for (Long fileId : lessonRequest.getFileIds()) {
-            fileList.add(fileRepository.findById(fileId).orElse(null));
-        }
-
         Lesson lesson = Lesson.builder()
                 .name(lessonRequest.getName())
                 .description(lessonRequest.getDescription())
                 .videoLink(lessonRequest.getVideoLink())
                 .module(module)
-                .files(fileList)
+                .files(null)
                 .deleted(false)
                 .build();
 
@@ -88,16 +82,10 @@ public class LessonService {
             return new ApiResponse(ResponseError.NOTFOUND("Modul"));
         }
 
-        List<File> fileList = new ArrayList<>();
-        for (Long fileId : lessonRequest.getFileIds()) {
-            fileList.add(fileRepository.findById(fileId).orElse(null));
-        }
-
         currentLesson.setName(lessonRequest.getName());
         currentLesson.setDescription(lessonRequest.getDescription());
         currentLesson.setVideoLink(lessonRequest.getVideoLink());
         currentLesson.setModule(module);
-        currentLesson.setFiles(fileList);
 
         lessonRepository.save(currentLesson);
         return new ApiResponse("Lesson yangilandi");
@@ -215,6 +203,86 @@ public class LessonService {
         response.put("moduleStatistics", moduleStatistics);
 
         return new ApiResponse(response);
+    }
+
+    public ApiResponse addFile(ReqLessonFiles reqLessonFiles) {
+        Lesson lesson = lessonRepository.findById(reqLessonFiles.getLessonId()).orElse(null);
+        if (lesson == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        }
+        if (reqLessonFiles.getFileIds() == null || reqLessonFiles.getFileIds().isEmpty()) {
+            return new ApiResponse(ResponseError.NOTFOUND("Fayllar"));
+        }
+
+        List<File> files = fileRepository.findAllById(reqLessonFiles.getFileIds()); // Barcha fayllarni bitta so‘rovda olish
+        Set<Long> foundFileIds = files.stream().map(File::getId).collect(Collectors.toSet());
+        List<Long> notFoundFiles = reqLessonFiles.getFileIds().stream()
+                .filter(id -> !foundFileIds.contains(id))
+                .toList();
+
+        if (!notFoundFiles.isEmpty()) {
+            return new ApiResponse("Fayllar topilmadi: " + notFoundFiles);
+        }
+
+        lesson.setFiles(files);
+        return new ApiResponse("Fayllar saqlandi");
+    }
+
+    public ApiResponse deleteFiles(ReqLessonFiles reqLessonFiles) {
+        Lesson lesson = lessonRepository.findById(reqLessonFiles.getLessonId()).orElse(null);
+        if (lesson == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        }
+        if (reqLessonFiles.getFileIds() == null || reqLessonFiles.getFileIds().isEmpty()) {
+            return new ApiResponse(ResponseError.NOTFOUND("Fayllar"));
+        }
+        List<File> lessonFiles = lesson.getFiles();
+        Set<Long> lessonFileIds = lessonFiles.stream().map(File::getId).collect(Collectors.toSet());
+
+        List<Long> deleteFileIds = reqLessonFiles.getFileIds().stream()
+                .filter(lessonFileIds::contains)
+                .toList();
+        if (deleteFileIds.isEmpty()) {
+            return new ApiResponse(ResponseError.NOTFOUND("O‘chirish uchun mos fayllar"));
+        }
+        lessonFiles.removeIf(file -> deleteFileIds.contains(file.getId()));
+        lessonRepository.save(lesson);
+
+        return new ApiResponse("Fayllar o‘chirildi");
+    }
+
+    public ApiResponse updateFiles(ReqLessonFiles reqLessonFiles, List<Long> oldFiles) {
+        Lesson lesson = lessonRepository.findById(reqLessonFiles.getLessonId()).orElse(null);
+        if (lesson == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        }
+
+        if (reqLessonFiles.getFileIds() == null || reqLessonFiles.getFileIds().isEmpty()) {
+            return new ApiResponse(ResponseError.NOTFOUND("Yangi fayllar"));
+        }
+
+        List<File> lessonFiles = (lesson.getFiles() != null) ? lesson.getFiles() : new ArrayList<>();
+        Set<Long> lessonFileIds = lessonFiles.stream().map(File::getId).collect(Collectors.toSet());
+
+        List<Long> filesToRemove = (oldFiles != null)
+                ? oldFiles.stream().filter(lessonFileIds::contains).toList()
+                : Collections.emptyList();
+
+        List<File> newFiles = fileRepository.findAllById(reqLessonFiles.getFileIds());
+
+        Set<Long> foundNewFileIds = newFiles.stream().map(File::getId).collect(Collectors.toSet());
+        List<Long> notFoundFiles = reqLessonFiles.getFileIds().stream()
+                .filter(id -> !foundNewFileIds.contains(id))
+                .toList();
+        lessonFiles.removeIf(file -> filesToRemove.contains(file.getId()));
+        lessonFiles.addAll(newFiles);
+        lesson.setFiles(lessonFiles); // Yangilangan fayllarni saqlash uchun qo‘shish shart!
+
+        lessonRepository.save(lesson);
+
+        return new ApiResponse("Fayllar yangilandi. O‘chirilganlar: " + filesToRemove +
+                ", Qo‘shilganlar: " + foundNewFileIds +
+                (notFoundFiles.isEmpty() ? "" : ", Bazada yo‘q fayllar: " + notFoundFiles));
     }
 
     private LessonDTO lessonDTO(Lesson lesson) {
