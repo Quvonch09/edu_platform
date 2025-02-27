@@ -76,9 +76,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 
     @Query(value = "select distinct u.* from users u  left join groups g on u.id = g.teacher_id where\n" +
-            "                                    (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%')))\n" +
-            "                                    and (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%')))\n" +
-            "                                    and (:groupId IS NULL OR g.id = :groupId) and u.role = :role " , nativeQuery = true)
+            "                                                (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%')))\n" +
+            "                                                and (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%')))\n" +
+            "                                                and (:groupId IS NULL OR g.id = :groupId) and u.role = :role order by u.id desc" , nativeQuery = true)
     Page<User> searchUsers(@Param("fullName") String fullName,
                               @Param("phoneNumber") String phoneNumber,
                               @Param("groupId") Long groupId,
@@ -147,7 +147,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             (:hasPaid = TRUE AND
              EXTRACT(MONTH FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(MONTH FROM CURRENT_DATE)
              AND
-             EXTRACT(YEAR FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(YEAR FROM CURRENT_DATE)))
+             EXTRACT(YEAR FROM COALESCE(p.payment_date, DATE '1920-05-15')) = EXTRACT(YEAR FROM CURRENT_DATE))) order by u.id desc
        
 """,
     nativeQuery = true)

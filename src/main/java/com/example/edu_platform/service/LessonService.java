@@ -29,9 +29,13 @@ public class LessonService {
 
     public ApiResponse createLesson(LessonRequest lessonRequest) {
 
-        Module module = moduleRepository.findById(lessonRequest.getModuleId()).orElse(null);
+        Module module = moduleRepository.findByIdAndDeletedFalse(lessonRequest.getModuleId()).orElse(null);
         if (module == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Module"));
+        }
+
+        if (module.getCategory() == null){
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu modulga lesson qushish mumkin emas"));
         }
 
         List<File> files = fileRepository.findAllById(lessonRequest.getFileIds());
@@ -65,6 +69,7 @@ public class LessonService {
 
         List<Lesson> foundLessons = lessonRepository.findByModuleIdAndDeletedFalse(moduleId);
         List<LessonDTO> lessonDTOs = foundLessons.stream()
+                .filter(lesson -> lesson.getModule().getCategory() != null)
                 .map(this::lessonDTO)
                 .toList();
 
@@ -83,6 +88,7 @@ public class LessonService {
         } else if (module == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Modul"));
         }
+
         List<File> files = fileRepository.findAllById(lessonRequest.getFileIds());
         if (files.size() != lessonRequest.getFileIds().size()) {
             List<Long> notFoundFileIds = lessonRequest.getFileIds().stream()
@@ -127,6 +133,7 @@ public class LessonService {
         return new ApiResponse("Lesson guruh uchun ochildi");
     }
 
+
     public ApiResponse search(String name, int size, int page) {
         PageRequest pageRequest = PageRequest.of(page, size);
         Page<Lesson> lessons;
@@ -138,6 +145,7 @@ public class LessonService {
         }
 
         List<LessonDTO> lessonDTOS = lessons.stream()
+                .filter(lesson -> lesson.getModule().getCategory() != null)
                 .map(lesson -> LessonDTO.builder()
                         .lessonId(lesson.getId())
                         .name(lesson.getName())

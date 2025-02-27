@@ -18,15 +18,15 @@ import java.util.List;
 public class OptionController {
     private final OptionService optionService;
 
-    @PostMapping("/save/{questionId}")
-    @Operation(summary = "(TEACHER) Javob saqlash")
-    @PreAuthorize("hasRole('ROLE_TEACHER')")
-    public ResponseEntity<ApiResponse> saveOption(
-            @RequestBody List<ReqOption> reqOption,
-            @PathVariable Long questionId
-    ){
-        return ResponseEntity.ok(optionService.saveOption(questionId,reqOption));
-    }
+//    @PostMapping("/save/{questionId}")
+//    @Operation(summary = "(TEACHER) Javob saqlash")
+//    @PreAuthorize("hasRole('ROLE_TEACHER')")
+//    public ResponseEntity<ApiResponse> saveOption(
+//            @RequestBody List<ReqOption> reqOption,
+//            @PathVariable Long questionId
+//    ){
+//        return ResponseEntity.ok(optionService.saveOption(questionId,reqOption));
+//    }
 
     @PutMapping("/update/{optionId}")
     @Operation(summary = "(TEACHER) Javobni yangilash")

@@ -19,10 +19,10 @@ public class OptionService {
     private final OptionRepository optionRepository;
     private final QuestionRepository questionRepository;
 
-    public ApiResponse saveOption(Long questionId,List<ReqOption> reqOption){
+    public String saveOption(Long questionId,List<ReqOption> reqOption){
         Question question = questionRepository.findById(questionId).orElse(null);
         if (question == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Question"));
+            return "Question not found";
         }
         for (ReqOption option : reqOption) {
             Option option1 = Option.builder()
@@ -32,7 +32,8 @@ public class OptionService {
                     .build();
             optionRepository.save(option1);
         }
-        return new ApiResponse("Optionlar saqlandi");
+
+        return "Optionlar saqlandi";
     }
 
     public ApiResponse updateOption(Long optionId,ReqOption reqOption){

@@ -17,6 +17,7 @@ public class Category extends AbsEntity {
     private Double coursePrice;
     private Integer duration;
     private Boolean active;
+    private Boolean deleted;
     @OneToOne
     private File file;
 }

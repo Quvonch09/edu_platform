@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ModuleRepository extends JpaRepository<Module,Long> {
@@ -13,4 +14,5 @@ public interface ModuleRepository extends JpaRepository<Module,Long> {
     Page<Module> findByNameContainingIgnoreCaseAndDeletedFalse(String name, Pageable pageable);
 
     Optional<Module> findByIdAndDeletedFalse(Long id);
+    List<Module> findAllByCategoryIdAndDeletedFalse(Long categoryId);
 }

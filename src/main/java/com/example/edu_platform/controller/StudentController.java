@@ -18,7 +18,7 @@ import java.time.LocalDate;
 public class StudentController {
     private final StudentService studentService;
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_TEACHER', 'ROLE_CEO')")
     @Operation(summary = "ADMIN/TEACHER student qushish")
     @PostMapping
     public ResponseEntity<ApiResponse> saveStudent(@RequestBody ReqStudent reqStudent){
