@@ -29,7 +29,6 @@ public class ChatController {
 
 
     @Operation(summary = "Userlar chatda yozishgan userlarni chiqaradi")
-    @PreAuthorize("hasAnyRole('ROLE_CLIENT','ROLE_MASTER','ROLE_SUPER_ADMIN','ROLE_ADMIN')")
     @GetMapping("/users")
     public ResponseEntity<List<ChatUser>> getChatUsers(@CurrentUser User user)
     {
@@ -37,28 +36,28 @@ public class ChatController {
     }
 
 
-    @Operation(summary = "Начать чат Web uchun. Status MASTER, CLIENT")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SUPER_ADMIN')")
-    @GetMapping("/web/nachat-chat")
-    public ResponseEntity<List<SearchChatUser>> getChatNachat(
-            @RequestParam("status") String status,
-            @RequestParam(value = "fullName",required = false) String fullName,
-            @RequestParam(value = "phone",required = false) String phone)
-    {
-        return ResponseEntity.ok(chatService.searchNachatChat(fullName,phone,status));
-    }
+//    @Operation(summary = "Начать чат Web uchun. Status MASTER, CLIENT")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_СEO')")
+//    @GetMapping("/web/nachat-chat")
+//    public ResponseEntity<List<SearchChatUser>> getChatNachat(
+//            @RequestParam("status") String status,
+//            @RequestParam(value = "fullName",required = false) String fullName,
+//            @RequestParam(value = "phone",required = false) String phone)
+//    {
+//        return ResponseEntity.ok(chatService.searchNachatChat(fullName,phone,status));
+//    }
+
+//
+//    @Operation(summary = "Web uchun. Barcha messagelarni o'qildi qilish.")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SUPER_ADMIN')")
+//    @GetMapping("/all-message-ready")
+//    public ResponseEntity<ApiResponse> getAllMessagesReady(@CurrentUser User user)
+//    {
+//        return ResponseEntity.ok(chatService.makeAllChatMessagesRead(user));
+//    }
 
 
-    @Operation(summary = "Web uchun. Barcha messagelarni o'qildi qilish.")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SUPER_ADMIN')")
-    @GetMapping("/all-message-ready")
-    public ResponseEntity<ApiResponse> getAllMessagesReady(@CurrentUser User user)
-    {
-        return ResponseEntity.ok(chatService.makeAllChatMessagesRead(user));
-    }
-
-
-    @PreAuthorize("hasAnyRole('ROLE_CLIENT','ROLE_MASTER','ROLE_SUPER_ADMIN','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_STUDENT','ROLE_TEACHER')")
     @PostMapping("/nachat-chat/send")
     public ResponseEntity<ApiResponse> sendChatMessage(
             @RequestBody SendNachatChat sendNachatChat, @CurrentUser User user)
@@ -68,7 +67,7 @@ public class ChatController {
 
 
     @Operation(summary = "Chatda userlarni search qilish. Faqat user o'zi yozishgan userlarni chiqaradi")
-    @PreAuthorize("hasAnyRole('ROLE_CLIENT','ROLE_MASTER','ROLE_SUPER_ADMIN','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_STUDENT')")
     @GetMapping("/search")
     public ResponseEntity<List<SearchChatUser>> search(@CurrentUser User user, @RequestParam(value = "name") String name)
     {
@@ -77,7 +76,7 @@ public class ChatController {
 
 
     @Operation(summary = "Userni chatda online yoki offlini bo'lishini saqlash")
-    @PreAuthorize("hasAnyRole('ROLE_CLIENT','ROLE_MASTER','ROLE_SUPER_ADMIN','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_STUDENT')")
     @GetMapping("/online-offline")
     public ResponseEntity<ApiResponse> onlineOffline(
             @RequestParam(value = "isActive") boolean isActive,
