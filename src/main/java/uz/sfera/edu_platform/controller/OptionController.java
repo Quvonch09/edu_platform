@@ -17,26 +17,6 @@ import java.util.List;
 public class OptionController {
     private final OptionService optionService;
 
-    @PostMapping("/save/{questionId}")
-    @Operation(summary = "(TEACHER) Javob saqlash")
-    @PreAuthorize("hasRole('ROLE_TEACHER')")
-    public ResponseEntity<ApiResponse> saveOption(
-            @RequestBody List<ReqOption> reqOption,
-            @PathVariable Long questionId
-    ){
-        return ResponseEntity.ok(optionService.saveOption(questionId,reqOption));
-    }
-
-    @PutMapping("/update/{optionId}")
-    @Operation(summary = "(TEACHER) Javobni yangilash")
-    @PreAuthorize("hasRole('ROLE_TEACHER')")
-    public ResponseEntity<ApiResponse> updateOption(
-            @RequestBody ReqOption reqOption,
-            @PathVariable Long optionId
-    ){
-        return ResponseEntity.ok(optionService.updateOption(optionId, reqOption));
-    }
-
     @GetMapping("/getByQuestion/{questionId}")
     @Operation(summary = "Question bo'yicha optionlarni ko'rish")
     public ResponseEntity<ApiResponse> getByQuestion(
@@ -45,12 +25,4 @@ public class OptionController {
         return ResponseEntity.ok(optionService.getByQuestion(questionId));
     }
 
-    @DeleteMapping("/delete/{optionId}")
-    @Operation(summary = "(TEACHER) Javobni o'chirish")
-    @PreAuthorize("hasRole('ROLE_TEACHER')")
-    public ResponseEntity<ApiResponse> deleteOption(
-            @PathVariable Long optionId
-    ){
-        return ResponseEntity.ok(optionService.deleteOption(optionId));
-    }
 }

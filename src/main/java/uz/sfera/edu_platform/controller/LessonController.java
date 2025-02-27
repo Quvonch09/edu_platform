@@ -2,6 +2,7 @@ package uz.sfera.edu_platform.controller;
 
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.req.LessonRequest;
+import uz.sfera.edu_platform.payload.req.ReqLessonFiles;
 import uz.sfera.edu_platform.payload.req.ReqLessonTracking;
 import uz.sfera.edu_platform.service.LessonService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -77,6 +80,34 @@ public class LessonController {
             @PathVariable Long groupId
     ){
         return ResponseEntity.ok(lessonService.getOpenLessonsInGroup(groupId));
+    }
+
+    @PostMapping("/addFiles")
+    @Operation(summary = "(TEACHER) Dars uchun fayllar biriktirish")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    public ResponseEntity<ApiResponse> addFile(
+            @RequestBody ReqLessonFiles reqLessonFiles
+    ){
+        return ResponseEntity.ok(lessonService.addFile(reqLessonFiles));
+    }
+
+    @DeleteMapping("/deleteFiles")
+    @Operation(summary = "(TEACHER) Dars ichidagi fayllarni o'chirish")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    public ResponseEntity<ApiResponse> removeFile(
+            @RequestBody ReqLessonFiles reqLessonFiles
+    ){
+        return ResponseEntity.ok(lessonService.deleteFiles(reqLessonFiles));
+    }
+
+    @PutMapping("/updateFiles")
+    @Operation(summary = "(TEACHER) Fayllarni yangilash")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    public ResponseEntity<ApiResponse> updateFiles(
+            @RequestBody ReqLessonFiles reqLessonFiles,
+            @RequestParam List<Long> oldFiles
+    ){
+        return ResponseEntity.ok(lessonService.updateFiles(reqLessonFiles, oldFiles));
     }
 
     @GetMapping("/statistics")

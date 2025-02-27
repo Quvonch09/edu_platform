@@ -147,10 +147,10 @@ public class UserService {
 
 
     public ApiResponse updateTeacher(Long teacherId, ReqTeacher reqTeacher) {
-        boolean b = userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(reqTeacher.getPhoneNumber(), Role.ROLE_TEACHER);
-        if (b) {
-            return new ApiResponse(ResponseError.ALREADY_EXIST("Bu User"));
-        }
+//        boolean b = userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(reqTeacher.getPhoneNumber(), Role.ROLE_TEACHER);
+//        if (b) {
+//            return new ApiResponse(ResponseError.ALREADY_EXIST("Bu User"));
+//        }
 
         User user = userRepository.findById(teacherId).orElse(null);
         if (user == null) {

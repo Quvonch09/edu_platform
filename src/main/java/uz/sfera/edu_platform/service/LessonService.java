@@ -6,6 +6,7 @@ import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.LessonDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.req.LessonRequest;
+import uz.sfera.edu_platform.payload.req.ReqLessonFiles;
 import uz.sfera.edu_platform.payload.req.ReqLessonTracking;
 import uz.sfera.edu_platform.payload.res.ResPageable;
 import jakarta.transaction.Transactional;
@@ -15,9 +16,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.repository.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,17 +30,13 @@ public class LessonService {
 
     public ApiResponse createLesson(LessonRequest lessonRequest) {
 
-        Module module = moduleRepository.findById(lessonRequest.getModuleId()).orElse(null);
+        Module module = moduleRepository.findByIdAndDeletedFalse(lessonRequest.getModuleId()).orElse(null);
         if (module == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Module"));
         }
 
-        List<File> files = fileRepository.findAllById(lessonRequest.getFileIds());
-        if (files.size() != lessonRequest.getFileIds().size()) {
-            List<Long> notFoundFileIds = lessonRequest.getFileIds().stream()
-                    .filter(id -> files.stream().noneMatch(file -> file.getId().equals(id)))
-                    .toList();
-            return new ApiResponse(ResponseError.NOTFOUND("Fayllar: " + notFoundFileIds));
+        if (module.getCategory() == null){
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu modulga lesson qushish mumkin emas"));
         }
 
         Lesson lesson = Lesson.builder()
@@ -48,7 +44,7 @@ public class LessonService {
                 .description(lessonRequest.getDescription())
                 .videoLink(lessonRequest.getVideoLink())
                 .module(module)
-                .files(files)
+                .files(null)
                 .deleted(false)
                 .build();
 
@@ -66,6 +62,7 @@ public class LessonService {
 
         List<Lesson> foundLessons = lessonRepository.findByModuleIdAndDeletedFalse(moduleId);
         List<LessonDTO> lessonDTOs = foundLessons.stream()
+                .filter(lesson -> lesson.getModule().getCategory() != null)
                 .map(this::lessonDTO)
                 .toList();
 
@@ -84,18 +81,11 @@ public class LessonService {
         } else if (module == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Modul"));
         }
-        List<File> files = fileRepository.findAllById(lessonRequest.getFileIds());
-        if (files.size() != lessonRequest.getFileIds().size()) {
-            List<Long> notFoundFileIds = lessonRequest.getFileIds().stream()
-                    .filter(id -> files.stream().noneMatch(file -> file.getId().equals(id)))
-                    .toList();
-            return new ApiResponse(ResponseError.NOTFOUND("Fayllar: " + notFoundFileIds));
-        }
+
         currentLesson.setName(lessonRequest.getName());
         currentLesson.setDescription(lessonRequest.getDescription());
         currentLesson.setVideoLink(lessonRequest.getVideoLink());
         currentLesson.setModule(module);
-        currentLesson.setFiles(files);
 
         lessonRepository.save(currentLesson);
         return new ApiResponse("Lesson yangilandi");
@@ -128,6 +118,7 @@ public class LessonService {
         return new ApiResponse("Lesson guruh uchun ochildi");
     }
 
+
     public ApiResponse search(String name, int size, int page) {
         PageRequest pageRequest = PageRequest.of(page, size);
         Page<Lesson> lessons;
@@ -137,13 +128,19 @@ public class LessonService {
         } else {
             lessons = lessonRepository.findByNameAndDeletedFalse(name, pageRequest);
         }
+        List<Long> files = new ArrayList<>();
+        for (Lesson lesson : lessons) {
+            files.add(lesson.getId());
+        }
 
         List<LessonDTO> lessonDTOS = lessons.stream()
+                .filter(lesson -> lesson.getModule().getCategory() != null)
                 .map(lesson -> LessonDTO.builder()
                         .lessonId(lesson.getId())
                         .name(lesson.getName())
                         .description(lesson.getDescription())
                         .videoLink(lesson.getVideoLink())
+                        .fileIds(files)
                         .createdAt(lesson.getCreatedAt())
                         .build())
                 .toList();
@@ -211,6 +208,86 @@ public class LessonService {
         response.put("moduleStatistics", moduleStatistics);
 
         return new ApiResponse(response);
+    }
+
+    public ApiResponse addFile(ReqLessonFiles reqLessonFiles) {
+        Lesson lesson = lessonRepository.findById(reqLessonFiles.getLessonId()).orElse(null);
+        if (lesson == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        }
+        if (reqLessonFiles.getFileIds() == null || reqLessonFiles.getFileIds().isEmpty()) {
+            return new ApiResponse(ResponseError.NOTFOUND("Fayllar"));
+        }
+
+        List<File> files = fileRepository.findAllById(reqLessonFiles.getFileIds()); // Barcha fayllarni bitta so‘rovda olish
+        Set<Long> foundFileIds = files.stream().map(File::getId).collect(Collectors.toSet());
+        List<Long> notFoundFiles = reqLessonFiles.getFileIds().stream()
+                .filter(id -> !foundFileIds.contains(id))
+                .toList();
+
+        if (!notFoundFiles.isEmpty()) {
+            return new ApiResponse("Fayllar topilmadi: " + notFoundFiles);
+        }
+
+        lesson.setFiles(files);
+        return new ApiResponse("Fayllar saqlandi");
+    }
+
+    public ApiResponse deleteFiles(ReqLessonFiles reqLessonFiles) {
+        Lesson lesson = lessonRepository.findById(reqLessonFiles.getLessonId()).orElse(null);
+        if (lesson == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        }
+        if (reqLessonFiles.getFileIds() == null || reqLessonFiles.getFileIds().isEmpty()) {
+            return new ApiResponse(ResponseError.NOTFOUND("Fayllar"));
+        }
+        List<File> lessonFiles = lesson.getFiles();
+        Set<Long> lessonFileIds = lessonFiles.stream().map(File::getId).collect(Collectors.toSet());
+
+        List<Long> deleteFileIds = reqLessonFiles.getFileIds().stream()
+                .filter(lessonFileIds::contains)
+                .toList();
+        if (deleteFileIds.isEmpty()) {
+            return new ApiResponse(ResponseError.NOTFOUND("O‘chirish uchun mos fayllar"));
+        }
+        lessonFiles.removeIf(file -> deleteFileIds.contains(file.getId()));
+        lessonRepository.save(lesson);
+
+        return new ApiResponse("Fayllar o‘chirildi");
+    }
+
+    public ApiResponse updateFiles(ReqLessonFiles reqLessonFiles, List<Long> oldFiles) {
+        Lesson lesson = lessonRepository.findById(reqLessonFiles.getLessonId()).orElse(null);
+        if (lesson == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        }
+
+        if (reqLessonFiles.getFileIds() == null || reqLessonFiles.getFileIds().isEmpty()) {
+            return new ApiResponse(ResponseError.NOTFOUND("Yangi fayllar"));
+        }
+
+        List<File> lessonFiles = (lesson.getFiles() != null) ? lesson.getFiles() : new ArrayList<>();
+        Set<Long> lessonFileIds = lessonFiles.stream().map(File::getId).collect(Collectors.toSet());
+
+        List<Long> filesToRemove = (oldFiles != null)
+                ? oldFiles.stream().filter(lessonFileIds::contains).toList()
+                : Collections.emptyList();
+
+        List<File> newFiles = fileRepository.findAllById(reqLessonFiles.getFileIds());
+
+        Set<Long> foundNewFileIds = newFiles.stream().map(File::getId).collect(Collectors.toSet());
+        List<Long> notFoundFiles = reqLessonFiles.getFileIds().stream()
+                .filter(id -> !foundNewFileIds.contains(id))
+                .toList();
+        lessonFiles.removeIf(file -> filesToRemove.contains(file.getId()));
+        lessonFiles.addAll(newFiles);
+        lesson.setFiles(lessonFiles); // Yangilangan fayllarni saqlash uchun qo‘shish shart!
+
+        lessonRepository.save(lesson);
+
+        return new ApiResponse("Fayllar yangilandi. O‘chirilganlar: " + filesToRemove +
+                ", Qo‘shilganlar: " + foundNewFileIds +
+                (notFoundFiles.isEmpty() ? "" : ", Bazada yo‘q fayllar: " + notFoundFiles));
     }
 
     private LessonDTO lessonDTO(Lesson lesson) {

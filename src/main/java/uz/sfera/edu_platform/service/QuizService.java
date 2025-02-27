@@ -1,12 +1,12 @@
 package uz.sfera.edu_platform.service;
 
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.*;
 import uz.sfera.edu_platform.payload.*;
 import uz.sfera.edu_platform.payload.req.ReqPassTest;
 import uz.sfera.edu_platform.payload.req.ReqQuiz;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.repository.*;
 
 import java.time.LocalDateTime;
@@ -31,6 +31,11 @@ public class QuizService {
         if (lesson == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
         }
+
+        if (lesson.getModule().getCategory() == null){
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu lessonning categoriyasi uchirilgan"));
+        }
+
         Quiz quiz = Quiz.builder()
                 .title(reqQuiz.getTitle())
                 .lesson(lesson)
@@ -70,21 +75,21 @@ public class QuizService {
         return allQuestions.stream()
                 .limit(settings.getQuestionCount())
                 .map(question -> {
-                    QuestionDTO questionDTO = questionService.questionDTO(question);
-                    List<OptionDTO> options = optionRepository.findByQuestionId(question.getId())
-                            .stream()
+                    List<OptionDTO> optionDTOList = optionRepository.findByQuestionId(question.getId()).stream()
                             .map(optionService::optionDTO)
-                            .collect(Collectors.toList());
-                    questionDTO.setOptions(options);
-                    return questionDTO;
+                            .toList();
+                    return questionService.questionDTO(question, optionDTOList);
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public ApiResponse getQuiz(Long quizId) {
         Quiz quiz = quizRepository.findById(quizId).orElse(null);
         if (quiz == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
+        }
+        if (quiz.getLesson().getModule().getCategory() == null){
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu quizning categoriyasi uchirilgan"));
         }
         return new ApiResponse(quizDTO(quiz));
     }
@@ -152,6 +157,7 @@ public class QuizService {
             return new ApiResponse(ResponseError.NOTFOUND("Lesson bo'yicha quizlar"));
         }
         List<QuizDTO> quizDTOS = quizList.stream()
+                .filter(quiz -> quiz.getLesson().getModule().getCategory() != null)
                 .map(this::quizDTO)
                 .collect(Collectors.toList());
         return new ApiResponse(quizDTOS);
