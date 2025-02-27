@@ -16,10 +16,13 @@ public class GraphicDay {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private LocalTime startTime;
     private LocalTime endTime;
+
     @ManyToMany(fetch = FetchType.EAGER)
     private List<DayOfWeek> weekDay;
+
     @ManyToOne
     private Room room;
 }

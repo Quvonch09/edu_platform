@@ -28,6 +28,7 @@ public class RoomService {
     private final GraphicDayRepository graphicDayRepository;
     private final DayOfWeekRepository dayOfWeekRepository;
 
+
     public ApiResponse saveRoom(ReqRoom reqRoom){
         boolean b = roomRepository.existsByName(reqRoom.getName());
         if (b){
@@ -48,8 +49,6 @@ public class RoomService {
                 .build();
         roomRepository.save(room);
 
-
-
         List<DayOfWeek> dayOfWeeks = new ArrayList<>();
         for (Integer weekDay : reqRoom.getWeekDays()) {
             DayOfWeek dayOfWeek = dayOfWeekRepository.findById(weekDay).orElse(null);
@@ -66,9 +65,9 @@ public class RoomService {
                 .room(room)
                 .build();
         graphicDayRepository.save(graphicDay);
+
         room.setGraphicDayId(graphicDay.getId());
         roomRepository.save(room);
-
 
         return new ApiResponse("Successfully saved");
     }
@@ -169,6 +168,7 @@ public class RoomService {
         if (graphicDay == null){
             return new ApiResponse(ResponseError.NOTFOUND("Roomning grafigi"));
         }
+
         graphicDayRepository.delete(graphicDay);
         roomRepository.delete(room);
         return new ApiResponse("Successfully deleted");
