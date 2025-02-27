@@ -75,13 +75,13 @@ public class GroupService {
                 .startTime(startDate)
                 .endTime(endDate)
                 .build();
-        graphicDayRepository.save(graphicDay);
+        GraphicDay day = graphicDayRepository.save(graphicDay);
 
         Group group = Group.builder()
                 .name(reqGroup.getGroupName())
                 .category(category)
                 .teacher(teacher)
-                .days(graphicDay)
+                .days(day)
                 .active(true)
                 .endDate(reqGroup.getStartDate().plusDays(category.getDuration()))
                 .startDate(reqGroup.getStartDate())
