@@ -2,10 +2,12 @@ package uz.sfera.edu_platform.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uz.sfera.edu_platform.entity.Option;
 import uz.sfera.edu_platform.entity.Question;
 import uz.sfera.edu_platform.entity.Quiz;
 import uz.sfera.edu_platform.entity.enums.QuestionEnum;
 import uz.sfera.edu_platform.payload.ApiResponse;
+import uz.sfera.edu_platform.payload.OptionDTO;
 import uz.sfera.edu_platform.payload.QuestionDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.req.ReqQuestion;
@@ -13,6 +15,7 @@ import uz.sfera.edu_platform.repository.OptionRepository;
 import uz.sfera.edu_platform.repository.QuestionRepository;
 import uz.sfera.edu_platform.repository.QuizRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -53,11 +56,19 @@ public class QuestionService {
         if (questionList.isEmpty()){
             return new ApiResponse(ResponseError.NOTFOUND("Questionlar"));
         }
-        List<QuestionDTO> questionDTOS = questionList.stream()
-                .filter(question -> question.getQuiz().getLesson().getModule().getCategory() != null)
-                .map(this::questionDTO)
+
+        List<QuestionDTO> questionDTOList = questionList.stream()
+                .filter(question -> question.getQuiz().getLesson().getModule().getCategory() != null) // Filter qismi
+                .map(question -> {
+                    List<OptionDTO> optionDTOList = optionRepository.findByQuestionId(question.getId()).stream()
+                            .map(optionService::optionDTO)
+                            .toList();
+
+                    return questionDTO(question, optionDTOList);
+                })
                 .toList();
-        return new ApiResponse(questionDTOS);
+
+        return new ApiResponse(questionDTOList);
     }
 
     public ApiResponse deleteQuiz(Long questionId){
@@ -91,12 +102,13 @@ public class QuestionService {
         return new ApiResponse("Question yangilandi");
     }
 
-    public QuestionDTO questionDTO(Question question){
+    public QuestionDTO questionDTO(Question question,List<OptionDTO> optionList){
         return QuestionDTO.builder()
                 .id(question.getId())
                 .text(question.getQuestion())
                 .difficulty(question.getQuestionEnum().toString())
                 .quizId(question.getQuiz().getId())
+                .options(optionList)
                 .build();
     }
 }
