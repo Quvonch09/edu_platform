@@ -174,7 +174,7 @@ public class ChatController {
 
 
     @Operation(summary = "User chatda tanlagan user bilan chatda yozishgan xabarlari chiqadi")
-    @PreAuthorize("hasAnyRole('ROLE_CLIENT','ROLE_MASTER','ROLE_SUPER_ADMIN','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_STUDENT','ROLE_TEACHER')")
     @GetMapping("/messages/{sender}/{recipient}")
     public ResponseEntity<List<ChatDto>> findChatMessages(
             @PathVariable Long sender,
@@ -183,9 +183,8 @@ public class ChatController {
         return ResponseEntity.ok(chatService.findChatMessages(sender, recipient));
     }
 
-
     @Operation(summary = "User o'zi yozishgan uzerlarni o'chiradi")
-    @PreAuthorize("hasAnyRole('ROLE_CLIENT','ROLE_MASTER','ROLE_SUPER_ADMIN','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_STUDENT','ROLE_TEACHER')")
     @DeleteMapping("/user")
     public ResponseEntity<ApiResponse> deleteUser(
             @RequestParam(value = "usersIds") List<Long> usersIds,

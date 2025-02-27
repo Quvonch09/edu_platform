@@ -61,7 +61,7 @@ public class CategoryController {
 
 
 
-    @PreAuthorize("hasAnyRole( 'ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_CEO')")
     @Operation(summary = "CEO categoryni update qilish")
     @PutMapping("/{categoryId}")
     public ResponseEntity<ApiResponse> updateCategory(
