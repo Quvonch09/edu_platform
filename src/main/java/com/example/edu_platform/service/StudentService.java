@@ -80,7 +80,7 @@ public class StudentService {
 
         Page<ResStudent>
             users = userRepository.searchStudents(fullName, phoneNumber, userStatus !=null ? userStatus.name() : null, groupName,
-                    teacherId, startAge, hasPaid,endAge, PageRequest.of(page, size));
+                    teacherId, startAge, endAge,hasPaid , PageRequest.of(page, size));
 
         ResPageable resPageable = ResPageable.builder()
                 .page(page)
