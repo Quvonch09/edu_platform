@@ -82,7 +82,7 @@ public class LessonController {
         return ResponseEntity.ok(lessonService.getOpenLessonsInGroup(groupId));
     }
 
-    @PutMapping("/addFiles")
+    @PostMapping("/addFiles")
     @Operation(summary = "(TEACHER) Dars uchun fayllar biriktirish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> addFile(
