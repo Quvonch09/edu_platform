@@ -142,7 +142,6 @@ public class ModuleService {
                 .id(module.getId())
                 .name(module.getName())
                 .category(module.getCategory().getName())
-                .deleted(module.isDeleted())
                 .build();
     }
 
