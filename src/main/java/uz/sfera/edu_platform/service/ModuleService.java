@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -63,19 +64,12 @@ public class ModuleService {
         PageRequest pageRequest = PageRequest.of(page, size);
         Page<Module> modules = moduleRepository.findByCategoryIdAndDeletedFalse(categoryId, pageRequest);
 
-        List<ModuleDTO> groupDTOList = modules.stream().map(module -> ModuleDTO.builder()
-                .id(module.getId())
-                .name(module.getName())
-                .category(module.getCategory().getName())
-                .deleted(module.isDeleted())
-                .build()).toList();
-
         ResPageable resPageable = ResPageable.builder()
                 .page(page)
                 .size(size)
                 .totalPage(modules.getTotalPages())
                 .totalElements(modules.getTotalElements())
-                .body(groupDTOList)
+                .body(moduleDTOList(modules))
                 .build();
 
         return new ApiResponse(resPageable);
@@ -92,21 +86,12 @@ public class ModuleService {
             modules = moduleRepository.findByNameContainingIgnoreCaseAndDeletedFalse(name, pageRequest);
         }
 
-        List<ModuleDTO> moduleDTOList = modules.stream()
-                .map(module -> ModuleDTO.builder()
-                        .id(module.getId())
-                        .name(module.getName())
-                        .category(module.getCategory().getName())
-                        .deleted(module.isDeleted())
-                        .build())
-                .toList();
-
         ResPageable resPageable = ResPageable.builder()
                 .page(page)
                 .size(size)
                 .totalPage(modules.getTotalPages())
                 .totalElements(modules.getTotalElements())
-                .body(moduleDTOList)
+                .body(moduleDTOList(modules))
                 .build();
 
         return new ApiResponse(resPageable);
@@ -118,6 +103,11 @@ public class ModuleService {
         if (foundModule == null){
             return new ApiResponse(ResponseError.NOTFOUND("Modul"));
         }
+
+        if (foundModule.getCategory() == null){
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu modulning categoriyasi uchirilgan"));
+        }
+
         return new ApiResponse(moduleDTO(foundModule));
     }
 
@@ -154,5 +144,16 @@ public class ModuleService {
                 .category(module.getCategory().getName())
                 .deleted(module.isDeleted())
                 .build();
+    }
+
+    private List<ModuleDTO> moduleDTOList(Page<Module> modules){
+        return modules.stream()
+                .filter(module -> module.getCategory() != null)
+                .map(module -> ModuleDTO.builder()
+                        .id(module.getId())
+                        .name(module.getName())
+                        .category(module.getCategory().getName())
+                        .build())
+                .toList();
     }
 }

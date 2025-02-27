@@ -31,6 +31,11 @@ public class QuizService {
         if (lesson == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
         }
+
+        if (lesson.getModule().getCategory() == null){
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu lessonning categoriyasi uchirilgan"));
+        }
+
         Quiz quiz = Quiz.builder()
                 .title(reqQuiz.getTitle())
                 .lesson(lesson)
@@ -85,6 +90,9 @@ public class QuizService {
         Quiz quiz = quizRepository.findById(quizId).orElse(null);
         if (quiz == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
+        }
+        if (quiz.getLesson().getModule().getCategory() == null){
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu quizning categoriyasi uchirilgan"));
         }
         return new ApiResponse(quizDTO(quiz));
     }
@@ -152,6 +160,7 @@ public class QuizService {
             return new ApiResponse(ResponseError.NOTFOUND("Lesson bo'yicha quizlar"));
         }
         List<QuizDTO> quizDTOS = quizList.stream()
+                .filter(quiz -> quiz.getLesson().getModule().getCategory() != null)
                 .map(this::quizDTO)
                 .collect(Collectors.toList());
         return new ApiResponse(quizDTOS);

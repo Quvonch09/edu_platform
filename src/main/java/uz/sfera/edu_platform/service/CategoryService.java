@@ -1,16 +1,20 @@
 package uz.sfera.edu_platform.service;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.Category;
+import uz.sfera.edu_platform.entity.Group;
+import uz.sfera.edu_platform.entity.Module;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.CategoryDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.res.ResPageable;
 import uz.sfera.edu_platform.repository.CategoryRepository;
 import uz.sfera.edu_platform.repository.FileRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
+import uz.sfera.edu_platform.repository.GroupRepository;
+import uz.sfera.edu_platform.repository.ModuleRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +24,8 @@ import java.util.List;
 public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final FileRepository fileRepository;
+    private final GroupRepository groupRepository;
+    private final ModuleRepository moduleRepository;
 
     public ApiResponse saveCategory(CategoryDTO categoryDTO) {
         boolean b = categoryRepository.existsByName(categoryDTO.getName());
@@ -34,6 +40,7 @@ public class CategoryService {
                 .duration(categoryDTO.getDuration())
                 .file(fileRepository.findById(categoryDTO.getFileId()).orElse(null))
                 .active(true)
+                .deleted(false)
                 .build();
         categoryRepository.save(category);
         return new ApiResponse("Category successfully saved");
@@ -70,7 +77,7 @@ public class CategoryService {
 
 
     public ApiResponse getAllList(){
-        List<Category> allCategory = categoryRepository.findAll();
+        List<Category> allCategory = categoryRepository.findAllByDeletedFalse();
         List<CategoryDTO> categoryDTOList = new ArrayList<>();
         for (Category category : allCategory) {
             categoryDTOList.add(convertCategoryToCategoryDTO(category));
@@ -85,6 +92,12 @@ public class CategoryService {
         if (category == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Category"));
         }
+
+        boolean b = categoryRepository.existsByNameAndIdNot(category.getName(),category.getId());
+        if (b) {
+            return new ApiResponse(ResponseError.ALREADY_EXIST("Category"));
+        }
+
         category.setName(categoryDTO.getName());
         category.setDescription(categoryDTO.getDescription());
         category.setDuration(categoryDTO.getDuration());
@@ -102,7 +115,18 @@ public class CategoryService {
             return new ApiResponse(ResponseError.NOTFOUND("Category"));
         }
 
-        categoryRepository.delete(category);
+        for (Group group : groupRepository.findAllByCategoryId(category.getId())) {
+            group.setCategory(null);
+            groupRepository.save(group);
+        }
+
+        for (Module module : moduleRepository.findAllByCategoryIdAndDeletedFalse(category.getId())) {
+            module.setCategory(null);
+            moduleRepository.save(module);
+        }
+
+        category.setDeleted(true);
+        categoryRepository.save(category);
         return new ApiResponse("Category successfully deleted");
     }
 

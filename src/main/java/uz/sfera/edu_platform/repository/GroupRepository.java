@@ -192,7 +192,7 @@ ORDER BY r.rank_position;
             "            and (:teacherName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :teacherName, '%')))\n" +
             "            and ( coalesce(:startDate , null) IS NULL OR g.start_date <= CAST(:startDate AS DATE))\n" +
             "            and (coalesce(:endDate ,null) IS NULL OR g.end_date >= CAST(:endDate AS DATE))\n" +
-            "            and (:categoryId IS NULL OR g.category_id = :categoryId )",
+            "            and (:categoryId IS NULL OR g.category_id = :categoryId ) order by g.id desc",
             nativeQuery = true)
     Page<Group> searchGroup(@Param("name") String name,
                             @Param("teacherName") String teacherName,
@@ -239,5 +239,7 @@ GROUP BY g.name;
 
     @Query(value = "select g.* from groups g join groups_students gs on gs.group_id = g.id where g.teacher_id = ?1 or gs.students_id = ?1", nativeQuery = true)
     Group findGroup(Long userId);
+
+    List<Group> findAllByCategoryId(Long categoryId);
 
 }

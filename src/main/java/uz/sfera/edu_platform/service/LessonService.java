@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.repository.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,17 +31,18 @@ public class LessonService {
 
     public ApiResponse createLesson(LessonRequest lessonRequest) {
 
-        Module module = moduleRepository.findById(lessonRequest.getModuleId()).orElse(null);
+        Module module = moduleRepository.findByIdAndDeletedFalse(lessonRequest.getModuleId()).orElse(null);
         if (module == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Module"));
         }
 
-        List<File> files = fileRepository.findAllById(lessonRequest.getFileIds());
-        if (files.size() != lessonRequest.getFileIds().size()) {
-            List<Long> notFoundFileIds = lessonRequest.getFileIds().stream()
-                    .filter(id -> files.stream().noneMatch(file -> file.getId().equals(id)))
-                    .toList();
-            return new ApiResponse(ResponseError.NOTFOUND("Fayllar: " + notFoundFileIds));
+        if (module.getCategory() == null){
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu modulga lesson qushish mumkin emas"));
+        }
+
+        List<File> fileList = new ArrayList<>();
+        for (Long fileId : lessonRequest.getFileIds()) {
+            fileList.add(fileRepository.findById(fileId).orElse(null));
         }
 
         Lesson lesson = Lesson.builder()
@@ -48,7 +50,7 @@ public class LessonService {
                 .description(lessonRequest.getDescription())
                 .videoLink(lessonRequest.getVideoLink())
                 .module(module)
-                .files(files)
+                .files(fileList)
                 .deleted(false)
                 .build();
 
@@ -66,6 +68,7 @@ public class LessonService {
 
         List<Lesson> foundLessons = lessonRepository.findByModuleIdAndDeletedFalse(moduleId);
         List<LessonDTO> lessonDTOs = foundLessons.stream()
+                .filter(lesson -> lesson.getModule().getCategory() != null)
                 .map(this::lessonDTO)
                 .toList();
 
@@ -84,18 +87,17 @@ public class LessonService {
         } else if (module == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Modul"));
         }
-        List<File> files = fileRepository.findAllById(lessonRequest.getFileIds());
-        if (files.size() != lessonRequest.getFileIds().size()) {
-            List<Long> notFoundFileIds = lessonRequest.getFileIds().stream()
-                    .filter(id -> files.stream().noneMatch(file -> file.getId().equals(id)))
-                    .toList();
-            return new ApiResponse(ResponseError.NOTFOUND("Fayllar: " + notFoundFileIds));
+
+        List<File> fileList = new ArrayList<>();
+        for (Long fileId : lessonRequest.getFileIds()) {
+            fileList.add(fileRepository.findById(fileId).orElse(null));
         }
+
         currentLesson.setName(lessonRequest.getName());
         currentLesson.setDescription(lessonRequest.getDescription());
         currentLesson.setVideoLink(lessonRequest.getVideoLink());
         currentLesson.setModule(module);
-        currentLesson.setFiles(files);
+        currentLesson.setFiles(fileList);
 
         lessonRepository.save(currentLesson);
         return new ApiResponse("Lesson yangilandi");
@@ -128,6 +130,7 @@ public class LessonService {
         return new ApiResponse("Lesson guruh uchun ochildi");
     }
 
+
     public ApiResponse search(String name, int size, int page) {
         PageRequest pageRequest = PageRequest.of(page, size);
         Page<Lesson> lessons;
@@ -139,6 +142,7 @@ public class LessonService {
         }
 
         List<LessonDTO> lessonDTOS = lessons.stream()
+                .filter(lesson -> lesson.getModule().getCategory() != null)
                 .map(lesson -> LessonDTO.builder()
                         .lessonId(lesson.getId())
                         .name(lesson.getName())
