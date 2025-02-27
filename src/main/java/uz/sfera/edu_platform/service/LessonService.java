@@ -133,6 +133,11 @@ public class LessonService {
             files.add(lesson.getId());
         }
 
+        List<Long> files = new ArrayList<>();
+        for (Lesson lesson : lessons) {
+            files.add(lesson.getId());
+        }
+
         List<LessonDTO> lessonDTOS = lessons.stream()
                 .filter(lesson -> lesson.getModule().getCategory() != null)
                 .map(lesson -> LessonDTO.builder()
