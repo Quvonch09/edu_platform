@@ -1,12 +1,12 @@
 package uz.sfera.edu_platform.service;
 
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.*;
 import uz.sfera.edu_platform.payload.*;
 import uz.sfera.edu_platform.payload.req.ReqPassTest;
 import uz.sfera.edu_platform.payload.req.ReqQuiz;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.repository.*;
 
 import java.time.LocalDateTime;
@@ -75,15 +75,12 @@ public class QuizService {
         return allQuestions.stream()
                 .limit(settings.getQuestionCount())
                 .map(question -> {
-                    QuestionDTO questionDTO = questionService.questionDTO(question);
-                    List<OptionDTO> options = optionRepository.findByQuestionId(question.getId())
-                            .stream()
+                    List<OptionDTO> optionDTOList = optionRepository.findByQuestionId(question.getId()).stream()
                             .map(optionService::optionDTO)
-                            .collect(Collectors.toList());
-                    questionDTO.setOptions(options);
-                    return questionDTO;
+                            .toList();
+                    return questionService.questionDTO(question, optionDTOList);
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public ApiResponse getQuiz(Long quizId) {
