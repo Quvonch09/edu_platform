@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.Category;
+import uz.sfera.edu_platform.entity.File;
 import uz.sfera.edu_platform.entity.Group;
 import uz.sfera.edu_platform.entity.Module;
 import uz.sfera.edu_platform.payload.ApiResponse;
@@ -18,6 +19,7 @@ import uz.sfera.edu_platform.repository.ModuleRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -49,17 +51,17 @@ public class CategoryService {
 
     public ApiResponse getAllCategories(String name, String description, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
-        Page<Category> allCategory = categoryRepository.getAllCategory(name, description, pageRequest);
-        List<CategoryDTO> categoryDTOList = new ArrayList<>();
-        for (Category category : allCategory.getContent()) {
-            categoryDTOList.add(convertCategoryToCategoryDTO(category));
+        Page<Category> pages = categoryRepository.getAllCategory(name, description, pageRequest);
+        if(pages.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Category"));
         }
+
         ResPageable resPageable = ResPageable.builder()
                 .page(page)
                 .size(size)
-                .totalElements(allCategory.getTotalElements())
-                .totalPage(allCategory.getTotalPages())
-                .body(categoryDTOList)
+                .totalElements(pages.getTotalElements())
+                .totalPage(pages.getTotalPages())
+                .body(pages.getContent().stream().map(this::convertCategoryToCategoryDTO).toList())
                 .build();
         return new ApiResponse(resPageable);
     }
@@ -67,24 +69,16 @@ public class CategoryService {
 
 
     public ApiResponse getCategoryById(Long id) {
-        Category category = categoryRepository.findById(id).orElse(null);
-        if (category == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Category"));
-        }
-
-        return new ApiResponse(convertCategoryToCategoryDTO(category));
+        return categoryRepository.findById(id)
+                .map(category -> new ApiResponse(convertCategoryToCategoryDTO(category)))
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Category")));
     }
 
 
     public ApiResponse getAllList(){
-        List<Category> allCategory = categoryRepository.findAllByDeletedFalse();
-        List<CategoryDTO> categoryDTOList = new ArrayList<>();
-        for (Category category : allCategory) {
-            categoryDTOList.add(convertCategoryToCategoryDTO(category));
-        }
-        return new ApiResponse(categoryDTOList);
+        List<Category> categories = categoryRepository.findAll();
+        return new ApiResponse(categories.stream().map(this::convertCategoryToCategoryDTO).toList());
     }
-
 
 
     public ApiResponse updateCategory(Long categoryId, CategoryDTO categoryDTO) {
@@ -142,7 +136,6 @@ public class CategoryService {
     }
 
 
-
     private CategoryDTO convertCategoryToCategoryDTO(Category category) {
         return CategoryDTO.builder()
                 .id(category.getId())
@@ -151,7 +144,7 @@ public class CategoryService {
                 .price(category.getCoursePrice())
                 .duration(category.getDuration())
                 .active(category.getActive())
-                .fileId(category.getFile() != null ? category.getFile().getId() : null)
+                .fileId(Optional.ofNullable(category.getFile()).map(File::getId).orElse(null))
                 .build();
     }
 }

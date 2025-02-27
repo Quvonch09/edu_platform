@@ -19,6 +19,7 @@ public class DataLoader implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final DayOfWeekRepository dayOfWeekRepository;
 
+
     @Value("${spring.jpa.hibernate.ddl-auto}")
     private String ddl;
 

@@ -18,9 +18,10 @@ public class Attendance extends AbsEntity {
 
     private Boolean attendance;
     private LocalDate date;
+
     @ManyToOne
     private Group group;
+
     @ManyToOne
     private User student;
-
 }

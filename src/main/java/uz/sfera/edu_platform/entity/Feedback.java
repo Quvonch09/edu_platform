@@ -13,14 +13,19 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Entity
 public class Feedback extends AbsEntity {
+
     private String feedback;
     private Integer rating; // 5 ball
+
     @ManyToOne
     private User teacher;
+
     @ManyToOne
     private Lesson lesson;
+
     @ManyToOne
     private Quiz quiz;
+
     @ManyToOne
     private User student;
 }
