@@ -1,16 +1,7 @@
 package uz.sfera.edu_platform.service;
 
-import com.example.edu_platform.entity.Option;
-import com.example.edu_platform.entity.Question;
-import com.example.edu_platform.entity.Quiz;
-import com.example.edu_platform.entity.enums.QuestionEnum;
-import com.example.edu_platform.payload.ApiResponse;
-import com.example.edu_platform.payload.QuestionDTO;
-import com.example.edu_platform.payload.ResponseError;
-import com.example.edu_platform.payload.req.ReqQuestion;
-import com.example.edu_platform.repository.OptionRepository;
-import com.example.edu_platform.repository.QuestionRepository;
-import com.example.edu_platform.repository.QuizRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.Question;
 import uz.sfera.edu_platform.entity.Quiz;
 import uz.sfera.edu_platform.entity.enums.QuestionEnum;
@@ -18,10 +9,9 @@ import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.QuestionDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.req.ReqQuestion;
+import uz.sfera.edu_platform.repository.OptionRepository;
 import uz.sfera.edu_platform.repository.QuestionRepository;
 import uz.sfera.edu_platform.repository.QuizRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 

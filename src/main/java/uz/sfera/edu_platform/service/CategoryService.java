@@ -1,27 +1,20 @@
 package uz.sfera.edu_platform.service;
 
-import com.example.edu_platform.entity.Category;
-import com.example.edu_platform.entity.Group;
-import com.example.edu_platform.entity.Module;
-import com.example.edu_platform.payload.ApiResponse;
-import com.example.edu_platform.payload.CategoryDTO;
-import com.example.edu_platform.payload.ResponseError;
-import com.example.edu_platform.payload.res.ResPageable;
-import com.example.edu_platform.repository.CategoryRepository;
-import com.example.edu_platform.repository.FileRepository;
-import com.example.edu_platform.repository.GroupRepository;
-import com.example.edu_platform.repository.ModuleRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.Category;
+import uz.sfera.edu_platform.entity.Group;
+import uz.sfera.edu_platform.entity.Module;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.CategoryDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.res.ResPageable;
 import uz.sfera.edu_platform.repository.CategoryRepository;
 import uz.sfera.edu_platform.repository.FileRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
+import uz.sfera.edu_platform.repository.GroupRepository;
+import uz.sfera.edu_platform.repository.ModuleRepository;
 
 import java.util.ArrayList;
 import java.util.List;
