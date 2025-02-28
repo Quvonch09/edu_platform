@@ -54,134 +54,74 @@ public class LessonService {
 
     @Transactional
     public ApiResponse getLessonInModule(Long moduleId) {
+        Module module = moduleRepository.findByIdAndDeletedFalse(moduleId).orElse(null);
+        if (module == null) return new ApiResponse(ResponseError.NOTFOUND("Modul"));
 
-        Module optionalModule = moduleRepository.findByIdAndDeletedFalse(moduleId).orElse(null);
-        if (optionalModule == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Modul"));
-        }
+        List<LessonDTO> lessons = lessonRepository.findByModuleIdAndDeletedFalse(moduleId).stream()
+                .filter(l -> l.getModule().getCategory() != null)
+                .map(this::lessonDTO).toList();
 
-        List<Lesson> foundLessons = lessonRepository.findByModuleIdAndDeletedFalse(moduleId);
-        List<LessonDTO> lessonDTOs = foundLessons.stream()
-                .filter(lesson -> lesson.getModule().getCategory() != null)
-                .map(this::lessonDTO)
-                .toList();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("lessonCount", lessonDTOs.size());
-        response.put("lessons", lessonDTOs);
-
-        return new ApiResponse(response);
+        return new ApiResponse(Map.of("lessonCount", lessons.size(), "lessons", lessons));
     }
 
-    public ApiResponse update(Long lessonId,LessonRequest lessonRequest){
-        Lesson currentLesson = lessonRepository.findByIdAndDeletedFalse(lessonId).orElse(null);
-        Module module = moduleRepository.findByIdAndDeletedFalse(lessonRequest.getModuleId()).orElse(null);
-        if (currentLesson == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
-        } else if (module == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Modul"));
-        }
-
-        currentLesson.setName(lessonRequest.getName());
-        currentLesson.setDescription(lessonRequest.getDescription());
-        currentLesson.setVideoLink(lessonRequest.getVideoLink());
-        currentLesson.setModule(module);
-
-        lessonRepository.save(currentLesson);
-        return new ApiResponse("Lesson yangilandi");
-    }
-
-    public ApiResponse delete(Long lessonId){
+    public ApiResponse updateLesson(Long lessonId, LessonRequest lessonRequest) {
         Lesson lesson = lessonRepository.findByIdAndDeletedFalse(lessonId).orElse(null);
-        if (lesson == null){
+        if (lesson == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
         }
-        lesson.setDeleted(true);
+        Module module = moduleRepository.findByIdAndDeletedFalse(lessonRequest.getModuleId()).orElse(null);
+        if (module == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Modul"));
+        }
+        lesson.setName(lessonRequest.getName());
+        lesson.setDescription(lessonRequest.getDescription());
+        lesson.setVideoLink(lessonRequest.getVideoLink());
+        lesson.setModule(module);
+
         lessonRepository.save(lesson);
-        return new ApiResponse("Lesson o'chirildi");
+        return new ApiResponse("Lesson muvaffaqiyatli yangilandi");
+    }
+
+
+    public ApiResponse delete(Long lessonId) {
+        return lessonRepository.findByIdAndDeletedFalse(lessonId).map(lesson -> {
+            lesson.setDeleted(true);
+            lessonRepository.save(lesson);
+            return new ApiResponse("Lesson o'chirildi");
+        }).orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Lesson")));
     }
 
     @Transactional
-    public ApiResponse allowLesson(ReqLessonTracking reqLessonTracking){
-        Lesson lesson = lessonRepository.findById(reqLessonTracking.getLessonId()).orElse(null);
-        Group group = groupRepository.findById(reqLessonTracking.getGroupId()).orElse(null);
-        if (lesson == null || lesson.isDeleted()){
-            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
-        } else if (group == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Group"));
-        }
-        LessonTracking lessonTracking = LessonTracking.builder()
-                .group(group)
-                .lesson(lesson)
-                .build();
-        lessonTrackingRepository.save(lessonTracking);
+    public ApiResponse allowLesson(ReqLessonTracking req) {
+        Lesson lesson = lessonRepository.findById(req.getLessonId()).orElse(null);
+        Group group = groupRepository.findById(req.getGroupId()).orElse(null);
+        if (lesson == null || lesson.isDeleted() || group == null)
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson yoki Group"));
+
+        lessonTrackingRepository.save(new LessonTracking(lesson,group));
         return new ApiResponse("Lesson guruh uchun ochildi");
     }
 
-
     public ApiResponse search(String name, int size, int page) {
-        PageRequest pageRequest = PageRequest.of(page, size);
-        Page<Lesson> lessons;
+        Page<Lesson> lessons = name == null || name.trim().isEmpty()
+                ? lessonRepository.findAll(PageRequest.of(page, size))
+                : lessonRepository.findByNameAndDeletedFalse(name, PageRequest.of(page, size));
 
-        if (name == null || name.trim().isEmpty()) {
-            lessons = lessonRepository.findAll(pageRequest);
-        } else {
-            lessons = lessonRepository.findByNameAndDeletedFalse(name, pageRequest);
-        }
-        List<Long> files = new ArrayList<>();
-        for (Lesson lesson : lessons) {
-            files.add(lesson.getId());
-        }
-
-        List<LessonDTO> lessonDTOS = lessons.stream()
-                .filter(lesson -> lesson.getModule().getCategory() != null)
-                .map(lesson -> LessonDTO.builder()
-                        .lessonId(lesson.getId())
-                        .name(lesson.getName())
-                        .description(lesson.getDescription())
-                        .videoLink(lesson.getVideoLink())
-                        .fileIds(files)
-                        .createdAt(lesson.getCreatedAt())
-                        .build())
-                .toList();
-
-        ResPageable resPageable = ResPageable.builder()
-                .page(page)
-                .size(size)
-                .totalPage(lessons.getTotalPages())
-                .totalElements(lessons.getTotalElements())
-                .body(lessonDTOS)
-                .build();
-
-        return new ApiResponse(resPageable);
+        return new ApiResponse(new ResPageable(page, size, lessons.getTotalPages(),
+                lessons.getTotalElements(), lessons.map(this::lessonDTO).toList()));
     }
-
 
     @Transactional
     public ApiResponse getOpenLessonsInGroup(Long groupId) {
-        List<LessonTracking> lessonTrackings = lessonTrackingRepository.findByGroupId(groupId);
-        if (lessonTrackings.isEmpty()) {
-            return new ApiResponse(ResponseError.NOTFOUND("Ochiq darslar"));
-        }
-
-        Group group = groupRepository.findById(groupId).orElse(null);
-
-
-        List<LessonDTO> lessonDTOs = lessonTrackings.stream()
+        List<LessonDTO> lessons = lessonTrackingRepository.findByGroupId(groupId).stream()
                 .map(LessonTracking::getLesson)
-                .filter(lesson -> !lesson.isDeleted())
+                .filter(l -> !l.isDeleted())
                 .map(this::lessonDTO)
                 .toList();
 
-        if (lessonDTOs.isEmpty()) {
-            return new ApiResponse(ResponseError.NOTFOUND("Ochiq darslar"));
-        }
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("lessonCount", lessonDTOs.size() +"/" +lessonRepository.countLessonsByCategoryId(group != null ? group.getCategory().getId() : 0));
-        response.put("lessons", lessonDTOs);
-
-        return new ApiResponse(response);
+        return lessons.isEmpty()
+                ? new ApiResponse(ResponseError.NOTFOUND("Ochiq darslar"))
+                : new ApiResponse(Map.of("lessonCount", lessons.size(), "lessons", lessons));
     }
 
     public ApiResponse getStatistics() {
@@ -210,84 +150,19 @@ public class LessonService {
         return new ApiResponse(response);
     }
 
-    public ApiResponse addFile(ReqLessonFiles reqLessonFiles) {
-        Lesson lesson = lessonRepository.findById(reqLessonFiles.getLessonId()).orElse(null);
-        if (lesson == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
-        }
-        if (reqLessonFiles.getFileIds() == null || reqLessonFiles.getFileIds().isEmpty()) {
-            return new ApiResponse(ResponseError.NOTFOUND("Fayllar"));
-        }
+    public ApiResponse manageFiles(ReqLessonFiles req, boolean isAdding) {
+        Lesson lesson = lessonRepository.findById(req.getLessonId()).orElse(null);
+        if (lesson == null) return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
 
-        List<File> files = fileRepository.findAllById(reqLessonFiles.getFileIds()); // Barcha fayllarni bitta so‘rovda olish
+        List<File> files = fileRepository.findAllById(req.getFileIds());
         Set<Long> foundFileIds = files.stream().map(File::getId).collect(Collectors.toSet());
-        List<Long> notFoundFiles = reqLessonFiles.getFileIds().stream()
-                .filter(id -> !foundFileIds.contains(id))
-                .toList();
+        List<Long> notFoundFiles = req.getFileIds().stream().filter(id -> !foundFileIds.contains(id)).toList();
 
-        if (!notFoundFiles.isEmpty()) {
-            return new ApiResponse("Fayllar topilmadi: " + notFoundFiles);
-        }
-
-        lesson.setFiles(files);
-        return new ApiResponse("Fayllar saqlandi");
-    }
-
-    public ApiResponse deleteFiles(ReqLessonFiles reqLessonFiles) {
-        Lesson lesson = lessonRepository.findById(reqLessonFiles.getLessonId()).orElse(null);
-        if (lesson == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
-        }
-        if (reqLessonFiles.getFileIds() == null || reqLessonFiles.getFileIds().isEmpty()) {
-            return new ApiResponse(ResponseError.NOTFOUND("Fayllar"));
-        }
-        List<File> lessonFiles = lesson.getFiles();
-        Set<Long> lessonFileIds = lessonFiles.stream().map(File::getId).collect(Collectors.toSet());
-
-        List<Long> deleteFileIds = reqLessonFiles.getFileIds().stream()
-                .filter(lessonFileIds::contains)
-                .toList();
-        if (deleteFileIds.isEmpty()) {
-            return new ApiResponse(ResponseError.NOTFOUND("O‘chirish uchun mos fayllar"));
-        }
-        lessonFiles.removeIf(file -> deleteFileIds.contains(file.getId()));
-        lessonRepository.save(lesson);
-
-        return new ApiResponse("Fayllar o‘chirildi");
-    }
-
-    public ApiResponse updateFiles(ReqLessonFiles reqLessonFiles, List<Long> oldFiles) {
-        Lesson lesson = lessonRepository.findById(reqLessonFiles.getLessonId()).orElse(null);
-        if (lesson == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
-        }
-
-        if (reqLessonFiles.getFileIds() == null || reqLessonFiles.getFileIds().isEmpty()) {
-            return new ApiResponse(ResponseError.NOTFOUND("Yangi fayllar"));
-        }
-
-        List<File> lessonFiles = (lesson.getFiles() != null) ? lesson.getFiles() : new ArrayList<>();
-        Set<Long> lessonFileIds = lessonFiles.stream().map(File::getId).collect(Collectors.toSet());
-
-        List<Long> filesToRemove = (oldFiles != null)
-                ? oldFiles.stream().filter(lessonFileIds::contains).toList()
-                : Collections.emptyList();
-
-        List<File> newFiles = fileRepository.findAllById(reqLessonFiles.getFileIds());
-
-        Set<Long> foundNewFileIds = newFiles.stream().map(File::getId).collect(Collectors.toSet());
-        List<Long> notFoundFiles = reqLessonFiles.getFileIds().stream()
-                .filter(id -> !foundNewFileIds.contains(id))
-                .toList();
-        lessonFiles.removeIf(file -> filesToRemove.contains(file.getId()));
-        lessonFiles.addAll(newFiles);
-        lesson.setFiles(lessonFiles); // Yangilangan fayllarni saqlash uchun qo‘shish shart!
+        if (isAdding) lesson.getFiles().addAll(files);
+        else lesson.getFiles().removeIf(file -> foundFileIds.contains(file.getId()));
 
         lessonRepository.save(lesson);
-
-        return new ApiResponse("Fayllar yangilandi. O‘chirilganlar: " + filesToRemove +
-                ", Qo‘shilganlar: " + foundNewFileIds +
-                (notFoundFiles.isEmpty() ? "" : ", Bazada yo‘q fayllar: " + notFoundFiles));
+        return new ApiResponse(isAdding ? "Fayllar qo'shildi" : "Fayllar o‘chirildi",ResponseError.NOTFOUND(notFoundFiles));
     }
 
     private LessonDTO lessonDTO(Lesson lesson) {

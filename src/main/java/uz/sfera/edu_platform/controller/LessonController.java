@@ -53,7 +53,7 @@ public class LessonController {
             @PathVariable Long lessonId,
             @RequestBody LessonRequest lessonRequest
     ){
-        return ResponseEntity.ok(lessonService.update(lessonId,lessonRequest));
+        return ResponseEntity.ok(lessonService.updateLesson(lessonId,lessonRequest));
     }
 
     @DeleteMapping("/delete/{lessonId}")
@@ -82,32 +82,22 @@ public class LessonController {
         return ResponseEntity.ok(lessonService.getOpenLessonsInGroup(groupId));
     }
 
-    @PostMapping("/addFiles")
-    @Operation(summary = "(TEACHER) Dars uchun fayllar biriktirish")
+    @PostMapping("/addFile")
+    @Operation(summary = "(TEACHER) Dars uchun fayl qo'shish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
-    public ResponseEntity<ApiResponse> addFile(
+    public ResponseEntity<ApiResponse> manageFiles(
             @RequestBody ReqLessonFiles reqLessonFiles
     ){
-        return ResponseEntity.ok(lessonService.addFile(reqLessonFiles));
+        return ResponseEntity.ok(lessonService.manageFiles(reqLessonFiles, true));
     }
 
     @DeleteMapping("/deleteFiles")
-    @Operation(summary = "(TEACHER) Dars ichidagi fayllarni o'chirish")
+    @Operation(summary = "(TEACHER) Darsga tegishli fayllarni o'chirish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
-    public ResponseEntity<ApiResponse> removeFile(
+    public ResponseEntity<ApiResponse> deleteFiles(
             @RequestBody ReqLessonFiles reqLessonFiles
     ){
-        return ResponseEntity.ok(lessonService.deleteFiles(reqLessonFiles));
-    }
-
-    @PutMapping("/updateFiles")
-    @Operation(summary = "(TEACHER) Fayllarni yangilash")
-    @PreAuthorize("hasRole('ROLE_TEACHER')")
-    public ResponseEntity<ApiResponse> updateFiles(
-            @RequestBody ReqLessonFiles reqLessonFiles,
-            @RequestParam List<Long> oldFiles
-    ){
-        return ResponseEntity.ok(lessonService.updateFiles(reqLessonFiles, oldFiles));
+        return ResponseEntity.ok(lessonService.manageFiles(reqLessonFiles,false));
     }
 
     @GetMapping("/statistics")
