@@ -23,5 +23,5 @@ public class Task {
     @ManyToOne
     private Lesson lesson;
 
-    private boolean deleted;
+    private boolean deleted; // byte
 }

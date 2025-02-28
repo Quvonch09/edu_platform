@@ -20,5 +20,5 @@ public class Option {
     @ManyToOne
     private Question question;
 
-    private boolean correct;
+    private boolean correct; // byte
 }

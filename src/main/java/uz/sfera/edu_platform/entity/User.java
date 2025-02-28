@@ -20,7 +20,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "Users")
+@Table(name = "users")
 public class User extends AbsEntity implements UserDetails {
 
     @Column(nullable = false)

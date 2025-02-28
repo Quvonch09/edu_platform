@@ -15,12 +15,12 @@ import java.util.List;
 @Entity
 @Table(name = "groups")
 public class Group extends AbsEntity {
+
     @Column(nullable = false)
     private String name;
 
     @ManyToOne
     private User teacher;
-    private boolean active;
 
     @ManyToOne
     private Category category;
@@ -33,5 +33,7 @@ public class Group extends AbsEntity {
     private LocalDate endDate;
 
     @OneToOne
-    private GraphicDay days;
+    private GraphicDay graphicDay;
+
+    private boolean active; //enum status (ochiq, yopildi, tugatildi)
 }

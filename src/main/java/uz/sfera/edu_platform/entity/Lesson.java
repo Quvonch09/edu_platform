@@ -27,5 +27,5 @@ public class Lesson extends AbsEntity {
     @ManyToMany(fetch = FetchType.LAZY)
     private List<File> files;
 
-    private boolean deleted;
+    private boolean deleted; // byte
 }

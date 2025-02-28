@@ -14,13 +14,16 @@ public class Category extends AbsEntity {
 
     @Column(nullable = false)
     private String name;
-    private String description;
-    private Double coursePrice;
-    private Integer duration;
-    private boolean active;
 
-    private boolean deleted;
-  
+    private String description;
+
+    @Column(nullable = false)
+    private double coursePrice;
+
+    private Integer duration; // byte
+
+    private boolean active; // byte ga utqazish kerak
+
     @OneToOne
     private File file;
 

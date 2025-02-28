@@ -17,8 +17,9 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 @Entity
-public class Payment extends AbsEntity {
-    private Double price;
+public class Payment extends AbsEntity { //TODO OZOD repositoryga kirish
+
+    private double price;
 
     @ManyToOne
     private User student;
