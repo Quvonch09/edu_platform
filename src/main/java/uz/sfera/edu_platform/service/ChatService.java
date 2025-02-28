@@ -242,7 +242,6 @@ public class ChatService {
     }
 
 
-
     public ChatDto saveMessageBody(ChatDto dto, Chat chat)
     {
         chat.setReceiver(dto.getReceiver());
