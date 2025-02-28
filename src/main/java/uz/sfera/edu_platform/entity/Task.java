@@ -18,4 +18,5 @@ public class Task {
     private File file;
     @ManyToOne
     private Lesson lesson;
+    private boolean deleted;
 }

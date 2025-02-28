@@ -13,10 +13,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.repository.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.Serializable;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,73 +24,25 @@ public class ResultService {
 
     private final ResultRepository resultRepository;
     private final UserRepository userRepository;
-    private final GroupRepository groupRepository;
     private final QuizRepository quizRepository;
     private final LessonTrackingRepository lessonTrackingRepository;
 
     public ApiResponse getUserResults(Long userId, int page, int size) {
-        User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("User"));
-        }
-
-        PageRequest pageRequest = PageRequest.of(page, size);
-        Page<Result> resultsPage = resultRepository.findByUserId(userId, pageRequest);
-
-        if (resultsPage.isEmpty()) {
-            return new ApiResponse(ResponseError.NOTFOUND("Natijalar"));
-        }
-
-        List<ResultDTO> results = resultsPage.stream()
-                .map(this::convertToDTO)
-                .toList();
-
-        ResPageable resPageable = ResPageable.builder()
-                .page(page)
-                .size(size)
-                .totalPage(resultsPage.getTotalPages())
-                .totalElements(resultsPage.getTotalElements())
-                .body(results)
-                .build();
-
-        return new ApiResponse(resPageable);
+        return userRepository.findById(userId)
+                .map(user -> {
+                    Page<Result> resultsPage = resultRepository.findByUserId(userId, PageRequest.of(page, size));
+                    return resultsPage.isEmpty() ?
+                            new ApiResponse(ResponseError.NOTFOUND("Natijalar")) :
+                            new ApiResponse(new ResPageable(page, size, resultsPage.getTotalPages(),
+                                    resultsPage.getTotalElements(), resultsPage.map(this::convertToDTO).toList()));
+                })
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("User")));
     }
-
-
-    public ApiResponse getUserResultHistory(User user, int page, int size) {
-        if (user == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("User"));
-        }
-
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Result> historyPage = resultRepository.findByUserId(user.getId(), pageRequest);
-
-        if (historyPage.isEmpty()) {
-            return new ApiResponse(ResponseError.NOTFOUND("Natija tarixi"));
-        }
-
-        List<ResultDTO> history = historyPage.stream()
-                .map(this::convertToDTO)
-                .toList();
-
-        ResPageable resPageable = ResPageable.builder()
-                .page(page)
-                .size(size)
-                .totalPage(historyPage.getTotalPages())
-                .totalElements(historyPage.getTotalElements())
-                .body(history)
-                .build();
-
-        return new ApiResponse(resPageable);
-    }
-
 
     public ApiResponse getResultById(Long resultId) {
-        Result result = resultRepository.findById(resultId).orElse(null);
-        if (result == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Result"));
-        }
-        return new ApiResponse(convertToDTO(result));
+        return resultRepository.findById(resultId)
+                .map(result -> new ApiResponse(convertToDTO(result)))
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Result")));
     }
 
     public ApiResponse deleteResult(Long resultId) {
@@ -114,42 +66,37 @@ public class ResultService {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         List<Long> lessonIds = lessonTrackingRepository.findLessonIdsByGroupId(groupId);
-        if (lessonIds.isEmpty()) {
-            return new ApiResponse(ResponseError.NOTFOUND("Guruhga tegishli darslar"));
-        }
+        if (lessonIds.isEmpty()) return new ApiResponse(ResponseError.NOTFOUND("Guruhga tegishli darslar"));
 
         List<Long> quizIds = quizRepository.findQuizIdsByLessonIds(lessonIds);
-        if (quizIds.isEmpty()) {
-            return new ApiResponse(ResponseError.NOTFOUND("Guruhga tegishli testlar"));
-        }
+        if (quizIds.isEmpty()) return new ApiResponse(ResponseError.NOTFOUND("Guruhga tegishli testlar"));
 
         Page<Result> resultsPage = resultRepository.findByQuizIdIn(quizIds, pageRequest);
-        if (resultsPage.isEmpty()) {
-            return new ApiResponse(ResponseError.NOTFOUND("Guruh imtihon natijalari"));
-        }
-        Map<String, Integer> studentTotalScores = new HashMap<>();
+        if (resultsPage.isEmpty()) return new ApiResponse(ResponseError.NOTFOUND("Guruh imtihon natijalari"));
 
-        resultsPage.forEach(result -> {
-            String userName = result.getUser().getFullName();
-            int totalScore = studentTotalScores.getOrDefault(userName, 0) + result.getCorrectAnswers();
-            studentTotalScores.put(userName, totalScore);
-        });
-        List<Map<String, Object>> rankedResults = new ArrayList<>();
-        int rank = 1;
-        for (Map.Entry<String, Integer> entry : studentTotalScores.entrySet()
-                .stream()
-                .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
-                .toList()) {
+        Map<String, Integer> studentTotalScores = resultsPage.stream()
+                .collect(Collectors.toMap(
+                        result -> result.getUser().getFullName(),
+                        Result::getCorrectAnswers,
+                        Integer::sum
+                ));
 
-            Map<String, Object> studentData = new HashMap<>();
-            studentData.put("rank", rank++);
-            studentData.put("userName", entry.getKey());
-            studentData.put("totalScore", entry.getValue());
-            rankedResults.add(studentData);
-        }
+        AtomicInteger rank = new AtomicInteger(1);
+        List<Map<String, Object>> rankedResults = studentTotalScores.entrySet().stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder()))
+                .map(entry -> {
+                    Map<String, Object> studentData = new HashMap<>();
+                    studentData.put("rank", rank.getAndIncrement());
+                    studentData.put("userName", entry.getKey());
+                    studentData.put("totalScore", entry.getValue());
+                    return studentData;
+                })
+                .toList();
 
         return new ApiResponse(rankedResults);
     }
+
+
 
     private ResultDTO convertToDTO(Result result) {
         return ResultDTO.builder()
