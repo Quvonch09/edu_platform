@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.Option;
@@ -27,92 +28,78 @@ public class QuestionService {
     private final OptionService optionService;
     private final OptionRepository optionRepository;
 
-    public ApiResponse saveQuestion(QuestionEnum difficulty,ReqQuestion reqQuestion){
-        int c = 0;
+    @Transactional
+    public ApiResponse saveQuestion(QuestionEnum difficulty, ReqQuestion reqQuestion) {
         Quiz quiz = quizRepository.findById(reqQuestion.getQuizId()).orElse(null);
-        if (quiz == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
+        if (quiz == null) return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
+
+        long correctAnswers = reqQuestion.getReqOptionList().stream().filter(ReqOption::isCorrect).count();
+        if (correctAnswers != 1) {
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Har bir savol uchun faqat 1 ta to'g'ri javob bo‘lishi kerak"));
         }
-
-        long correctCount = reqQuestion.getReqOptionList()
-                .stream()
-                .filter(ReqOption::isCorrect)
-                .count();
-
-        if (correctCount != 1) {
-            return new ApiResponse(ResponseError.DEFAULT_ERROR("Har bir savol uchun faqat 1 ta to'g'ri javob bo'ladi"));
-        }
-
 
         Question question = Question.builder()
                 .question(reqQuestion.getQuestionText())
-                .quiz(quiz)
                 .questionEnum(difficulty)
+                .quiz(quiz)
                 .build();
-        Question save = questionRepository.save(question);
+        questionRepository.save(question);
+        optionService.saveOption(question.getId(), reqQuestion.getReqOptionList());
 
-
-        String apiResponse = optionService.saveOption(save.getId(), reqQuestion.getReqOptionList());
-        if (!apiResponse.equals("Optionlar saqlandi")){
-            return new ApiResponse(apiResponse);
-        }
-
-        return new ApiResponse("Question yaratildi");
+        return new ApiResponse("Savol yaratildi");
     }
 
-    public ApiResponse getQuestionByQuiz(Long quizId){
+    public ApiResponse getQuestionByQuiz(Long quizId) {
         Quiz quiz = quizRepository.findById(quizId).orElse(null);
-        if (quiz == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
-        }
-        List<Question> questionList = questionRepository.findByQuizId(quizId);
-        if (questionList.isEmpty()){
-            return new ApiResponse(ResponseError.NOTFOUND("Questionlar"));
-        }
+        if (quiz == null) return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
 
-        List<QuestionDTO> questionDTOList = questionList.stream()
-                .filter(question -> question.getQuiz().getLesson().getModule().getCategory() != null) // Filter qismi
-                .map(question -> {
-                    List<OptionDTO> optionDTOList = optionRepository.findByQuestionId(question.getId()).stream()
-                            .map(optionService::optionDTO)
-                            .toList();
-
-                    return questionDTO(question, optionDTOList);
-                })
+        List<QuestionDTO> questionDTOList = questionRepository.findByQuizId(quizId).stream()
+                .filter(q -> q.getQuiz().getLesson().getModule().getCategory() != null)
+                .map(q -> questionDTO(q, optionRepository.findByQuestionId(q.getId())
+                        .stream().map(optionService::optionDTO).toList()))
                 .toList();
 
-        return new ApiResponse(questionDTOList);
+        return questionDTOList.isEmpty()
+                ? new ApiResponse(ResponseError.NOTFOUND("Questionlar"))
+                : new ApiResponse(questionDTOList);
     }
 
-    public ApiResponse deleteQuiz(Long questionId){
-        Question question = questionRepository.findById(questionId).orElse(null);
-        if (question == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Question"));
-        }
-
-        optionRepository.deleteAll(optionRepository.findByQuestionId(question.getId()));
-        questionRepository.delete(question);
-
-        return new ApiResponse("Question o'chirildi");
+    public ApiResponse deleteQuiz(Long questionId) {
+        return questionRepository.findById(questionId)
+                .map(question -> {
+                    optionRepository.deleteByQuestionId(questionId); // Barcha optionlarni 1 ta so‘rov bilan o‘chirish
+                    questionRepository.delete(question);
+                    return new ApiResponse("Question o'chirildi");
+                })
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Question")));
     }
 
-    public ApiResponse updateQuestion(Long questionId,QuestionEnum difficulty,ReqQuestion reqQuestion){
-        Quiz quiz = quizRepository.findById(reqQuestion.getQuizId()).orElse(null);
-        Question question = questionRepository.findById(questionId).orElse(null);
-        if (question == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Question"));
-        } else if (quiz == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
-        }
-        question.setQuestion(reqQuestion.getQuestionText());
-        question.setQuestionEnum(difficulty);
-        question.setQuiz(quiz);
 
-        optionRepository.deleteAll(optionRepository.findByQuestionId(questionId));
-        optionService.saveOption(question.getId(), reqQuestion.getReqOptionList());
-        questionRepository.save(question);
+    public ApiResponse updateQuestion(Long questionId, QuestionEnum difficulty, ReqQuestion reqQuestion) {
+        return questionRepository.findById(questionId)
+                .map(question -> quizRepository.findById(reqQuestion.getQuizId())
+                        .map(quiz -> {
+                            question.setQuestion(reqQuestion.getQuestionText());
+                            question.setQuestionEnum(difficulty);
+                            question.setQuiz(quiz);
 
-        return new ApiResponse("Question yangilandi");
+                            optionRepository.deleteByQuestionId(questionId);
+
+                            int correctCount = (int) reqQuestion.getReqOptionList().stream()
+                                    .filter(ReqOption::isCorrect)
+                                    .count();
+
+                            if (correctCount != 1) {
+                                return new ApiResponse(ResponseError.DEFAULT_ERROR("Har bir savol uchun faqat 1 ta to‘g‘ri javob bo‘lishi kerak"));
+                            }
+
+                            optionService.saveOption(question.getId(), reqQuestion.getReqOptionList());
+                            questionRepository.save(question);
+
+                            return new ApiResponse("Question yangilandi");
+                        })
+                        .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Quiz"))))
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Question")));
     }
 
     public QuestionDTO questionDTO(Question question,List<OptionDTO> optionList){

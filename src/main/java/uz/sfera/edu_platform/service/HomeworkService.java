@@ -27,34 +27,32 @@ public class HomeworkService {
     private final TaskRepository taskRepository;
     private final FileRepository fileRepository;
 
-    public ApiResponse createHomework(User user, ReqHomework reqHomework){
-        Task task = taskRepository.findById(reqHomework.getTaskId()).orElse(null);
-        File file = fileRepository.findById(reqHomework.getFileId()).orElse(null);
-
-        if (task == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Task"));
-        }
-        Homework homework = Homework.builder()
-                .answer(reqHomework.getAnswer())
-                .file(file)
-                .task(task)
-                .ball(0)
-                .checked(false)
-                .student(user)
-                .build();
-        homeworkRepository.save(homework);
-        return new ApiResponse("Homework saqlandi");
+    public ApiResponse createHomework(User user, ReqHomework reqHomework) {
+        return taskRepository.findById(reqHomework.getTaskId())
+                .map(task -> {
+                    Homework homework = Homework.builder()
+                            .answer(reqHomework.getAnswer())
+                            .file(fileRepository.findById(reqHomework.getFileId()).orElse(null))
+                            .task(task)
+                            .ball(0)
+                            .checked(false)
+                            .student(user)
+                            .build();
+                    homeworkRepository.save(homework);
+                    return new ApiResponse("Homework saqlandi");
+                })
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Task")));
     }
 
-    public ApiResponse checkHomework(Long homeworkId,Integer ball){
-        Homework homework = homeworkRepository.findById(homeworkId).orElse(null);
-        if (homework == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Homework"));
-        }
-        homework.setChecked(true);
-        homework.setBall(ball);
-        homeworkRepository.save(homework);
-        return new ApiResponse("Homework tekshirildi");
+    public ApiResponse checkHomework(Long homeworkId, Integer ball) {
+        return homeworkRepository.findById(homeworkId)
+                .map(homework -> {
+                    homework.setChecked(true);
+                    homework.setBall(ball);
+                    homeworkRepository.save(homework);
+                    return new ApiResponse("Homework tekshirildi");
+                })
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Homework")));
     }
 
     public ApiResponse getMyHomeworks(boolean isChecked, User student, Long taskId, int page, int size) {
@@ -63,70 +61,32 @@ public class HomeworkService {
                 ? homeworkRepository.findByCheckedAndStudentId(isChecked, student.getId(), pageRequest)
                 : homeworkRepository.findByCheckedAndTaskId(isChecked, taskId, pageRequest);
 
-        if (homeworks.isEmpty()) {
-            return new ApiResponse(ResponseError.NOTFOUND("Homeworklar"));
-        }
-
-        List<HomeworkDTO> homeworkDTOS = homeworks.stream()
-                .map(this::homeworkDTO)
-                .toList();
-
-        ResPageable resPageable = ResPageable.builder()
-                .page(page)
-                .size(size)
-                .totalPage(homeworks.getTotalPages())
-                .totalElements(homeworks.getTotalElements())
-                .body(homeworkDTOS)
-                .build();
-
-        return new ApiResponse(resPageable);
+        return homeworks.isEmpty()
+                ? new ApiResponse(ResponseError.NOTFOUND("Homeworklar"))
+                : new ApiResponse(new ResPageable(page, size, homeworks.getTotalPages(),
+                homeworks.getTotalElements(), homeworks.map(this::homeworkDTO).toList()));
     }
-
 
     public ApiResponse getHomeworks(boolean isChecked, Long id, boolean byStudent, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size);
-        Page<Homework> homeworks = byStudent
-                ? homeworkRepository.findByCheckedAndStudentId(isChecked, id, pageRequest)
-                : homeworkRepository.findByCheckedAndTaskId(isChecked, id, pageRequest);
+        Page<Homework> homeworks = (byStudent
+                ? homeworkRepository.findByCheckedAndStudentId(isChecked, id, PageRequest.of(page, size))
+                : homeworkRepository.findByCheckedAndTaskId(isChecked, id, PageRequest.of(page, size)));
 
-        if (homeworks.isEmpty()) {
-            return new ApiResponse(ResponseError.NOTFOUND("Homeworklar"));
-        }
-
-        List<HomeworkDTO> homeworkDTOS = homeworks.stream()
-                .map(this::homeworkDTO)
-                .toList();
-
-        ResPageable resPageable = ResPageable.builder()
-                .page(page)
-                .size(size)
-                .totalPage(homeworks.getTotalPages())
-                .totalElements(homeworks.getTotalElements())
-                .body(homeworkDTOS)
-                .build();
-
-        return new ApiResponse(resPageable);
+        return homeworks.isEmpty()
+                ? new ApiResponse(ResponseError.NOTFOUND("Homeworklar"))
+                : new ApiResponse(new ResPageable(page, size, homeworks.getTotalPages(),
+                homeworks.getTotalElements(), homeworks.map(this::homeworkDTO).toList()));
     }
-
 
     public ApiResponse userStatistics(User student) {
         long totalTasks = taskRepository.count();
         long completedHomeworks = homeworkRepository.countByStudentId(student.getId());
 
-        long totalPossibleBall = totalTasks * 5;
-        int earnedBall = homeworkRepository.sumBallByStudent(student);
-
-        String ballStats = earnedBall + "/" + totalPossibleBall;
-        String homeworkStats = completedHomeworks + "/" + totalTasks;
-
-        Map<String, String> statistics = Map.of(
-                "ballStatistics", ballStats,
-                "homeworkStatistics", homeworkStats
-        );
-
-        return new ApiResponse(statistics);
+        return new ApiResponse(Map.of(
+                "ballStatistics", homeworkRepository.sumBallByStudent(student) + "/" + (totalTasks * 5),
+                "homeworkStatistics", completedHomeworks + "/" + totalTasks
+        ));
     }
-
 
     private HomeworkDTO homeworkDTO(Homework homework){
         return HomeworkDTO.builder()

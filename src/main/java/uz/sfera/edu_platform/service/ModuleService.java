@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -47,68 +48,55 @@ public class ModuleService {
 
     @Transactional
     public ApiResponse getByCategory(Long categoryId, User user, int page, int size) {
-        Category category;
-        if (user.getRole().equals(Role.ROLE_STUDENT)){
-            Group group = groupRepository.findGroup(user.getId());
-            category = categoryRepository.findById(group != null ? group.getCategory().getId() : null).orElse(null);
-        } else {
-            if (categoryId == null){
-                return new ApiResponse(ResponseError.DEFAULT_ERROR("CategoryId kiritish kerak"));
-            }
-            category = categoryRepository.findById(categoryId).orElse(null);
-        }
+        Category category = (user.getRole().equals(Role.ROLE_STUDENT))
+                ? Optional.ofNullable(groupRepository.findGroup(user.getId()))
+                .map(Group::getCategory)
+                .orElse(null)
+                : (categoryId == null)
+                ? null
+                : categoryRepository.findById(categoryId).orElse(null);
+
         if (category == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Kategoriya"));
+            return new ApiResponse(ResponseError.NOTFOUND(
+                    user.getRole().equals(Role.ROLE_STUDENT) ? "Foydalanuvchiga bog‘liq kategoriya" : "Kategoriya"
+            ));
         }
 
-        PageRequest pageRequest = PageRequest.of(page, size);
-        Page<Module> modules = moduleRepository.findByCategoryIdAndDeletedFalse(categoryId, pageRequest);
+        Page<Module> modules = moduleRepository.findByCategoryIdAndDeletedFalse(category.getId(), PageRequest.of(page, size));
 
-        ResPageable resPageable = ResPageable.builder()
+        return new ApiResponse(ResPageable.builder()
                 .page(page)
                 .size(size)
                 .totalPage(modules.getTotalPages())
                 .totalElements(modules.getTotalElements())
                 .body(moduleDTOList(modules))
-                .build();
-
-        return new ApiResponse(resPageable);
+                .build());
     }
+
 
     @Transactional
     public ApiResponse searchModule(String name, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size);
-        Page<Module> modules;
+        Page<Module> modules = (name == null || name.isBlank())
+                ? moduleRepository.findAll(PageRequest.of(page, size))
+                : moduleRepository.findByNameContainingIgnoreCaseAndDeletedFalse(name, PageRequest.of(page, size));
 
-        if (name == null || name.trim().isEmpty()) {
-            modules = moduleRepository.findAll(pageRequest);
-        } else {
-            modules = moduleRepository.findByNameContainingIgnoreCaseAndDeletedFalse(name, pageRequest);
-        }
-
-        ResPageable resPageable = ResPageable.builder()
+        return new ApiResponse(ResPageable.builder()
                 .page(page)
                 .size(size)
                 .totalPage(modules.getTotalPages())
                 .totalElements(modules.getTotalElements())
                 .body(moduleDTOList(modules))
-                .build();
-
-        return new ApiResponse(resPageable);
+                .build());
     }
 
 
-    public ApiResponse getModule(Long moduleId){
-        Module foundModule = moduleRepository.findByIdAndDeletedFalse(moduleId).orElse(null);
-        if (foundModule == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Modul"));
-        }
 
-        if (foundModule.getCategory() == null){
-            return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu modulning categoriyasi uchirilgan"));
-        }
-
-        return new ApiResponse(moduleDTO(foundModule));
+    public ApiResponse getModule(Long moduleId) {
+        return moduleRepository.findByIdAndDeletedFalse(moduleId)
+                .map(module -> module.getCategory() != null
+                        ? new ApiResponse(moduleDTO(module))
+                        : new ApiResponse(ResponseError.DEFAULT_ERROR("Bu modulning kategoriyasi o‘chirilgan")))
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Modul")));
     }
 
     public ApiResponse update(Long moduleId,ModuleRequest moduleRequest){
@@ -127,14 +115,14 @@ public class ModuleService {
         return new ApiResponse("Modul yangilandi");
     }
 
-    public ApiResponse delete(Long moduleId){
-        Module module = moduleRepository.findByIdAndDeletedFalse(moduleId).orElse(null);
-        if (module == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Modul"));
-        }
-        module.setDeleted(true);
-        moduleRepository.save(module);
-        return new ApiResponse("Modul o'chirildi");
+    public ApiResponse delete(Long moduleId) {
+        return moduleRepository.findByIdAndDeletedFalse(moduleId)
+                .map(module -> {
+                    module.setDeleted(true);
+                    moduleRepository.save(module);
+                    return new ApiResponse("Modul o‘chirildi");
+                })
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Modul")));
     }
 
     private ModuleDTO moduleDTO(Module module){
