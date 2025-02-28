@@ -59,7 +59,6 @@ public class ModuleServiceTest {
         moduleDTO.setId(1L);
         moduleDTO.setName("Test Module");
         moduleDTO.setCategory("Test Category");
-        moduleDTO.setDeleted(false);
     }
 
     @Test
