@@ -18,9 +18,8 @@ import uz.sfera.edu_platform.repository.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,9 +32,8 @@ public class GroupService {
     private final GraphicDayRepository graphicDayRepository;
     private final LessonRepository lessonRepository;
 
-    public ApiResponse saveGroup(ReqGroup reqGroup){
-        boolean b = groupRepository.existsByName(reqGroup.getGroupName());
-        if(b){
+    public ApiResponse saveGroup(ReqGroup reqGroup) {
+        if (groupRepository.existsByName(reqGroup.getGroupName())) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Group"));
         }
 
@@ -54,71 +52,70 @@ public class GroupService {
             return new ApiResponse(ResponseError.NOTFOUND("Room"));
         }
 
-        List<DayOfWeek> dayOfWeekList = null;
-
-        if (reqGroup.getDayIds() != null) {
-            dayOfWeekList = new ArrayList<>(dayOfWeekRepository.findAllById(reqGroup.getDayIds()));
-        }
+        List<DayOfWeek> dayOfWeekList = reqGroup.getDayIds() != null
+                ? new ArrayList<>(dayOfWeekRepository.findAllById(reqGroup.getDayIds()))
+                : Collections.emptyList();
 
         LocalTime startDate = LocalTime.parse(reqGroup.getStartTime());
         LocalTime endDate = LocalTime.parse(reqGroup.getEndTime());
 
-        boolean b1 = graphicDayRepository.existsByGraphicDayInGroup(room.getId(), startDate, endDate);
-        if (b1){
+        if (graphicDayRepository.existsByGraphicDayInGroup(room.getId(), startDate, endDate)) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
         }
 
+        GraphicDay day = graphicDayRepository.save(
+                GraphicDay.builder()
+                        .room(room)
+                        .weekDay(dayOfWeekList)
+                        .startTime(startDate)
+                        .endTime(endDate)
+                        .build()
+        );
 
-        GraphicDay graphicDay = GraphicDay.builder()
-                .room(room)
-                .weekDay(dayOfWeekList)
-                .startTime(startDate)
-                .endTime(endDate)
-                .build();
-        GraphicDay day = graphicDayRepository.save(graphicDay);
+        groupRepository.save(
+                Group.builder()
+                        .name(reqGroup.getGroupName())
+                        .category(category)
+                        .teacher(teacher)
+                        .days(day)
+                        .active(true)
+                        .startDate(reqGroup.getStartDate())
+                        .endDate(reqGroup.getStartDate().plusDays(category.getDuration().longValue()))
+                        .build()
+        );
 
-        Group group = Group.builder()
-                .name(reqGroup.getGroupName())
-                .category(category)
-                .teacher(teacher)
-                .days(day)
-                .active(true)
-                .endDate(reqGroup.getStartDate().plusDays(category.getDuration()))
-                .startDate(reqGroup.getStartDate())
-                .build();
-        groupRepository.save(group);
         return new ApiResponse("Successfully saved group");
     }
 
 
 
+
     @Transactional
-    public ApiResponse search(String groupName,String teacherName, LocalDate startDate,
-                              LocalDate endDate,Long categoryId, int page, int size){
+    public ApiResponse search(String groupName, String teacherName, LocalDate startDate,
+                              LocalDate endDate, Long categoryId, int page, int size) {
 
-        Page<Group> groups = groupRepository.searchGroup(groupName, teacherName, startDate, endDate,categoryId,
-                PageRequest.of(page , size));
+        Page<Group> groups = groupRepository.searchGroup(groupName, teacherName, startDate, endDate, categoryId,
+                PageRequest.of(page, size));
 
-        List<GroupDTO> list = new ArrayList<>();
-        for (Group group : groups) {
+        List<GroupDTO> list = groups.stream().map(group -> {
             GraphicDay graphicDay = graphicDayRepository.findGraphicDay(group.getId()).orElse(null);
 
-            List<String> days = new ArrayList<>();
-            for (DayOfWeek dayOfWeek : group.getDays().getWeekDay()) {
-                days.add(dayOfWeek.getDayOfWeek().name());
-            }
+            List<String> days = group.getDays().getWeekDay().stream()
+                    .map(dayOfWeek -> dayOfWeek.getDayOfWeek().name())
+                    .collect(Collectors.toList());
 
-            list.add(convertGroupToGroupDTO(group,days, graphicDay != null ? graphicDay : null));
-        }
-        ResPageable resPageable = ResPageable.builder()
+            return convertGroupToGroupDTO(group, days, graphicDay);
+        }).collect(Collectors.toList());
+
+        return new ApiResponse(ResPageable.builder()
                 .page(page)
                 .size(size)
                 .totalPage(groups.getTotalPages())
                 .totalElements(groups.getTotalElements())
                 .body(list)
-                .build();
-        return new ApiResponse(resPageable);
+                .build());
     }
+
 
 
     @Transactional
@@ -128,21 +125,23 @@ public class GroupService {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
 
-        List<String> days = new ArrayList<>();
-        for (DayOfWeek dayOfWeek : group.getDays().getWeekDay()) {
-            days.add(dayOfWeek.getDayOfWeek().name());
-        }
+        List<String> days = group.getDays().getWeekDay().stream()
+                .map(dayOfWeek -> dayOfWeek.getDayOfWeek().name())
+                .collect(Collectors.toList());
+
         ResGroup resGroup = ResGroup.builder()
                 .id(group.getId())
                 .name(group.getName())
-                .categoryName(group.getCategory() != null ? group.getCategory().getName() : null)
-                .teacherName(group.getTeacher() != null ? group.getTeacher().getFullName() : null)
+                .categoryName(Optional.ofNullable(group.getCategory()).map(Category::getName).orElse(null))
+                .teacherName(Optional.ofNullable(group.getTeacher()).map(User::getFullName).orElse(null))
                 .startDate(group.getStartDate())
                 .endDate(group.getEndDate())
-                .active(group.getActive())
+                .active(group.isActive())
                 .studentCount(group.getStudents().size())
                 .countEndMonth(group.getEndDate().getMonthValue() - LocalDate.now().getMonthValue())
-                .countAllLessons(lessonRepository.countLessonsByCategoryId(group.getCategory().getId()))
+                .countAllLessons(Optional.ofNullable(group.getCategory())
+                        .map(category -> lessonRepository.countLessonsByCategoryId(category.getId()))
+                        .orElse(0))
                 .countGroupLessons(groupRepository.countGroupLessons(group.getId()))
                 .departureStudentCount(groupRepository.countGroup(group.getId()))
                 .days(days)
@@ -152,23 +151,23 @@ public class GroupService {
     }
 
 
+
     @Transactional
-    public ApiResponse getGroupsList(){
-        List<Group> all = groupRepository.findAll();
-        List<GroupListDTO> groupDTOList = new ArrayList<>();
-        for (Group group : all) {
-            GroupListDTO groupListDTO = GroupListDTO.builder()
-                    .id(group.getId())
-                    .name(group.getName())
-                    .categoryName(group.getCategory() != null ? group.getCategory().getName() : null)
-                    .teacherName(group.getTeacher() != null ? group.getTeacher().getFullName() : null)
-                    .startDate(group.getStartDate())
-                    .endDate(group.getEndDate())
-                    .build();
-            groupDTOList.add(groupListDTO);
-        }
+    public ApiResponse getGroupsList() {
+        List<GroupListDTO> groupDTOList = groupRepository.findAll().stream()
+                .map(group -> GroupListDTO.builder()
+                        .id(group.getId())
+                        .name(group.getName())
+                        .categoryName(Optional.ofNullable(group.getCategory()).map(Category::getName).orElse(null))
+                        .teacherName(Optional.ofNullable(group.getTeacher()).map(User::getFullName).orElse(null))
+                        .startDate(group.getStartDate())
+                        .endDate(group.getEndDate())
+                        .build())
+                .collect(Collectors.toList());
+
         return new ApiResponse(groupDTOList);
     }
+
 
 
     public ApiResponse updateGroup(Long groupId, ReqGroup reqGroup){
@@ -177,39 +176,36 @@ public class GroupService {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
 
-        List<DayOfWeek> dayOfWeekList = null;
-
-        if (reqGroup.getDayIds() != null) {
-            dayOfWeekList = new ArrayList<>(dayOfWeekRepository.findAllById(reqGroup.getDayIds()));
-        }
+        List<DayOfWeek> dayOfWeekList = reqGroup.getDayIds() != null
+                ? dayOfWeekRepository.findAllById(reqGroup.getDayIds())
+                : Collections.emptyList();
 
         GraphicDay graphicDay = graphicDayRepository.findGraphicDay(reqGroup.getRoomId()).orElse(null);
-        LocalTime startDate = LocalTime.parse(reqGroup.getStartTime());
-        LocalTime endDate = LocalTime.parse(reqGroup.getEndTime());
+        LocalTime startTime = LocalTime.parse(reqGroup.getStartTime());
+        LocalTime endTime = LocalTime.parse(reqGroup.getEndTime());
 
-        if (!Objects.equals(reqGroup.getRoomId(), Objects.requireNonNull(graphicDay).getRoom().getId())){
-            boolean b1 = graphicDayRepository.existsByGraphicDayInGroup(reqGroup.getRoomId(), startDate, endDate);
-            if (b1){
+        if (graphicDay == null || !Objects.equals(reqGroup.getRoomId(), graphicDay.getRoom().getId())) {
+            if (graphicDayRepository.existsByGraphicDayInGroup(reqGroup.getRoomId(), startTime, endTime)) {
                 return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
             }
+
             if (graphicDay != null) {
                 graphicDay.setWeekDay(dayOfWeekList);
-                graphicDay.setStartTime(startDate);
-                graphicDay.setEndTime(endDate);
+                graphicDay.setStartTime(startTime);
+                graphicDay.setEndTime(endTime);
                 graphicDayRepository.save(graphicDay);
             }
         }
-
 
         group.setName(reqGroup.getGroupName());
         group.setCategory(categoryRepository.findById(reqGroup.getCategoryId()).orElse(null));
         group.setTeacher(userRepository.findById(reqGroup.getTeacherId()).orElse(null));
         group.setStartDate(reqGroup.getStartDate());
         group.setDays(graphicDay);
+
         groupRepository.save(group);
         return new ApiResponse("Successfully updated group");
     }
-
 
 
     public ApiResponse deleteGroup(Long groupId){
@@ -235,7 +231,7 @@ public class GroupService {
                 .teacherId(group.getTeacher() != null ? group.getTeacher().getId() : null)
                 .startDate(group.getStartDate())
                 .endDate(group.getEndDate())
-                .active(group.getActive())
+                .active(group.isActive())
                 .studentCount(group.getStudents().size())
                 .countEndMonth(calculateCountEndMonth(group.getEndDate()))
                 .countAllLessons(lessonRepository.countLessonsByCategoryId(group.getCategory().getId()))

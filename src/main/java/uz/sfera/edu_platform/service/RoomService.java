@@ -20,6 +20,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,79 +32,73 @@ public class RoomService {
     private final DayOfWeekRepository dayOfWeekRepository;
 
 
-    public ApiResponse saveRoom(ReqRoom reqRoom){
-        boolean b = roomRepository.existsByName(reqRoom.getName());
-        if (b){
+    public ApiResponse saveRoom(ReqRoom reqRoom) {
+        if (roomRepository.existsByName(reqRoom.getName())) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu nomli xona"));
         }
 
-        //Parse qilishda xatolik
         LocalTime startTime = reqRoom.getStartTime();
         LocalTime endTime = reqRoom.getEndTime();
 
-        if (graphicDayRepository.existsByRoomIdAndStartTimeBeforeAndEndTimeAfter(reqRoom.getId(),startTime,endTime)){
-            return new ApiResponse(ResponseError.ALREADY_EXIST("Bu vaqtda xona "));
+        if (graphicDayRepository.existsByRoomIdAndStartTimeBeforeAndEndTimeAfter(reqRoom.getId(), startTime, endTime)) {
+            return new ApiResponse(ResponseError.ALREADY_EXIST("Bu vaqtda xona band"));
         }
 
-        Room room = Room.builder()
+        Room room = roomRepository.save(Room.builder()
                 .name(reqRoom.getName())
                 .color(reqRoom.getColor())
-                .build();
+                .build());
 
-        Room save = roomRepository.save(room);
-
-        List<DayOfWeek> dayOfWeeks = new ArrayList<>();
-        for (Integer weekDay : reqRoom.getWeekDays()) {
-            DayOfWeek dayOfWeek = dayOfWeekRepository.findById(weekDay).orElse(null);
-            if (dayOfWeek == null){
-                return new ApiResponse(ResponseError.NOTFOUND("WeekDays"));
-            }
-            dayOfWeeks.add(dayOfWeek);
+        List<DayOfWeek> dayOfWeeks = dayOfWeekRepository.findAllById(reqRoom.getWeekDays());
+        if (dayOfWeeks.size() != reqRoom.getWeekDays().size()) {
+            return new ApiResponse(ResponseError.NOTFOUND("WeekDays"));
         }
 
-        GraphicDay graphicDay = GraphicDay.builder()
+        GraphicDay graphicDay = graphicDayRepository.save(GraphicDay.builder()
                 .startTime(startTime)
                 .endTime(endTime)
                 .weekDay(dayOfWeeks)
-                .room(save)
-                .build();
+                .room(room)
+                .build());
 
-        GraphicDay day = graphicDayRepository.save(graphicDay);
-        save.setGraphicDayId(day.getId());
-        roomRepository.save(save);
+        room.setGraphicDayId(graphicDay.getId());
+        roomRepository.save(room);
 
         return new ApiResponse("Successfully saved");
     }
 
 
+
     public ApiResponse getRooms(String name, String color, int page, int size){
         PageRequest pageRequest = PageRequest.of(page, size);
         Page<ResRoom> allRooms = roomRepository.getAllRooms(name, color, pageRequest);
-        ResPageable resPageable = ResPageable.builder()
+        return new ApiResponse(ResPageable.builder()
                 .page(page)
                 .size(size)
                 .totalPage(allRooms.getTotalPages())
                 .totalElements(allRooms.getTotalElements())
                 .body(allRooms.getContent())
-                .build();
-        return new ApiResponse(resPageable);
+                .build());
     }
 
 
-    public ApiResponse getRoomsList(){
-        List<Room> all = roomRepository.findAll();
-        List<RoomDTO> resRooms = new ArrayList<>();
-        for (Room room : all) {
-            GraphicDay graphicDay = graphicDayRepository.findByRoomId(room.getId()).orElse(null);
-            RoomDTO roomDTO = RoomDTO.builder()
+    public ApiResponse getRoomsList() {
+        List<Room> allRooms = roomRepository.findAll();
+        Map<Long, GraphicDay> graphicDayMap = graphicDayRepository.findAll()
+                .stream()
+                .collect(Collectors.toMap(gd -> gd.getRoom().getId(), gd -> gd));
+
+        List<RoomDTO> resRooms = allRooms.stream().map(room -> {
+            GraphicDay graphicDay = graphicDayMap.get(room.getId());
+            return RoomDTO.builder()
                     .id(room.getId())
                     .name(room.getName())
                     .color(room.getColor())
                     .startTime(graphicDay != null ? graphicDay.getStartTime() : null)
                     .endTime(graphicDay != null ? graphicDay.getEndTime() : null)
                     .build();
-            resRooms.add(roomDTO);
-        }
+        }).collect(Collectors.toList());
+
         return new ApiResponse(resRooms);
     }
 
@@ -112,7 +109,7 @@ public class RoomService {
             return new ApiResponse(ResponseError.NOTFOUND("Room"));
         }
 
-        GraphicDay graphicDay = graphicDayRepository.findByRoomId(room.getId()).orElse(null);
+        GraphicDay graphicDay = graphicDayRepository.findByRoomId(roomId).orElse(null);
 
         RoomDTO roomDTO = RoomDTO.builder()
                 .id(room.getId())
@@ -121,8 +118,10 @@ public class RoomService {
                 .startTime(graphicDay != null ? graphicDay.getStartTime() : null)
                 .endTime(graphicDay != null ? graphicDay.getEndTime() : null)
                 .build();
+
         return new ApiResponse(roomDTO);
     }
+
 
 
 
@@ -137,24 +136,24 @@ public class RoomService {
 
         GraphicDay graphicDay = graphicDayRepository.findByRoomId(room.getId()).orElse(null);
 
-        LocalTime startTime = reqRoom.getStartTime();
-        LocalTime endTime = reqRoom.getEndTime();
+        List<DayOfWeek> dayOfWeeks = reqRoom.getWeekDays().stream()
+                .map(weekDay -> dayOfWeekRepository.findById(weekDay).orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
-        List<DayOfWeek> dayOfWeeks = new ArrayList<>();
-        for (Integer weekDay : reqRoom.getWeekDays()) {
-            DayOfWeek dayOfWeek = dayOfWeekRepository.findById(weekDay).orElse(null);
-            if (dayOfWeek == null){
-                return new ApiResponse(ResponseError.NOTFOUND("WeekDays"));
-            }
-            dayOfWeeks.add(dayOfWeek);
+        if (dayOfWeeks.size() != reqRoom.getWeekDays().size()) {
+            return new ApiResponse(ResponseError.NOTFOUND("WeekDays"));
         }
 
-        graphicDay.setStartTime(startTime);
-        graphicDay.setEndTime(endTime);
+
+        graphicDay.setStartTime(reqRoom.getStartTime());
+        graphicDay.setEndTime(reqRoom.getEndTime());
         graphicDay.setWeekDay(dayOfWeeks);
         graphicDay.setRoom(room);
+
         roomRepository.save(room);
         graphicDayRepository.save(graphicDay);
+
         return new ApiResponse("Successfully updated");
     }
 
@@ -165,13 +164,11 @@ public class RoomService {
             return new ApiResponse(ResponseError.NOTFOUND("Room"));
         }
 
-        GraphicDay graphicDay = graphicDayRepository.findByRoomId(room.getId()).orElse(null);
-        if (graphicDay == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Roomning grafigi"));
-        }
+        graphicDayRepository.findByRoomId(room.getId())
+                .ifPresent(graphicDayRepository::delete);
 
-        graphicDayRepository.delete(graphicDay);
         roomRepository.delete(room);
         return new ApiResponse("Successfully deleted");
     }
+
 }
