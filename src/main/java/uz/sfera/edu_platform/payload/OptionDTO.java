@@ -12,5 +12,5 @@ import lombok.*;
 public class OptionDTO {
     private Long id;
     private String text;
-    private Boolean isCorrect;
+    private boolean isCorrect;
 }

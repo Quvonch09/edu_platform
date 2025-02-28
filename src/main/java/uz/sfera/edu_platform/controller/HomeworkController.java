@@ -32,7 +32,7 @@ public class HomeworkController {
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> checkHomework(
             @PathVariable Long homeworkId,
-            @RequestParam Integer ball
+            @RequestParam byte ball
     ){
         return ResponseEntity.ok(homeworkService.checkHomework(homeworkId, ball));
     }
