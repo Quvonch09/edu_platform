@@ -23,14 +23,17 @@ import java.util.List;
 @Table(name = "Users")
 public class User extends AbsEntity implements UserDetails {
 
+    @Column(nullable = false)
     private String fullName;
 
+    @Column(nullable = false, unique = true)
     private String phoneNumber;
 
     private Integer age;
 
     private String parentPhoneNumber;
 
+    @Column(nullable = false)
     private String password;
 
     @ManyToMany

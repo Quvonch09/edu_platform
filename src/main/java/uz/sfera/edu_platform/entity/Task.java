@@ -14,6 +14,7 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String title;
 
     @OneToOne
@@ -21,4 +22,6 @@ public class Task {
 
     @ManyToOne
     private Lesson lesson;
+
+    private boolean deleted;
 }

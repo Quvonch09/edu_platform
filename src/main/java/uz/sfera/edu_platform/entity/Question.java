@@ -15,6 +15,7 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String question;
 
     @Enumerated(EnumType.STRING)

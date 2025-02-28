@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,11 +38,8 @@ public class StudentService {
     private final JwtProvider jwtProvider;
 
     @Transactional
-    public ApiResponse saveStudent(ReqStudent reqStudent){
-        boolean b = userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(
-                reqStudent.getPhoneNumber(), Role.ROLE_STUDENT);
-
-        if(b){
+    public ApiResponse saveStudent(ReqStudent reqStudent) {
+        if (userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(reqStudent.getPhoneNumber(), Role.ROLE_STUDENT)) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Student"));
         }
 
@@ -66,21 +64,27 @@ public class StudentService {
                 .build();
 
         group.getStudents().add(student);
-        userRepository.save(student);
         groupRepository.save(group);
+
+        userRepository.save(student);
         return new ApiResponse("Successfully saved student");
     }
+
 
 
 
     public ApiResponse searchStudent(String fullName, String phoneNumber,
                                      UserStatus userStatus, String groupName,
                                      Long teacherId, Integer startAge, Integer endAge, Boolean hasPaid,
-                                     int page, int size){
+                                     int page, int size) {
 
-        Page<ResStudent>
-            users = userRepository.searchStudents(fullName, phoneNumber, userStatus !=null ? userStatus.name() : null, groupName,
-                    teacherId, startAge, endAge,hasPaid , PageRequest.of(page, size));
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        Page<ResStudent> users = userRepository.searchStudents(
+                fullName, phoneNumber,
+                Optional.ofNullable(userStatus).map(Enum::name).orElse(null),
+                groupName, teacherId, startAge, endAge, hasPaid, pageRequest
+        );
 
         ResPageable resPageable = ResPageable.builder()
                 .page(page)
@@ -89,9 +93,10 @@ public class StudentService {
                 .totalElements(users.getTotalElements())
                 .body(users.getContent())
                 .build();
-        return new ApiResponse(resPageable);
 
+        return new ApiResponse(resPageable);
     }
+
 
 
 
@@ -120,33 +125,42 @@ public class StudentService {
 
 
     @Transactional
-    public ApiResponse updateStudent(Long studentId, ReqStudent reqStudent){
+    public ApiResponse updateStudent(Long studentId, ReqStudent reqStudent) {
         User user = userRepository.findById(studentId).orElse(null);
-        if(user == null){
+        if (user == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
 
-        Group group1 = groupRepository.findById(reqStudent.getGroupId()).orElse(null);
-        if(group1 == null){
+        Group newGroup = groupRepository.findById(reqStudent.getGroupId()).orElse(null);
+        if (newGroup == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
 
-        Group group = groupRepository.findGroup(user.getId());
-        group.getStudents().remove(user);
+        Group oldGroup = groupRepository.findGroup(user.getId());
+        if (oldGroup != null) {
+            oldGroup.getStudents().remove(user);
+        }
 
         user.setFullName(reqStudent.getFullName());
         user.setPhoneNumber(reqStudent.getPhoneNumber());
         user.setParentPhoneNumber(reqStudent.getParentPhoneNumber());
         user.setAge(reqStudent.getAge());
         user.setFile(fileRepository.findById(reqStudent.getFileId()).orElse(null));
-        user.setPassword(passwordEncoder.encode(reqStudent.getPassword()));
-        group1.getStudents().add(user);
-        groupRepository.save(group);
+
+        if (reqStudent.getPassword() != null && !reqStudent.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(reqStudent.getPassword()));
+        }
+
+        newGroup.getStudents().add(user);
+
         userRepository.save(user);
+
         String token = jwtProvider.generateToken(user.getPhoneNumber());
-        ResponseLogin responseLogin = new ResponseLogin(token,user.getRole().name(), user.getId());
+        ResponseLogin responseLogin = new ResponseLogin(token, user.getRole().name(), user.getId());
+
         return new ApiResponse(responseLogin);
     }
+
 
 
     @Transactional

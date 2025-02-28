@@ -15,12 +15,12 @@ import java.util.List;
 @Entity
 @Table(name = "groups")
 public class Group extends AbsEntity {
+    @Column(nullable = false)
     private String name;
 
     @ManyToOne
     private User teacher;
-
-    private Boolean active;
+    private boolean active;
 
     @ManyToOne
     private Category category;

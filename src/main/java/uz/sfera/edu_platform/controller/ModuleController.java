@@ -47,8 +47,7 @@ public class ModuleController {
     }
 
     @GetMapping("getByCategory")
-    @Operation(summary = "(TEACHER/ADMIN/CEO) Categorydagi modullarni ko'rish")
-    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_CEO', 'ROLE_STUDENT')")
+    @Operation(summary = "Categorydagi modullarni ko'rish")
     public ResponseEntity<ApiResponse> getByCategory(
             @RequestParam(required = false) Long categoryId,
             @CurrentUser User user,

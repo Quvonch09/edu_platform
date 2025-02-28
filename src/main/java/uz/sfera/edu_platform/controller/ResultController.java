@@ -35,7 +35,7 @@ public class ResultController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(resultService.getUserResultHistory(user, page, size));
+        return ResponseEntity.ok(resultService.getUserResults(user.getId(), page, size));
     }
 
     @GetMapping("/{resultId}")

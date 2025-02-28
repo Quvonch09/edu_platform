@@ -81,8 +81,8 @@ public class QuizController {
     public ResponseEntity<ApiResponse> passTest(
             @PathVariable Long quizId,
             @RequestBody List<ReqPassTest> passTestList,
-            @CurrentUser User user,
-            @RequestParam Long timeTaken) {
+            @CurrentUser User user
+    ) {
         return ResponseEntity.ok(quizService.passTest(passTestList, user,quizId));
     }
 }
