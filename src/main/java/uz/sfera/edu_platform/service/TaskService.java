@@ -50,10 +50,13 @@ public class TaskService {
         if (lesson == null){
             return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
         }
-        List<Task> tasks = taskRepository.findByLessonIdAndDeletedTrue(lessonId);
+        
+        List<Task> tasks = taskRepository.findByLessonIdAndDeleted(lessonId, (byte) 0);
+
         if (tasks.isEmpty()){
             return new ApiResponse(ResponseError.NOTFOUND("Tasklar"));
         }
+
         List<TaskDTO> taskDTOS = tasks.stream()
                 .map(this::taskDTO)
                 .toList();

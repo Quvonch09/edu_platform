@@ -117,7 +117,7 @@ public class CategoryService {
         groups.forEach(group -> group.setCategory(null));
         groupRepository.saveAll(groups);
 
-        List<Module> modules = moduleRepository.findAllByCategoryIdAndDeletedFalse(category.getId());
+        List<Module> modules = moduleRepository.findAllByCategoryIdAndDeleted(category.getId(), (byte) 0);
         modules.forEach(module -> module.setCategory(null));
         moduleRepository.saveAll(modules);
 
