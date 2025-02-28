@@ -36,8 +36,8 @@ public class RoomService {
         }
 
         //Parse qilishda xatolik
-        LocalTime startTime = LocalTime.parse(reqRoom.getStartTime());
-        LocalTime endTime = LocalTime.parse(reqRoom.getEndTime());
+        LocalTime startTime = reqRoom.getStartTime();
+        LocalTime endTime = reqRoom.getEndTime();
 
         if (graphicDayRepository.existsByRoomIdAndStartTimeBeforeAndEndTimeAfter(reqRoom.getId(),startTime,endTime)){
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu vaqtda xona "));
@@ -137,8 +137,8 @@ public class RoomService {
 
         GraphicDay graphicDay = graphicDayRepository.findByRoomId(room.getId()).orElse(null);
 
-        LocalTime startTime = LocalTime.parse(reqRoom.getStartTime());
-        LocalTime endTime = LocalTime.parse(reqRoom.getEndTime());
+        LocalTime startTime = reqRoom.getStartTime();
+        LocalTime endTime = reqRoom.getEndTime();
 
         List<DayOfWeek> dayOfWeeks = new ArrayList<>();
         for (Integer weekDay : reqRoom.getWeekDays()) {
