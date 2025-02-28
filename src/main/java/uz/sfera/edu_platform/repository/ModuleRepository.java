@@ -10,9 +10,9 @@ import java.util.Optional;
 
 public interface ModuleRepository extends JpaRepository<Module,Long> {
     boolean existsByName(String name);
-    Page<Module> findByCategoryIdAndDeletedFalse(Long categoryId, Pageable pageable);
-    Page<Module> findByNameContainingIgnoreCaseAndDeletedFalse(String name, Pageable pageable);
+    Page<Module> findByCategoryIdAndDeleted(Long categoryId, byte deleted, Pageable pageable);
+    Page<Module> findByNameContainingIgnoreCaseAndDeleted(String name, byte deleted, Pageable pageable);
 
-    Optional<Module> findByIdAndDeletedFalse(Long id);
-    List<Module> findAllByCategoryIdAndDeletedFalse(Long categoryId);
+    Optional<Module> findByIdAndDeleted(Long id,byte deleted);
+    List<Module> findAllByCategoryIdAndDeleted(Long categoryId, byte deleted);
 }

@@ -1,8 +1,5 @@
 package uz.sfera.edu_platform.component;
 
-import uz.sfera.edu_platform.entity.DayOfWeek;
-import uz.sfera.edu_platform.entity.enums.WeekDay;
-import uz.sfera.edu_platform.repository.DayOfWeekRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -17,7 +14,6 @@ import uz.sfera.edu_platform.repository.UserRepository;
 public class DataLoader implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final DayOfWeekRepository dayOfWeekRepository;
 
 
     @Value("${spring.jpa.hibernate.ddl-auto}")
@@ -36,28 +32,6 @@ public class DataLoader implements CommandLineRunner {
             newUser.setAccountNonLocked(true);
             newUser.setCredentialsNonExpired(true);
             userRepository.save(newUser);
-
-            DayOfWeek monday = new DayOfWeek();
-            monday.setDayOfWeek(WeekDay.MONDAY);
-            dayOfWeekRepository.save(monday);
-            DayOfWeek tuesday = new DayOfWeek();
-            tuesday.setDayOfWeek(WeekDay.TUESDAY);
-            dayOfWeekRepository.save(tuesday);
-            DayOfWeek wednesday = new DayOfWeek();
-            wednesday.setDayOfWeek(WeekDay.WEDNESDAY);
-            dayOfWeekRepository.save(wednesday);
-            DayOfWeek thursday = new DayOfWeek();
-            thursday.setDayOfWeek(WeekDay.THURSDAY);
-            dayOfWeekRepository.save(thursday);
-            DayOfWeek friday = new DayOfWeek();
-            friday.setDayOfWeek(WeekDay.FRIDAY);
-            dayOfWeekRepository.save(friday);
-            DayOfWeek saturday = new DayOfWeek();
-            saturday.setDayOfWeek(WeekDay.SATURDAY);
-            dayOfWeekRepository.save(saturday);
-            DayOfWeek sunday = new DayOfWeek();
-            sunday.setDayOfWeek(WeekDay.SUNDAY);
-            dayOfWeekRepository.save(sunday);
         }
     }
 }

@@ -73,10 +73,15 @@ public class OptionService {
     }
 
     public OptionDTO optionDTO(Option option){
+        boolean active = false;
+        if (option.getCorrect() == 1){
+            active = true;
+        }
+
         return OptionDTO.builder()
                 .id(option.getId())
                 .text(option.getName())
-                .isCorrect(option.getCorrect())
+                .isCorrect(active)
                 .build();
     }
 }

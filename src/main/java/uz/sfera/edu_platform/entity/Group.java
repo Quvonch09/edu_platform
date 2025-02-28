@@ -33,7 +33,7 @@ public class Group extends AbsEntity {
     private LocalDate endDate;
 
     @OneToOne
-    private GraphicDay graphicDay;
+    private GraphicDay days;
 
-    private boolean active; //enum status (ochiq, yopildi, tugatildi)
+    private boolean active;
 }

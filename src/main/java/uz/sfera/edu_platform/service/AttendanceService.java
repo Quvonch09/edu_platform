@@ -216,13 +216,9 @@ public class AttendanceService {
                 .orElseThrow(() -> new NotFoundException("Group not found"));
 
         // WeekDay enum qiymatlarini olish
-        Set<WeekDay> weekDays = Optional.ofNullable(group.getDays())
+        Set<WeekDay> weekDays = new HashSet<>(Optional.ofNullable(group.getDays())
                 .map(GraphicDay::getWeekDay)
-                .filter(list -> !list.isEmpty())
-                .map(list -> list.stream()
-                        .map(DayOfWeek::getDayOfWeek) // DayOfWeek obyektidan enumni olish
-                        .collect(Collectors.toSet()))
-                .orElse(Collections.emptySet());
+                .orElse(Collections.emptyList()));
 
         if (weekDays.isEmpty()) return Collections.emptyList();
 

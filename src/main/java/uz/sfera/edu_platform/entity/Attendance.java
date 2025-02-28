@@ -15,9 +15,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 public class Attendance extends AbsEntity {
-// keldi, sababsiz, sababli, empty
-    private Boolean attendance;//enum qilish kerak
 
+    private Boolean attendance;
     private LocalDate date;
 
     @ManyToOne

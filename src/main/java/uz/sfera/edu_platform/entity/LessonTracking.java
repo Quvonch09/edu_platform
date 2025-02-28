@@ -15,7 +15,6 @@ import lombok.*;
 public class LessonTracking extends AbsEntity {
     @ManyToOne
     private Lesson lesson;
-
     @OneToOne
     private Group group;
 }

@@ -17,18 +17,13 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 @Entity
-public class Payment extends AbsEntity { //TODO OZOD repositoryga kirish
-
-    private double price;
-
+public class Payment extends AbsEntity {
+    private Double price;
     @ManyToOne
     private User student;
-
     private LocalDate paymentDate;
-
     @Enumerated(EnumType.STRING)
     private PaymentStatusEnum paymentStatus;
-
     @Enumerated(EnumType.STRING)
     private PaymentEnum paymentType;
 }

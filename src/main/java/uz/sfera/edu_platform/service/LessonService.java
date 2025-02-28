@@ -30,7 +30,7 @@ public class LessonService {
 
     public ApiResponse createLesson(LessonRequest lessonRequest) {
 
-        Module module = moduleRepository.findByIdAndDeletedFalse(lessonRequest.getModuleId()).orElse(null);
+        Module module = moduleRepository.findByIdAndDeleted(lessonRequest.getModuleId(),(byte) 0).orElse(null);
         if (module == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Module"));
         }
@@ -54,10 +54,10 @@ public class LessonService {
 
     @Transactional
     public ApiResponse getLessonInModule(Long moduleId) {
-        Module module = moduleRepository.findByIdAndDeletedFalse(moduleId).orElse(null);
+        Module module = moduleRepository.findByIdAndDeleted(moduleId, (byte) 0).orElse(null);
         if (module == null) return new ApiResponse(ResponseError.NOTFOUND("Modul"));
 
-        List<LessonDTO> lessons = lessonRepository.findByModuleIdAndDeletedFalse(moduleId).stream()
+        List<LessonDTO> lessons = lessonRepository.findByModuleIdAndDeleted(moduleId, (byte) 0).stream()
                 .filter(l -> l.getModule().getCategory() != null)
                 .map(this::lessonDTO).toList();
 
@@ -65,11 +65,11 @@ public class LessonService {
     }
 
     public ApiResponse updateLesson(Long lessonId, LessonRequest lessonRequest) {
-        Lesson lesson = lessonRepository.findByIdAndDeletedFalse(lessonId).orElse(null);
+        Lesson lesson = lessonRepository.findByIdAndDeleted(lessonId, (byte) 0).orElse(null);
         if (lesson == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
         }
-        Module module = moduleRepository.findByIdAndDeletedFalse(lessonRequest.getModuleId()).orElse(null);
+        Module module = moduleRepository.findByIdAndDeleted(lessonRequest.getModuleId(), (byte) 0).orElse(null);
         if (module == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Modul"));
         }
@@ -84,7 +84,7 @@ public class LessonService {
 
 
     public ApiResponse delete(Long lessonId) {
-        return lessonRepository.findByIdAndDeletedFalse(lessonId).map(lesson -> {
+        return lessonRepository.findByIdAndDeleted(lessonId, (byte) 0).map(lesson -> {
             lesson.setDeleted((byte) 1);
             lessonRepository.save(lesson);
             return new ApiResponse("Lesson o'chirildi");
@@ -95,8 +95,14 @@ public class LessonService {
     public ApiResponse allowLesson(ReqLessonTracking req) {
         Lesson lesson = lessonRepository.findById(req.getLessonId()).orElse(null);
         Group group = groupRepository.findById(req.getGroupId()).orElse(null);
-        if (lesson == null || lesson.getDeleted() == 1 || group == null)
+
+        if (lesson == null || lesson.getDeleted() == 1 || group == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Lesson yoki Group"));
+        }
+
+        if (lessonTrackingRepository.existsByLessonIdAndGroupId(lesson.getId(), group.getId())) {
+            return new ApiResponse(ResponseError.ALREADY_EXIST("LessonTracking"));
+        }
 
         lessonTrackingRepository.save(new LessonTracking(lesson,group));
         return new ApiResponse("Lesson guruh uchun ochildi");
@@ -105,7 +111,7 @@ public class LessonService {
     public ApiResponse search(String name, int size, int page) {
         Page<Lesson> lessons = name == null || name.trim().isEmpty()
                 ? lessonRepository.findAll(PageRequest.of(page, size))
-                : lessonRepository.findByNameAndDeletedFalse(name, PageRequest.of(page, size));
+                : lessonRepository.findByNameAndDeleted(name, (byte) 0,PageRequest.of(page, size));
 
         return new ApiResponse(new ResPageable(page, size, lessons.getTotalPages(),
                 lessons.getTotalElements(), lessons.map(this::lessonDTO).toList()));
@@ -125,13 +131,13 @@ public class LessonService {
     }
 
     public ApiResponse getStatistics() {
-        long totalLessons = lessonRepository.countByDeletedFalse();
-        long deletedLessons = lessonRepository.countByDeletedTrue();
+        long totalLessons = lessonRepository.countByDeleted((byte) 0);
+        long deletedLessons = lessonRepository.countByDeleted((byte) 1);
 
         List<Map<String, Object>> moduleStatistics = moduleRepository.findAll().stream()
                 .map(module -> {
-                    long lessonCount = lessonRepository.countByModuleIdAndDeletedFalse(module.getId());
-                    long deletedLessonCount = lessonRepository.countByModuleIdAndDeletedTrue(module.getId());
+                    long lessonCount = lessonRepository.countByModuleIdAndDeleted(module.getId(),(byte) 0);
+                    long deletedLessonCount = lessonRepository.countByModuleIdAndDeleted(module.getId(), (byte) 1);
 
                     Map<String, Object> moduleStat = new HashMap<>();
                     moduleStat.put("moduleId", module.getId());

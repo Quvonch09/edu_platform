@@ -20,12 +20,11 @@ public class Category extends AbsEntity {
     @Column(nullable = false)
     private double coursePrice;
 
-    private Integer duration; // byte
+    private byte duration; // bayt
 
-    private boolean active; // byte ga utqazish kerak
+    private byte active;
 
     @OneToOne
     private File file;
 
-//    private byte active; // 0 = false , 1 = ture
 }

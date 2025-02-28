@@ -12,6 +12,7 @@ import java.time.LocalTime;
 @Builder
 @Entity
 public class Room {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

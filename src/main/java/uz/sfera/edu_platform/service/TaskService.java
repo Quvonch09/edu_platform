@@ -31,7 +31,7 @@ public class TaskService {
                 .title(reqTask.getTitle())
                 .file(file)
                 .lesson(lesson)
-                .deleted(false)
+                .deleted((byte) 0)
                 .build();
         taskRepository.save(task);
         return new ApiResponse("Task saqlandi");
@@ -50,10 +50,13 @@ public class TaskService {
         if (lesson == null){
             return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
         }
-        List<Task> tasks = taskRepository.findByLessonIdAndDeletedTrue(lessonId);
+        
+        List<Task> tasks = taskRepository.findByLessonIdAndDeleted(lessonId, (byte) 0);
+
         if (tasks.isEmpty()){
             return new ApiResponse(ResponseError.NOTFOUND("Tasklar"));
         }
+
         List<TaskDTO> taskDTOS = tasks.stream()
                 .map(this::taskDTO)
                 .toList();
@@ -86,7 +89,8 @@ public class TaskService {
         if (task == null){
             return new ApiResponse(ResponseError.NOTFOUND("Task"));
         }
-        task.setDeleted(true);
+
+        task.setDeleted((byte) 1);
         taskRepository.save(task);
         return new ApiResponse("Task o'chirildi");
     }

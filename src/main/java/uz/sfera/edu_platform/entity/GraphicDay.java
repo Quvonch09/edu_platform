@@ -19,7 +19,6 @@ public class GraphicDay {
     private Long id;
 
     private LocalTime startTime;
-
     private LocalTime endTime;
 
     @ElementCollection
