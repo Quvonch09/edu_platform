@@ -20,6 +20,7 @@ import uz.sfera.edu_platform.repository.ModuleRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,41 +31,44 @@ public class CategoryService {
     private final ModuleRepository moduleRepository;
 
     public ApiResponse saveCategory(CategoryDTO categoryDTO) {
-        boolean b = categoryRepository.existsByName(categoryDTO.getName());
-        if (b) {
+        if (categoryRepository.existsByName(categoryDTO.getName())) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Category"));
         }
 
-        Category category = Category.builder()
-                .name(categoryDTO.getName())
-                .description(categoryDTO.getDescription())
-                .coursePrice(categoryDTO.getPrice())
-                .duration(categoryDTO.getDuration())
-                .file(fileRepository.findById(categoryDTO.getFileId()).orElse(null))
-                .active(true)
-                .deleted(false)
-                .build();
+        Category category = new Category(
+                categoryDTO.getName(),
+                categoryDTO.getDescription(),
+                categoryDTO.getPrice(),
+                categoryDTO.getDuration(),
+                true,
+                false,
+                fileRepository.findById(categoryDTO.getFileId()).orElse(null)
+                );
+
         categoryRepository.save(category);
         return new ApiResponse("Category successfully saved");
     }
 
 
+
     public ApiResponse getAllCategories(String name, String description, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size);
-        Page<Category> pages = categoryRepository.getAllCategory(name, description, pageRequest);
-        if(pages.isEmpty()){
+        Page<Category> pages = categoryRepository.getAllCategory(name, description, PageRequest.of(page, size));
+
+        if (!pages.hasContent()) {
             return new ApiResponse(ResponseError.NOTFOUND("Category"));
         }
 
-        ResPageable resPageable = ResPageable.builder()
-                .page(page)
-                .size(size)
-                .totalElements(pages.getTotalElements())
-                .totalPage(pages.getTotalPages())
-                .body(pages.getContent().stream().map(this::convertCategoryToCategoryDTO).toList())
-                .build();
-        return new ApiResponse(resPageable);
+        return new ApiResponse(new ResPageable(
+                page,
+                size,
+                pages.getTotalPages(),
+                pages.getTotalElements(),
+                pages.getContent().stream()
+                        .map(this::convertCategoryToCategoryDTO)
+                        .collect(Collectors.toList())
+        ));
     }
+
 
 
 
@@ -87,8 +91,7 @@ public class CategoryService {
             return new ApiResponse(ResponseError.NOTFOUND("Category"));
         }
 
-        boolean b = categoryRepository.existsByNameAndIdNot(category.getName(),category.getId());
-        if (b) {
+        if (categoryRepository.existsByNameAndIdNot(categoryDTO.getName(), categoryId)) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Category"));
         }
 
@@ -97,10 +100,11 @@ public class CategoryService {
         category.setDuration(categoryDTO.getDuration());
         category.setCoursePrice(categoryDTO.getPrice());
         category.setFile(fileRepository.findById(categoryDTO.getFileId()).orElse(null));
-        categoryRepository.save(category);
 
+        categoryRepository.save(category);
         return new ApiResponse("Category successfully updated");
     }
+
 
 
     public ApiResponse deleteCategory(Long categoryId) {
@@ -109,20 +113,20 @@ public class CategoryService {
             return new ApiResponse(ResponseError.NOTFOUND("Category"));
         }
 
-        for (Group group : groupRepository.findAllByCategoryId(category.getId())) {
-            group.setCategory(null);
-            groupRepository.save(group);
-        }
+        List<Group> groups = groupRepository.findAllByCategoryId(category.getId());
+        groups.forEach(group -> group.setCategory(null));
+        groupRepository.saveAll(groups);
 
-        for (Module module : moduleRepository.findAllByCategoryIdAndDeletedFalse(category.getId())) {
-            module.setCategory(null);
-            moduleRepository.save(module);
-        }
+        List<Module> modules = moduleRepository.findAllByCategoryIdAndDeletedFalse(category.getId());
+        modules.forEach(module -> module.setCategory(null));
+        moduleRepository.saveAll(modules);
 
         category.setDeleted(true);
         categoryRepository.save(category);
+
         return new ApiResponse("Category successfully deleted");
     }
+
 
 
     public ApiResponse updateActiveCategory(Long categoryId, boolean active) {
@@ -143,7 +147,7 @@ public class CategoryService {
                 .description(category.getDescription())
                 .price(category.getCoursePrice())
                 .duration(category.getDuration())
-                .active(category.getActive())
+                .active(category.isActive())
                 .fileId(Optional.ofNullable(category.getFile()).map(File::getId).orElse(null))
                 .build();
     }

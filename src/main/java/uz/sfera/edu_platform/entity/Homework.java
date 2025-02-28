@@ -13,13 +13,14 @@ import lombok.*;
 @Builder
 @Entity
 public class Homework extends AbsEntity {
+
     private String answer;
     private Integer ball; // 5 ball
     @OneToOne
     private File file;
     @ManyToOne
     private User student;
-    private Boolean checked;
+    private boolean checked;
     @ManyToOne
     private Task task;
 }

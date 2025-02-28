@@ -13,8 +13,9 @@ public class Option {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false)
     private String name;
     @ManyToOne
     private Question question;
-    private Boolean correct;
+    private boolean correct;
 }

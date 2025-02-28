@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -36,18 +38,13 @@ public class PaymentService {
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
 
-        if (user.getRole().equals(Role.ROLE_STUDENT)){
-            if (paymentType.equals(PaymentEnum.CHIQIM)){
-                return new ApiResponse(ResponseError.DEFAULT_ERROR("Student faqat tulov qila oladi"));
-            }
+        if (Objects.equals(user.getRole(), Role.ROLE_STUDENT) && Objects.equals(paymentType, PaymentEnum.CHIQIM)) {
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Student faqat tulov qila oladi"));
         }
 
-        if (paymentType.equals(PaymentEnum.CHIQIM)){
-            if (paymentStatus == null){
-                return new ApiResponse(ResponseError.DEFAULT_ERROR("Status null bulishi mumkin emas"));
-            }
+        if (Objects.equals(paymentType, PaymentEnum.CHIQIM) && paymentStatus == null) {
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Status null bulishi mumkin emas"));
         }
-
 
         Payment payment = Payment.builder()
                 .student(user)
@@ -56,24 +53,21 @@ public class PaymentService {
                 .paymentStatus(paymentStatus)
                 .paymentType(paymentType)
                 .build();
+
         paymentRepository.save(payment);
         return new ApiResponse("Successfully saved");
     }
 
 
+
     public ApiResponse getPaymentCount() {
-        Integer studentCount = userRepository.countAllByStudent();
-        Integer countStudentsHasPaid = userRepository.countStudentsHasPaid();
-
-        studentCount = (studentCount != null) ? studentCount : 0;
-        countStudentsHasPaid = (countStudentsHasPaid != null) ? countStudentsHasPaid : 0;
-
-        int countStudentsNotPaid = Math.max(studentCount - countStudentsHasPaid, 0);
+        int studentCount = Optional.ofNullable(userRepository.countAllByStudent()).orElse(0);
+        int countStudentsHasPaid = Optional.ofNullable(userRepository.countStudentsHasPaid()).orElse(0);
 
         ResPayment resPayment = ResPayment.builder()
                 .countAllStudent(studentCount)
                 .tulovQilganStudent(countStudentsHasPaid)
-                .tulovQilmaganStudent(countStudentsNotPaid)
+                .tulovQilmaganStudent(Math.max(studentCount - countStudentsHasPaid, 0))
                 .tushum(paymentRepository.countPrice(PaymentEnum.TUSHUM))
                 .chiqim(paymentRepository.countPrice(PaymentEnum.CHIQIM))
                 .build();
@@ -83,23 +77,22 @@ public class PaymentService {
 
 
 
-    public ApiResponse search(String userName,PaymentStatusEnum paymentStatus, int page, int size){
-        PageRequest pageRequest = PageRequest.of(page, size);
-        Page<Payment> payments = paymentRepository.searchPayments(userName,paymentStatus != null
-                        ? paymentStatus.name() : null
-                ,pageRequest);
 
-        List<PaymentDTO> paymentDTOList = new ArrayList<>();
-        for (Payment payment : payments) {
-            PaymentDTO paymentDTO = PaymentDTO.builder()
-                    .id(payment.getId())
-                    .fullName(payment.getStudent().getFullName())
-                    .paymentDate(payment.getPaymentDate())
-                    .paymentStatus(payment.getPaymentStatus())
-                    .price(payment.getPrice())
-                    .build();
-            paymentDTOList.add(paymentDTO);
-        }
+    public ApiResponse search(String userName, PaymentStatusEnum paymentStatus, int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<Payment> payments = paymentRepository.searchPayments(
+                userName, Optional.ofNullable(paymentStatus).map(Enum::name).orElse(null), pageRequest
+        );
+
+        List<PaymentDTO> paymentDTOList = payments.stream()
+                .map(payment -> PaymentDTO.builder()
+                        .id(payment.getId())
+                        .fullName(payment.getStudent().getFullName())
+                        .paymentDate(payment.getPaymentDate())
+                        .paymentStatus(payment.getPaymentStatus())
+                        .price(payment.getPrice())
+                        .build())
+                .toList();
 
         ResPageable resPageable = ResPageable.builder()
                 .page(page)
@@ -108,6 +101,7 @@ public class PaymentService {
                 .totalPage(payments.getTotalPages())
                 .body(paymentDTOList)
                 .build();
+
         return new ApiResponse(resPageable);
     }
 
@@ -124,14 +118,16 @@ public class PaymentService {
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
 
-        payment.setPaymentStatus(paymentStatus);
-        payment.setPaymentType(paymentType);
+        payment.setPaymentStatus(Objects.requireNonNull(paymentStatus, "Payment status cannot be null"));
+        payment.setPaymentType(Objects.requireNonNull(paymentType, "Payment type cannot be null"));
         payment.setPaymentDate(reqPayment.getPaymentDate());
         payment.setStudent(user);
         payment.setPrice(reqPayment.getPrice());
+
         paymentRepository.save(payment);
         return new ApiResponse("Successfully updated");
     }
+
 
 
 
@@ -144,6 +140,7 @@ public class PaymentService {
         paymentRepository.delete(payment);
         return new ApiResponse("Successfully deleted");
     }
+
 
 
     public ApiResponse  getStatistic(){

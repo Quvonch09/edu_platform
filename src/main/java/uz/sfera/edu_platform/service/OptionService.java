@@ -19,22 +19,22 @@ public class OptionService {
     private final OptionRepository optionRepository;
     private final QuestionRepository questionRepository;
 
-    public String saveOption(Long questionId,List<ReqOption> reqOption){
-        Question question = questionRepository.findById(questionId).orElse(null);
-        if (question == null){
-            return "Question not found";
-        }
-        for (ReqOption option : reqOption) {
-            Option option1 = Option.builder()
-                    .name(option.getText())
-                    .correct(option.isCorrect())
-                    .question(question)
-                    .build();
-            optionRepository.save(option1);
-        }
-
-        return "Optionlar saqlandi";
+    public String saveOption(Long questionId, List<ReqOption> reqOptions) {
+        return questionRepository.findById(questionId)
+                .map(question -> {
+                    List<Option> options = reqOptions.stream()
+                            .map(opt -> Option.builder()
+                                    .name(opt.getText())
+                                    .correct(opt.isCorrect())
+                                    .question(question)
+                                    .build())
+                            .toList();
+                    optionRepository.saveAll(options);
+                    return "Optionlar saqlandi";
+                })
+                .orElse("Question not found");
     }
+
 
 //    public ApiResponse updateOption(Long optionId,ReqOption reqOption){
 //        Option option = optionRepository.findById(optionId).orElse(null);
@@ -76,7 +76,7 @@ public class OptionService {
         return OptionDTO.builder()
                 .id(option.getId())
                 .text(option.getName())
-                .isCorrect(option.getCorrect())
+                .isCorrect(option.isCorrect())
                 .build();
     }
 }

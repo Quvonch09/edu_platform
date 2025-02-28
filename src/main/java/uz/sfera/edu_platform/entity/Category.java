@@ -12,13 +12,14 @@ import lombok.*;
 @Builder
 public class Category extends AbsEntity {
 
+    @Column(nullable = false)
     private String name;
     private String description;
     private Double coursePrice;
     private Integer duration;
-    private Boolean active;
+    private boolean active;
 
-    private Boolean deleted;
+    private boolean deleted;
   
     @OneToOne
     private File file;

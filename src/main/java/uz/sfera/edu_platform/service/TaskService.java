@@ -31,6 +31,7 @@ public class TaskService {
                 .title(reqTask.getTitle())
                 .file(file)
                 .lesson(lesson)
+                .deleted(false)
                 .build();
         taskRepository.save(task);
         return new ApiResponse("Task saqlandi");
@@ -49,7 +50,7 @@ public class TaskService {
         if (lesson == null){
             return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
         }
-        List<Task> tasks = taskRepository.findByLessonId(lessonId);
+        List<Task> tasks = taskRepository.findByLessonIdAndDeletedTrue(lessonId);
         if (tasks.isEmpty()){
             return new ApiResponse(ResponseError.NOTFOUND("Tasklar"));
         }
@@ -85,7 +86,8 @@ public class TaskService {
         if (task == null){
             return new ApiResponse(ResponseError.NOTFOUND("Task"));
         }
-        taskRepository.delete(task);
+        task.setDeleted(true);
+        taskRepository.save(task);
         return new ApiResponse("Task o'chirildi");
     }
 
