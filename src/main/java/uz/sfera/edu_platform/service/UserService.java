@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,13 +41,11 @@ public class UserService {
 
     //    Teacher CRUD
     public ApiResponse saveTeacher(ReqTeacher reqTeacher) {
-        if (reqTeacher == null || reqTeacher.getFullName().isEmpty()){
+        if (reqTeacher == null || reqTeacher.getFullName().isEmpty()) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Iltimos ma'lumot kiriting"));
         }
 
-        boolean b = userRepository
-                .existsByPhoneNumberAndRoleAndEnabledTrue(reqTeacher.getPhoneNumber(), Role.ROLE_TEACHER);
-        if (b) {
+        if (userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(reqTeacher.getPhoneNumber(), Role.ROLE_TEACHER)) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu User"));
         }
 
@@ -61,7 +60,7 @@ public class UserService {
         User teacher = User.builder()
                 .fullName(reqTeacher.getFullName())
                 .phoneNumber(reqTeacher.getPhoneNumber())
-                .categories(categoryList)
+                .categories(List.of(category))
                 .password(passwordEncoder.encode(reqTeacher.getPassword()))
                 .enabled(true)
                 .role(Role.ROLE_TEACHER)
@@ -70,50 +69,51 @@ public class UserService {
                 .accountNonLocked(true)
                 .credentialsNonExpired(true)
                 .build();
+
         userRepository.save(teacher);
         return new ApiResponse("Teacher successfully saved");
     }
 
 
+
     @Transactional
-    public ApiResponse searchUsers(String fullName, String phoneNumber, Long groupId,Role role, int page, int size){
+    public ApiResponse searchUsers(String fullName, String phoneNumber, Long groupId, Role role, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
         Page<User> allTeachers = userRepository.searchUsers(fullName, phoneNumber, groupId, role.name(), pageRequest);
-        List<TeacherDTO> teacherList = new ArrayList<>();
-        for (User allTeacher : allTeachers) {
-            List<ResCategory> categories = new ArrayList<>();
-            for (Category category : allTeacher.getCategories()) {
-                categories.add(new ResCategory(category.getId(), category.getName()));
-            }
-            teacherList.add(convertUserToTeacherDTO(allTeacher,categories));
-        }
+
+        List<TeacherDTO> teacherList = allTeachers.stream()
+                .map(user -> convertUserToTeacherDTO(user,
+                        user.getCategories().stream()
+                                .map(category -> new ResCategory(category.getId(), category.getName()))
+                                .collect(Collectors.toList())))
+                .collect(Collectors.toList());
 
         ResPageable resPageable = ResPageable.builder()
                 .page(page)
                 .size(size)
                 .totalElements(allTeachers.getTotalElements())
-                .totalElements(allTeachers.getTotalElements())
                 .body(teacherList)
                 .build();
+
         return new ApiResponse(resPageable);
     }
 
 
-    public ApiResponse getUsersList(Role role){
-        List<User> allByRole = userRepository.findAllByRole(role);
-        List<UserDTO> userDTOList = new ArrayList<>();
-        for (User user : allByRole) {
-            UserDTO userDTO = UserDTO.builder()
-                    .id(user.getId())
-                    .fullName(user.getFullName())
-                    .phoneNumber(user.getPhoneNumber())
-                    .role(user.getRole().name())
-                    .fileId(user.getFile() != null ? user.getFile().getId() : null)
-                    .build();
-            userDTOList.add(userDTO);
-        }
+
+    public ApiResponse getUsersList(Role role) {
+        List<UserDTO> userDTOList = userRepository.findAllByRole(role).stream()
+                .map(user -> UserDTO.builder()
+                        .id(user.getId())
+                        .fullName(user.getFullName())
+                        .phoneNumber(user.getPhoneNumber())
+                        .role(user.getRole().name())
+                        .fileId(user.getFile() != null ? user.getFile().getId() : null)
+                        .build())
+                .collect(Collectors.toList());
+
         return new ApiResponse(userDTOList);
     }
+
 
 
 //    @Transactional
@@ -137,20 +137,15 @@ public class UserService {
             return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
         }
         List<ResStudentCount> res = groupRepository.findAllStudentsByTeacherId(teacherId);
-        if (res.isEmpty()) {
-            return new ApiResponse(ResponseError.NOTFOUND("Group"));
-        }
-        return new ApiResponse(res);
+
+        return new ApiResponse(res); // Bo'sh bo'lsa, oddiy bo'sh list qaytaradi
     }
 
 
 
 
+
     public ApiResponse updateTeacher(Long teacherId, ReqTeacher reqTeacher) {
-//        boolean b = userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(reqTeacher.getPhoneNumber(), Role.ROLE_TEACHER);
-//        if (b) {
-//            return new ApiResponse(ResponseError.ALREADY_EXIST("Bu User"));
-//        }
 
         User user = userRepository.findById(teacherId).orElse(null);
         if (user == null) {
@@ -159,11 +154,13 @@ public class UserService {
 
         user.setFullName(reqTeacher.getFullName());
         user.setPhoneNumber(reqTeacher.getPhoneNumber());
-        user.setPassword(reqTeacher.getPassword());
+        user.setPassword(passwordEncoder.encode(reqTeacher.getPassword())); // Parolni kodlash
         user.setFile(fileRepository.findById(reqTeacher.getFileId()).orElse(null));
+
         userRepository.save(user);
         return new ApiResponse("Teacher successfully updated");
     }
+
 
 
     public ApiResponse updateActiveTeacher(Long teacherId, Boolean active) {
@@ -184,12 +181,8 @@ public class UserService {
             return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
         }
 
-        if (user.getRole().equals(Role.ROLE_ADMIN)){
-            if (currentUser.getRole().equals(Role.ROLE_CEO)){
-                userRepository.delete(user);
-            } else {
-                return new ApiResponse(ResponseError.DEFAULT_ERROR("Sizda adminni uchirishga huquq yo'q"));
-            }
+        if (user.getRole().equals(Role.ROLE_ADMIN) && !currentUser.getRole().equals(Role.ROLE_CEO)) {
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Sizda adminni o‘chirishga huquq yo‘q"));
         }
 
         user.setEnabled(false);
@@ -198,7 +191,8 @@ public class UserService {
     }
 
 
-//    Admin CRUD
+
+    //    Admin CRUD
     public ApiResponse saveAdmin(ReqAdmin reqAdmin){
         boolean b = userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(reqAdmin.getPhoneNumber(), Role.ROLE_ADMIN);
         if (b) {

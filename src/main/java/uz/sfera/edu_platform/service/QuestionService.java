@@ -34,20 +34,23 @@ public class QuestionService {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
         }
 
+        long correctCount = reqQuestion.getReqOptionList()
+                .stream()
+                .filter(ReqOption::isCorrect)
+                .count();
+
+        if (correctCount != 1) {
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Har bir savol uchun faqat 1 ta to'g'ri javob bo'ladi"));
+        }
+
+
         Question question = Question.builder()
                 .question(reqQuestion.getQuestionText())
                 .quiz(quiz)
                 .questionEnum(difficulty)
                 .build();
         Question save = questionRepository.save(question);
-        for (ReqOption reqOption : reqQuestion.getReqOptionList()) {
-            if (reqOption.isCorrect()){
-                c++;
-            }
-        }
-        if (c != 1){
-            return new ApiResponse(ResponseError.DEFAULT_ERROR("Har bir savol uchun faqat 1 ta to'g'ri javob bo'ladi"));
-        }
+
 
         String apiResponse = optionService.saveOption(save.getId(), reqQuestion.getReqOptionList());
         if (!apiResponse.equals("Optionlar saqlandi")){
