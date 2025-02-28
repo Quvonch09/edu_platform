@@ -1,9 +1,12 @@
 package com.example.edu_platform.controller;
 
+import com.example.edu_platform.entity.User;
 import com.example.edu_platform.entity.enums.UserStatus;
 import com.example.edu_platform.payload.ApiResponse;
 import com.example.edu_platform.payload.req.ReqStudent;
+import com.example.edu_platform.security.CurrentUser;
 import com.example.edu_platform.service.StudentService;
+import com.example.edu_platform.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,7 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class StudentController {
     private final StudentService studentService;
+    private final UserService userService;
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
     @Operation(summary = "ADMIN/TEACHER student qushish")
@@ -82,6 +86,18 @@ public class StudentController {
         ApiResponse apiResponse = studentService.getStudentGroupBy(groupId);
         return ResponseEntity.ok(apiResponse);
     }
+
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @Operation(summary = "Teacher ning o'zining studentlari listi")
+    @GetMapping("/for-teacher")
+    public ResponseEntity<ApiResponse> getStudents(@CurrentUser User user){
+        ApiResponse apiResponse = studentService.getTeacherByStudnet(user);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+
+
+
 
 
 }

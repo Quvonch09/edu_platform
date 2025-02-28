@@ -305,4 +305,22 @@ public class UserService {
                 .fileId(user.getFile() != null ? user.getFile().getId() : null)
                 .build();
     }
+
+    public ApiResponse getTeacher (User user){
+
+        List<User> users = userRepository.searchForTeacher(user.getId());
+        List<UserDTO> list = users.stream().map(this::getTeacherDTO).toList();
+        return new ApiResponse(list);
+    }
+
+
+    public UserDTO getTeacherDTO(User user) {
+        return UserDTO.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .phoneNumber(user.getPhoneNumber())
+                .fileId(user.getFile() != null ? user.getFile().getId() : null)
+                .build();
+    }
+
 }
