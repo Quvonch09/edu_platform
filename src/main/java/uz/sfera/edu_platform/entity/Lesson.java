@@ -15,11 +15,16 @@ import java.util.List;
 public class Lesson extends AbsEntity {
 
     private String name;
+
     private String description;
+
     private String videoLink;
+
     @ManyToOne
     private Module module;
+
     @ManyToMany(fetch = FetchType.LAZY)
     private List<File> files;
+
     private boolean deleted;
 }

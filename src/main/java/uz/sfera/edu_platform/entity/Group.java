@@ -16,15 +16,22 @@ import java.util.List;
 @Table(name = "groups")
 public class Group extends AbsEntity {
     private String name;
+
     @ManyToOne
     private User teacher;
+
     private Boolean active;
+
     @ManyToOne
     private Category category;
+
     @ManyToMany
     private List<User> students;
+
     private LocalDate startDate;
+
     private LocalDate endDate;
+
     @OneToOne
     private GraphicDay days;
 }

@@ -14,9 +14,12 @@ public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String question;
+
     @Enumerated(EnumType.STRING)
     private QuestionEnum questionEnum;
+
     @ManyToOne
     private Quiz quiz;
 }
