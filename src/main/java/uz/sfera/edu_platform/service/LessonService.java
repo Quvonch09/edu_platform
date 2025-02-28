@@ -129,6 +129,11 @@ public class LessonService {
             lessons = lessonRepository.findByNameAndDeletedFalse(name, pageRequest);
         }
 
+        List<Long> files = new ArrayList<>();
+        for (Lesson lesson : lessons) {
+            files.add(lesson.getId());
+        }
+
         List<LessonDTO> lessonDTOS = lessons.stream()
                 .filter(lesson -> lesson.getModule().getCategory() != null)
                 .map(lesson -> LessonDTO.builder()
@@ -136,6 +141,7 @@ public class LessonService {
                         .name(lesson.getName())
                         .description(lesson.getDescription())
                         .videoLink(lesson.getVideoLink())
+                        .fileIds(files)
                         .createdAt(lesson.getCreatedAt())
                         .build())
                 .toList();

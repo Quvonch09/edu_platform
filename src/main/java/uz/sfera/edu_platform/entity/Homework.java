@@ -19,7 +19,7 @@ public class Homework extends AbsEntity {
     private File file;
     @ManyToOne
     private User student;
-    private Boolean checked;
+    private boolean checked;
     @ManyToOne
     private Task task;
 }

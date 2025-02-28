@@ -16,5 +16,5 @@ public class Option {
     private String name;
     @ManyToOne
     private Question question;
-    private Boolean correct;
+    private boolean correct;
 }
