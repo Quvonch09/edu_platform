@@ -10,6 +10,7 @@ import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.OptionDTO;
 import uz.sfera.edu_platform.payload.QuestionDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
+import uz.sfera.edu_platform.payload.req.ReqOption;
 import uz.sfera.edu_platform.payload.req.ReqQuestion;
 import uz.sfera.edu_platform.repository.OptionRepository;
 import uz.sfera.edu_platform.repository.QuestionRepository;
