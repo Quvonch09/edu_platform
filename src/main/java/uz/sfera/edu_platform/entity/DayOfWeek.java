@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class DayOfWeek {
+public class DayOfWeek { //TODO buni chopamiz
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

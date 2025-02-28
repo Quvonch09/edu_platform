@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Table(name = "quiz_sessions")
-public class QuizSession {
+public class QuizSession { //TODO OZOD CHOPAMIZ
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,9 +25,8 @@ public class QuizSession {
     @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-
     @Column(nullable = false)
-    private boolean active;
+    private LocalDateTime startTime;
+
+    private LocalDateTime endTime; // endTime bilan ishlash kerak active yoki active emasligini
 }

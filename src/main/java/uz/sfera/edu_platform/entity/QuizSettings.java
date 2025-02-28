@@ -13,8 +13,13 @@ public class QuizSettings {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Integer questionCount;
-    private Integer duration;
+
+    @Column(nullable = false)
+    private int questionCount;
+
+    @Column(nullable = false)
+    private int duration;
+
     @OneToOne
     private Quiz quiz;
 }

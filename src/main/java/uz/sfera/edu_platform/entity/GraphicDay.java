@@ -2,6 +2,7 @@ package uz.sfera.edu_platform.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import uz.sfera.edu_platform.entity.enums.WeekDay;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -18,10 +19,12 @@ public class GraphicDay {
     private Long id;
 
     private LocalTime startTime;
+
     private LocalTime endTime;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    private List<DayOfWeek> weekDay;
+    @ElementCollection
+    @Enumerated(EnumType.STRING)
+    private List<WeekDay> weekDay;
 
     @ManyToOne
     private Room room;

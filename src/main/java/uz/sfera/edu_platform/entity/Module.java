@@ -19,5 +19,5 @@ public class Module extends AbsEntity {
     @ManyToOne
     private Category category;
 
-    private boolean deleted;
+    private boolean deleted; // byte
 }

@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.entity;
 
+import jakarta.persistence.Column;
 import uz.sfera.edu_platform.entity.template.AbsEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -15,7 +16,9 @@ import lombok.experimental.SuperBuilder;
 public class Feedback extends AbsEntity {
 
     private String feedback;
-    private Integer rating; // 5 ball
+
+    @Column(nullable = false)
+    private Integer rating; // 5 ball --- byte
 
     @ManyToOne
     private User teacher;
