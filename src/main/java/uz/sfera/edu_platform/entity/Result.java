@@ -23,7 +23,7 @@ public class Result {
     private int totalQuestion;
 
     @Column(nullable = false)
-    private int correctAnswers;
+    private long correctAnswers;
 
     @Column(nullable = false)
     private Long timeTaken;

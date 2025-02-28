@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class ReqOption {
     private String text;
-    private boolean isCorrect;
+    private byte isCorrect;
 }

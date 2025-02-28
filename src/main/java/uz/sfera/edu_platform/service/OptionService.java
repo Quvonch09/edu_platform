@@ -25,7 +25,7 @@ public class OptionService {
                     List<Option> options = reqOptions.stream()
                             .map(opt -> Option.builder()
                                     .name(opt.getText())
-                                    .correct(opt.isCorrect())
+                                    .correct(opt.getIsCorrect())
                                     .question(question)
                                     .build())
                             .toList();
@@ -76,7 +76,7 @@ public class OptionService {
         return OptionDTO.builder()
                 .id(option.getId())
                 .text(option.getName())
-                .isCorrect(option.isCorrect())
+                .isCorrect(option.getCorrect())
                 .build();
     }
 }

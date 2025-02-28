@@ -45,7 +45,7 @@ public class LessonService {
                 .videoLink(lessonRequest.getVideoLink())
                 .module(module)
                 .files(null)
-                .deleted(false)
+                .deleted((byte) 0)
                 .build();
 
         lessonRepository.save(lesson);
@@ -85,7 +85,7 @@ public class LessonService {
 
     public ApiResponse delete(Long lessonId) {
         return lessonRepository.findByIdAndDeletedFalse(lessonId).map(lesson -> {
-            lesson.setDeleted(true);
+            lesson.setDeleted((byte) 1);
             lessonRepository.save(lesson);
             return new ApiResponse("Lesson o'chirildi");
         }).orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Lesson")));
@@ -95,6 +95,7 @@ public class LessonService {
     public ApiResponse allowLesson(ReqLessonTracking req) {
         Lesson lesson = lessonRepository.findById(req.getLessonId()).orElse(null);
         Group group = groupRepository.findById(req.getGroupId()).orElse(null);
+        if (lesson == null || lesson.getDeleted() == 1 || group == null)
 
         if (lesson == null || lesson.isDeleted() || group == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Lesson yoki Group"));
@@ -121,7 +122,7 @@ public class LessonService {
     public ApiResponse getOpenLessonsInGroup(Long groupId) {
         List<LessonDTO> lessons = lessonTrackingRepository.findByGroupId(groupId).stream()
                 .map(LessonTracking::getLesson)
-                .filter(l -> !l.isDeleted())
+                .filter(l -> l.getDeleted() == 0)
                 .map(this::lessonDTO)
                 .toList();
 
