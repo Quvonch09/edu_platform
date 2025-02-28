@@ -28,6 +28,7 @@ public class QuestionService {
     private final OptionRepository optionRepository;
 
     public ApiResponse saveQuestion(QuestionEnum difficulty,ReqQuestion reqQuestion){
+        int c = 0;
         Quiz quiz = quizRepository.findById(reqQuestion.getQuizId()).orElse(null);
         if (quiz == null){
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
@@ -39,6 +40,14 @@ public class QuestionService {
                 .questionEnum(difficulty)
                 .build();
         Question save = questionRepository.save(question);
+        for (ReqOption reqOption : reqQuestion.getReqOptionList()) {
+            if (reqOption.isCorrect()){
+                c++;
+            }
+        }
+        if (c != 1){
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Har bir savol uchun faqat 1 ta to'g'ri javob bo'ladi"));
+        }
 
         String apiResponse = optionService.saveOption(save.getId(), reqQuestion.getReqOptionList());
         if (!apiResponse.equals("Optionlar saqlandi")){

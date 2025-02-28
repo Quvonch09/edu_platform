@@ -143,7 +143,7 @@ public class CategoryService {
                 .description(category.getDescription())
                 .price(category.getCoursePrice())
                 .duration(category.getDuration())
-                .active(category.getActive())
+                .active(category.isActive())
                 .fileId(Optional.ofNullable(category.getFile()).map(File::getId).orElse(null))
                 .build();
     }

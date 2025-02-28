@@ -76,7 +76,7 @@ public class OptionService {
         return OptionDTO.builder()
                 .id(option.getId())
                 .text(option.getName())
-                .isCorrect(option.getCorrect())
+                .isCorrect(option.isCorrect())
                 .build();
     }
 }
