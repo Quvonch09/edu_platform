@@ -145,4 +145,13 @@ public class UserController {
         return ResponseEntity.ok(apiResponse);
     }
 
+
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    @Operation(summary = "Student ning o'zining teacherlari listi")
+    @GetMapping("/for-student")
+    public ResponseEntity<ApiResponse> getTeachers(@CurrentUser User user){
+        ApiResponse apiResponse = userService.getTeacher(user);
+        return ResponseEntity.ok(apiResponse);
+    }
+
 }

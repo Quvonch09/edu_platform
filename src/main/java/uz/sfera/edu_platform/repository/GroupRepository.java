@@ -112,12 +112,18 @@ SELECT
     t.full_name AS teacherName,
 
     -- ✅ Guruhning tugash foizi (progress)
-    CASE
-        WHEN g.end_date > g.created_at THEN
-            ROUND(100.0 * (DATE_PART('day', CURRENT_DATE - g.created_at) /
-                           NULLIF(DATE_PART('day', g.end_date - g.created_at), 0))::numeric, 2)
-        ELSE 100
-        END AS categoryPercentage,
+   CASE
+       -- Guruh tugagan bo‘lsa, 100% chiqadi
+       WHEN g.end_date <= CURRENT_DATE THEN 100.0
+       -- Guruh davom etayotgan bo‘lsa, foiz hisoblanadi
+       WHEN g.end_date > g.created_at THEN
+           ROUND(
+               100.0 * (DATE_PART('day', CURRENT_DATE - g.created_at) /
+                        NULLIF(DATE_PART('day', g.end_date - g.created_at), 0))::numeric, 2
+           )
+       ELSE 100.0
+   END AS categoryPercentage
+   
 
     COALESCE(lw.watched_lessons, 0) || '/' || COALESCE(lp.total_lessons, 0) AS lessonsProgress,
     m.name AS currentModule,

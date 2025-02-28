@@ -1,9 +1,11 @@
 package uz.sfera.edu_platform.controller;
 
 import jakarta.validation.Valid;
+import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.entity.enums.UserStatus;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.req.ReqStudent;
+import uz.sfera.edu_platform.security.CurrentUser;
 import uz.sfera.edu_platform.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -83,6 +85,18 @@ public class StudentController {
         ApiResponse apiResponse = studentService.getStudentGroupBy(groupId);
         return ResponseEntity.ok(apiResponse);
     }
+
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @Operation(summary = "Teacher ning o'zining studentlari listi")
+    @GetMapping("/for-teacher")
+    public ResponseEntity<ApiResponse> getStudents(@CurrentUser User user){
+        ApiResponse apiResponse = studentService.getTeacherByStudnet(user);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+
+
+
 
 
 }

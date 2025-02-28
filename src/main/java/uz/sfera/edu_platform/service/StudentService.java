@@ -203,4 +203,11 @@ public class StudentService {
                 .startStudyDate(user.getCreatedAt())
                 .build();
     }
+
+    public ApiResponse getTeacherByStudnet(User user){
+        List<User> users = userRepository.searchForUsers(user.getId());
+        List<StudentDTO> list = users.stream().map(this::getDto).toList();
+        return new ApiResponse(list);
+    }
+
 }
