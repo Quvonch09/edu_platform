@@ -34,7 +34,7 @@ public class HomeworkService {
                             .answer(reqHomework.getAnswer())
                             .file(fileRepository.findById(reqHomework.getFileId()).orElse(null))
                             .task(task)
-                            .ball(0)
+                            .ball()
                             .checked(false)
                             .student(user)
                             .build();
@@ -44,10 +44,10 @@ public class HomeworkService {
                 .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Task")));
     }
 
-    public ApiResponse checkHomework(Long homeworkId, Integer ball) {
+    public ApiResponse checkHomework(Long homeworkId, byte ball) {
         return homeworkRepository.findById(homeworkId)
                 .map(homework -> {
-                    homework.setChecked(true);
+                    homework.setChecked();
                     homework.setBall(ball);
                     homeworkRepository.save(homework);
                     return new ApiResponse("Homework tekshirildi");

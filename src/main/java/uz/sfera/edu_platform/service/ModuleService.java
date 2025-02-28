@@ -40,7 +40,7 @@ public class ModuleService {
         Module module = Module.builder()
                 .name(moduleRequest.getName())
                 .category(category)
-                .deleted(false)
+                .deleted((byte) 0)
                 .build();
         moduleRepository.save(module);
         return new ApiResponse("Modul yaratildi");
@@ -118,7 +118,7 @@ public class ModuleService {
     public ApiResponse delete(Long moduleId) {
         return moduleRepository.findByIdAndDeletedFalse(moduleId)
                 .map(module -> {
-                    module.setDeleted(true);
+                    module.setDeleted((byte) 1);
                     moduleRepository.save(module);
                     return new ApiResponse("Modul o‘chirildi");
                 })
