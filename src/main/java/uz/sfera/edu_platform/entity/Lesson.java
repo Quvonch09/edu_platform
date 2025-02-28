@@ -14,6 +14,7 @@ import java.util.List;
 @Entity
 public class Lesson extends AbsEntity {
 
+    @Column(nullable = false)
     private String name;
     private String description;
     private String videoLink;
