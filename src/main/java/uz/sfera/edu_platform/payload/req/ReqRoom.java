@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
+import uz.sfera.edu_platform.entity.enums.WeekDay;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -18,7 +19,8 @@ public class ReqRoom {
     private Long id;
     private String name;
     private String color;
-    private List<Integer> weekDays;
+    private List<WeekDay> weekDays;
+
     @Schema(description = "HH:mm formatda vaqt", example = "09:15")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     @DateTimeFormat(pattern = "HH:mm")

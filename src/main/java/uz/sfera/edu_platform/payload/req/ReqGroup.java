@@ -1,9 +1,12 @@
 package uz.sfera.edu_platform.payload.req;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 import uz.sfera.edu_platform.entity.enums.WeekDay;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Getter
@@ -17,7 +20,14 @@ public class ReqGroup {
     private Long teacherId;
     private LocalDate startDate;
     private Long roomId;
-    private String startTime;
-    private String endTime;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+    @DateTimeFormat(pattern = "HH:mm")
+    private LocalTime startTime;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+    @DateTimeFormat(pattern = "HH:mm")
+    private LocalTime endTime;
+
     private List<WeekDay> dayIds;
 }

@@ -31,7 +31,7 @@ public class TaskService {
                 .title(reqTask.getTitle())
                 .file(file)
                 .lesson(lesson)
-                .deleted(false)
+                .deleted((byte) 0)
                 .build();
         taskRepository.save(task);
         return new ApiResponse("Task saqlandi");
@@ -86,7 +86,8 @@ public class TaskService {
         if (task == null){
             return new ApiResponse(ResponseError.NOTFOUND("Task"));
         }
-        task.setDeleted(true);
+
+        task.setDeleted((byte) 1);
         taskRepository.save(task);
         return new ApiResponse("Task o'chirildi");
     }

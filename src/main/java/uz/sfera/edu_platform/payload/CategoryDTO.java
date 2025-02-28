@@ -13,9 +13,9 @@ public class CategoryDTO {
     private Long id;
     private String name;
     private String description;
-    private Integer duration;
-    private Double price;
+    private byte duration;
+    private double price;
     @Schema(hidden = true)
-    private Boolean active;
+    private boolean active;
     private Long fileId;
 }

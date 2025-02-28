@@ -1,6 +1,7 @@
 package uz.sfera.edu_platform.service;
 
 import uz.sfera.edu_platform.entity.*;
+import uz.sfera.edu_platform.entity.enums.WeekDay;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.GroupDTO;
 import uz.sfera.edu_platform.payload.GroupListDTO;
@@ -28,7 +29,6 @@ public class GroupService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final RoomRepository roomRepository;
-    private final DayOfWeekRepository dayOfWeekRepository;
     private final GraphicDayRepository graphicDayRepository;
     private final LessonRepository lessonRepository;
 
@@ -52,23 +52,17 @@ public class GroupService {
             return new ApiResponse(ResponseError.NOTFOUND("Room"));
         }
 
-        List<DayOfWeek> dayOfWeekList = reqGroup.getDayIds() != null
-                ? new ArrayList<>(dayOfWeekRepository.findAllById(reqGroup.getDayIds()))
-                : Collections.emptyList();
 
-        LocalTime startDate = LocalTime.parse(reqGroup.getStartTime());
-        LocalTime endDate = LocalTime.parse(reqGroup.getEndTime());
-
-        if (graphicDayRepository.existsByGraphicDayInGroup(room.getId(), startDate, endDate)) {
+        if (graphicDayRepository.existsByGraphicDayInGroup(room.getId(), reqGroup.getStartTime(), reqGroup.getEndTime())) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
         }
 
         GraphicDay day = graphicDayRepository.save(
                 GraphicDay.builder()
                         .room(room)
-                        .weekDay(dayOfWeekList)
-                        .startTime(startDate)
-                        .endTime(endDate)
+                        .weekDay(reqGroup.getDayIds())
+                        .startTime(reqGroup.getStartTime())
+                        .endTime(reqGroup.getEndTime())
                         .build()
         );
 
@@ -80,7 +74,7 @@ public class GroupService {
                         .days(day)
                         .active(true)
                         .startDate(reqGroup.getStartDate())
-                        .endDate(reqGroup.getStartDate().plusDays(category.getDuration().longValue()))
+                        .endDate(reqGroup.getStartDate().plusDays(category.getDuration()))
                         .build()
         );
 
@@ -101,7 +95,7 @@ public class GroupService {
             GraphicDay graphicDay = graphicDayRepository.findGraphicDay(group.getId()).orElse(null);
 
             List<String> days = group.getDays().getWeekDay().stream()
-                    .map(dayOfWeek -> dayOfWeek.getDayOfWeek().name())
+                    .map(weekDay -> weekDay.name())
                     .collect(Collectors.toList());
 
             return convertGroupToGroupDTO(group, days, graphicDay);
@@ -126,7 +120,7 @@ public class GroupService {
         }
 
         List<String> days = group.getDays().getWeekDay().stream()
-                .map(dayOfWeek -> dayOfWeek.getDayOfWeek().name())
+                .map(weekDay -> weekDay.name())
                 .collect(Collectors.toList());
 
         ResGroup resGroup = ResGroup.builder()
@@ -177,18 +171,17 @@ public class GroupService {
         }
 
         GraphicDay graphicDay = graphicDayRepository.findGraphicDay(reqGroup.getRoomId()).orElse(null);
-        LocalTime startTime = LocalTime.parse(reqGroup.getStartTime());
-        LocalTime endTime = LocalTime.parse(reqGroup.getEndTime());
+
 
         if (graphicDay == null || !Objects.equals(reqGroup.getRoomId(), graphicDay.getRoom().getId())) {
-            if (graphicDayRepository.existsByGraphicDayInGroup(reqGroup.getRoomId(), startTime, endTime)) {
+            if (graphicDayRepository.existsByGraphicDayInGroup(reqGroup.getRoomId(), reqGroup.getStartTime(), reqGroup.getEndTime())) {
                 return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
             }
 
             if (graphicDay != null) {
                 graphicDay.setWeekDay(reqGroup.getDayIds());
-                graphicDay.setStartTime(startTime);
-                graphicDay.setEndTime(endTime);
+                graphicDay.setStartTime(reqGroup.getStartTime());
+                graphicDay.setEndTime(reqGroup.getEndTime());
                 graphicDayRepository.save(graphicDay);
             }
         }
@@ -216,7 +209,7 @@ public class GroupService {
 
 
 
-    private GroupDTO convertGroupToGroupDTO(Group group, List<String> weekDays,GraphicDay graphicDay){
+    private GroupDTO convertGroupToGroupDTO(Group group, List<String> weekDays, GraphicDay graphicDay){
 
         return GroupDTO.builder()
                 .id(group.getId())

@@ -95,8 +95,14 @@ public class LessonService {
     public ApiResponse allowLesson(ReqLessonTracking req) {
         Lesson lesson = lessonRepository.findById(req.getLessonId()).orElse(null);
         Group group = groupRepository.findById(req.getGroupId()).orElse(null);
-        if (lesson == null || lesson.isDeleted() || group == null)
+
+        if (lesson == null || lesson.isDeleted() || group == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Lesson yoki Group"));
+        }
+
+        if (lessonTrackingRepository.existsByLessonIdAndGroupId(lesson.getId(), group.getId())) {
+            return new ApiResponse(ResponseError.ALREADY_EXIST("LessonTracking"));
+        }
 
         lessonTrackingRepository.save(new LessonTracking(lesson,group));
         return new ApiResponse("Lesson guruh uchun ochildi");
