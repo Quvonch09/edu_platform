@@ -1,6 +1,7 @@
 package uz.sfera.edu_platform.payload.req;
 
 import lombok.*;
+import uz.sfera.edu_platform.entity.enums.WeekDay;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,5 +19,5 @@ public class ReqGroup {
     private Long roomId;
     private String startTime;
     private String endTime;
-    private List<Integer> dayIds;
+    private List<WeekDay> dayIds;
 }

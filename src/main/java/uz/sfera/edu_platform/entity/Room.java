@@ -16,6 +16,4 @@ public class Room {
     @Column(nullable = false)
     private String name;
     private String color;
-    @Column(nullable = false)
-    private Long graphicDayId;
 }

@@ -176,10 +176,6 @@ public class GroupService {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
 
-        List<DayOfWeek> dayOfWeekList = reqGroup.getDayIds() != null
-                ? dayOfWeekRepository.findAllById(reqGroup.getDayIds())
-                : Collections.emptyList();
-
         GraphicDay graphicDay = graphicDayRepository.findGraphicDay(reqGroup.getRoomId()).orElse(null);
         LocalTime startTime = LocalTime.parse(reqGroup.getStartTime());
         LocalTime endTime = LocalTime.parse(reqGroup.getEndTime());
@@ -190,7 +186,7 @@ public class GroupService {
             }
 
             if (graphicDay != null) {
-                graphicDay.setWeekDay(dayOfWeekList);
+                graphicDay.setWeekDay(reqGroup.getDayIds());
                 graphicDay.setStartTime(startTime);
                 graphicDay.setEndTime(endTime);
                 graphicDayRepository.save(graphicDay);
