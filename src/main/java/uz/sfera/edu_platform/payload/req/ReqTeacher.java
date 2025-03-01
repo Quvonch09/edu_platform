@@ -18,7 +18,6 @@ public class ReqTeacher {
             message = "Invalid Uzbekistan phone number")
     private String phoneNumber;
 
-    @NotBlank(message = "Bush bulmasin")
     private Long categoryId;
 
     @NotBlank(message = "Bush bulmasin")
