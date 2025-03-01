@@ -23,9 +23,9 @@ public interface ModuleRepository extends JpaRepository<Module,Long> {
 
 
     @Query(value = "SELECT EXISTS (SELECT 1 FROM module m\n" +
-            "            JOIN lesson l ON l.module_id = m.id\n" +
-            "            JOIN lesson_tracking lt ON lt.lesson_id = l.id\n" +
-            "            WHERE m.id = :moduleId and lt.group_id = :groupId) and m.deleted = 0",
+            "                        JOIN lesson l ON l.module_id = m.id\n" +
+            "                        JOIN lesson_tracking lt ON lt.lesson_id = l.id\n" +
+            "                        WHERE m.id = :moduleId and lt.group_id = :groupId and m.deleted = 0)",
             nativeQuery = true)
     boolean checkOpenModulesByStudent(@Param("groupId") Long groupId, @Param("moduleId") Long moduleId);
 
