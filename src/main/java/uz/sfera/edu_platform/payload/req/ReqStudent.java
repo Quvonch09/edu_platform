@@ -20,7 +20,6 @@ public class ReqStudent {
             message = "Invalid Uzbekistan phone number")
     private String phoneNumber;
 
-    @NotBlank(message = "Bush bulmasin")
     private Integer age;
 
     @NotNull(message = "Bush bulmasin")
