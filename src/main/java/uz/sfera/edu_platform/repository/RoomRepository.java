@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface RoomRepository extends JpaRepository<Room, Long> {
+
     boolean existsByName(String name);
 
     @Query(value = "select r.id, r.name, r.color, r.start_time as startTime, r.end_time as endTime from room r\n" +
@@ -15,5 +16,4 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             "            and (?2 IS NULL OR LOWER(r.color) LIKE LOWER(CONCAT('%', ?2, '%')))",
             nativeQuery = true)
     Page<ResRoom> getAllRooms(String name, String color, Pageable pageable);
-
 }

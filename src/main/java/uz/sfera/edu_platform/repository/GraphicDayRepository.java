@@ -9,15 +9,8 @@ import java.time.LocalTime;
 import java.util.Optional;
 
 public interface GraphicDayRepository extends JpaRepository<GraphicDay, Long> {
-    boolean existsByRoomIdAndStartTimeBeforeAndEndTimeAfter(Long roomId, LocalTime startTime,
-                                                                      LocalTime endTime);
-
-    @Query(value = "select gd.* from room r join graphic_day gd on gd.id = r.graphic_day_id limit 1", nativeQuery = true)
-    Optional<GraphicDay> findByRoomId(Long roomId);
-
     @Query(value = "select gd.* from graphic_day gd join groups g on gd.id = g.days_id where g.id = ?1 limit 1", nativeQuery = true)
     Optional<GraphicDay> findGraphicDay(Long id);
-
 
     @Query(value = "SELECT EXISTS ( " +
             "SELECT 1 FROM graphic_day g " +
@@ -28,7 +21,4 @@ public interface GraphicDayRepository extends JpaRepository<GraphicDay, Long> {
     boolean existsByGraphicDayInGroup(@Param("roomId") Long roomId,
                                       @Param("startTime") LocalTime startTime,
                                       @Param("endTime") LocalTime endTime);
-
-
-
 }
