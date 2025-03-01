@@ -294,7 +294,8 @@ public class UserService {
                 .phoneNumber(user.getPhoneNumber())
                 .categories(categoryIds)
                 .active(user.isEnabled())
-                .groupCount(groupRepository.countByTeacherId(user.getId()))
+                .groupCount(groupRepository.countByTeacherId(user.getId()) != 0 ?
+                        groupRepository.countByTeacherId(user.getId()) : null)
                 .groupId(group != null ? group.getId() : null)
                 .groupName(group != null ? group.getName() : null)
                 .fileId(user.getFile() != null ? user.getFile().getId() : null)
