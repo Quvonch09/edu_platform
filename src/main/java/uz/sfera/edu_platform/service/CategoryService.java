@@ -42,7 +42,7 @@ public class CategoryService {
                 categoryDTO.getPrice(),
                 categoryDTO.getDuration(),
                 (byte) 1,
-                fileRepository.findById(categoryDTO.getFileId()).orElse(null)
+                categoryDTO.getFileId() > 0 ? fileRepository.findById(categoryDTO.getFileId()).orElse(null) : null
                 );
 
         categoryRepository.save(category);

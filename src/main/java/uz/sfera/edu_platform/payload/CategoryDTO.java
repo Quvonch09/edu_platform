@@ -19,12 +19,10 @@ public class CategoryDTO {
     @NotBlank(message = "Bush bulmasin")
     private String description;
 
-    @NotBlank(message = "Bush bulmasin")
     private byte duration;
 
-    @NotBlank(message = "Bush bulmasin")
     private double price;
     @Schema(hidden = true)
-    private boolean active;
+    private Boolean active;
     private Long fileId;
 }
