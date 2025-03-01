@@ -41,7 +41,7 @@ public class CategoryService {
                 categoryDTO.getPrice(),
                 categoryDTO.getDuration(),
                 (byte) 1,
-                categoryDTO.getFileId() != null ?
+                categoryDTO.getFileId() > 0 ?
                         fileRepository.findById(categoryDTO.getFileId()).orElse(null) : null
         );
 
