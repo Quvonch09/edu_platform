@@ -55,7 +55,7 @@ public class ResultService {
         return new ApiResponse("Result deleted successfully");
     }
 
-    private ResultDTO convertToDTO(Result result) {
+    public ResultDTO convertToDTO(Result result) {
         long timeTakenMinutes = Duration.between(result.getStartTime(), result.getEndTime()).toMinutes();
         return ResultDTO.builder()
                 .id(result.getId())
@@ -66,7 +66,6 @@ public class ResultService {
                 .timeTaken(timeTakenMinutes)
                 .startTime(result.getStartTime())
                 .endTime(result.getEndTime())
-                .createdAt(result.getCreatedAt())
                 .build();
     }
 }
