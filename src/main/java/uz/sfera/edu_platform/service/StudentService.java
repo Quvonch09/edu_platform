@@ -155,7 +155,7 @@ public class StudentService {
 
         userRepository.save(user);
 
-        String token = jwtProvider.generateToken(user.getPhoneNumber());
+          String token = jwtProvider.generateToken(user.getPhoneNumber());
         ResponseLogin responseLogin = new ResponseLogin(token, user.getRole().name(), user.getId());
 
         return new ApiResponse(responseLogin);

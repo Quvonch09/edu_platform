@@ -17,8 +17,10 @@ public class Option {
     @Column(nullable = false)
     private String name;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private Question question;
 
+    @Column(nullable = false)
     private byte correct; // byte
 }

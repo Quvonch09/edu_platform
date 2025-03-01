@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.controller;
 
+import jakarta.validation.Valid;
 import uz.sfera.edu_platform.entity.enums.QuestionEnum;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.req.ReqQuestion;
@@ -21,7 +22,7 @@ public class QuestionController {
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> saveQuestion(
             @RequestParam QuestionEnum questionEnum,
-            @RequestBody ReqQuestion reqQuestion
+            @Valid @RequestBody ReqQuestion reqQuestion
     ){
         return ResponseEntity.ok(questionService.saveQuestion(questionEnum, reqQuestion));
     }
@@ -40,7 +41,7 @@ public class QuestionController {
     public ResponseEntity<ApiResponse> updateQuestion(
             @PathVariable Long questionId,
             @RequestParam QuestionEnum difficulty,
-            @RequestBody ReqQuestion reqQuestion
+            @Valid @RequestBody ReqQuestion reqQuestion
     ){
         return ResponseEntity.ok(questionService.updateQuestion(questionId, difficulty, reqQuestion));
     }

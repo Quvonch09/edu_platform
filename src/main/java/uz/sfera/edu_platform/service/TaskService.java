@@ -72,8 +72,6 @@ public class TaskService {
             return new ApiResponse(ResponseError.NOTFOUND("task"));
         } else if (lesson == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
-        } else if (file == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("File"));
         }
 
         task.setTitle(reqTask.getTitle());

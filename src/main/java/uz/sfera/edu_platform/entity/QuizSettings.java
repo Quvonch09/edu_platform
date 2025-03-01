@@ -13,8 +13,12 @@ public class QuizSettings {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private Integer questionCount;
+
     private Integer duration;
-    @OneToOne
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private Quiz quiz;
 }

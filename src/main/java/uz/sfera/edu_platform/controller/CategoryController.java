@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.controller;
 
+import jakarta.validation.Valid;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.CategoryDTO;
 import uz.sfera.edu_platform.service.CategoryService;
@@ -19,7 +20,7 @@ public class CategoryController {
     @Operation(summary = "CEO category qushish")
     @PostMapping
     public ResponseEntity<ApiResponse> addCategory(
-            @RequestBody CategoryDTO categoryDTO
+            @Valid @RequestBody CategoryDTO categoryDTO
     ){
         ApiResponse apiResponse = categoryService.saveCategory(categoryDTO);
         return ResponseEntity.ok(apiResponse);
@@ -66,7 +67,7 @@ public class CategoryController {
     @PutMapping("/{categoryId}")
     public ResponseEntity<ApiResponse> updateCategory(
             @PathVariable Long categoryId,
-            @RequestBody CategoryDTO categoryDTO
+            @Valid @RequestBody CategoryDTO categoryDTO
     ){
         ApiResponse apiResponse = categoryService.updateCategory(categoryId, categoryDTO);
         return ResponseEntity.ok(apiResponse);
