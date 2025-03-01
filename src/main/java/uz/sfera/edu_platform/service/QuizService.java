@@ -29,8 +29,6 @@ public class QuizService {
     private final QuizSettingsRepository quizSettingsRepository;
     private final OptionService optionService;
 
-    Map<Long,Long> resultMap;
-
     public ApiResponse createQuiz(ReqQuiz reqQuiz) {
         return lessonRepository.findById(reqQuiz.getLessonId())
                 .map(lesson -> {
@@ -60,7 +58,7 @@ public class QuizService {
 
     public ApiResponse startTest(User user, Long quizId) {
         Quiz quiz = quizRepository.findById(quizId).orElse(null);
-        if (quiz == null) {
+        if (quiz == null || quiz.getDeleted() == 1) {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
         }
 
@@ -73,14 +71,12 @@ public class QuizService {
                 .user(user)
                 .build();
         Result save = resultRepository.save(result);
-        resultMap.put(save.getId(), user.getId());
         return new ApiResponse(getRandomQuestionsForQuiz(quizId));
     }
 
-    // passTestni qaytadan kurip chiqish
     public ApiResponse passTest(List<ReqPassTest> passTestList, User user, Long quizId) {
         Quiz quiz = quizRepository.findById(quizId).orElse(null);
-        if (quiz == null) {
+        if (quiz == null || quiz.getDeleted() == 1) {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
         }
 
