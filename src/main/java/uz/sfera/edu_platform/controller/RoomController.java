@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.controller;
 
+import jakarta.validation.Valid;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.req.ReqRoom;
 import uz.sfera.edu_platform.service.RoomService;
@@ -19,7 +20,7 @@ public class RoomController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @Operation(summary = "Admin room qushish")
     @PostMapping
-    public ResponseEntity<ApiResponse> saveRoom(@RequestBody ReqRoom reqRoom){
+    public ResponseEntity<ApiResponse> saveRoom(@Valid @RequestBody ReqRoom reqRoom){
         ApiResponse apiResponse = roomService.saveRoom(reqRoom);
         return ResponseEntity.ok(apiResponse);
     }
@@ -58,7 +59,7 @@ public class RoomController {
     @PreAuthorize("hasAnyRole('ROLE_CEO', 'ROLE_ADMIN')")
     @Operation(summary = " Admin roomni update qilish")
     @PutMapping("/{roomId}")
-    public ResponseEntity<ApiResponse> updateRoom(@PathVariable Long roomId, @RequestBody ReqRoom reqRoom){
+    public ResponseEntity<ApiResponse> updateRoom(@PathVariable Long roomId,@Valid @RequestBody ReqRoom reqRoom){
         ApiResponse roomById = roomService.updateRoom(roomId, reqRoom);
         return ResponseEntity.ok(roomById);
     }

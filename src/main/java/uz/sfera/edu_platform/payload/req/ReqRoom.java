@@ -15,10 +15,14 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class ReqRoom {
+
     @Schema(hidden = true)
     private Long id;
+
     private String name;
+
     private String color;
+
     private List<WeekDay> weekDays;
 
     @Schema(description = "HH:mm formatda vaqt", example = "09:15")
