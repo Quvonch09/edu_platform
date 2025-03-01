@@ -18,24 +18,6 @@ import java.util.List;
 public class OptionService {
     private final OptionRepository optionRepository;
     private final QuestionRepository questionRepository;
-
-    public String saveOption(Long questionId, List<ReqOption> reqOptions) {
-        return questionRepository.findById(questionId)
-                .map(question -> {
-                    List<Option> options = reqOptions.stream()
-                            .map(opt -> Option.builder()
-                                    .name(opt.getText())
-                                    .correct(opt.getIsCorrect())
-                                    .question(question)
-                                    .build())
-                            .toList();
-                    optionRepository.saveAll(options);
-                    return "Optionlar saqlandi";
-                })
-                .orElse("Question not found");
-    }
-
-
 //    public ApiResponse updateOption(Long optionId,ReqOption reqOption){
 //        Option option = optionRepository.findById(optionId).orElse(null);
 //        if (option == null){
