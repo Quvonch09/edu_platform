@@ -20,7 +20,7 @@ public class Category extends AbsEntity {
     @Column(nullable = false)
     private double coursePrice;
 
-    private byte duration; // bayt
+    private int duration; // bayt
 
     private byte active;
 
