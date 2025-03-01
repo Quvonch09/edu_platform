@@ -2,24 +2,28 @@ package uz.sfera.edu_platform.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Fetch;
 
+import java.time.Month;
+
+@Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity
-public class Quiz {
+public class ExamResult {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String title;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    private Lesson lesson;
+    private User student;
 
-    private byte deleted; // byte
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Month month;
+
+    @Column(nullable = false)
+    private byte ball;
 }

@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.controller;
 
+import jakarta.validation.Valid;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.req.ReqPassTest;
@@ -24,7 +25,7 @@ public class QuizController {
     @Operation(summary = "(TEACHER) Quiz yaratish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> createQuiz(
-            @RequestBody ReqQuiz reqQuiz
+            @Valid @RequestBody ReqQuiz reqQuiz
     ) {
         return ResponseEntity.ok(quizService.createQuiz(reqQuiz));
     }
@@ -52,7 +53,7 @@ public class QuizController {
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> updateQuiz(
             @PathVariable Long quizId,
-            @RequestBody ReqQuiz reqQuiz
+            @Valid @RequestBody ReqQuiz reqQuiz
     ) {
         return ResponseEntity.ok(quizService.updateQuiz(quizId, reqQuiz));
     }
@@ -80,7 +81,7 @@ public class QuizController {
     @PreAuthorize("hasAnyRole('ROLE_STUDENT')")
     public ResponseEntity<ApiResponse> passTest(
             @PathVariable Long quizId,
-            @RequestBody List<ReqPassTest> passTestList,
+            @Valid @RequestBody List<ReqPassTest> passTestList,
             @CurrentUser User user
     ) {
         return ResponseEntity.ok(quizService.passTest(passTestList, user,quizId));
