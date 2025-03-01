@@ -25,22 +25,33 @@ public class User extends AbsEntity implements UserDetails {
 
     @Column(nullable = false)
     private String fullName;
+
     @Column(nullable = false, unique = true)
     private String phoneNumber;
+
     private Integer age;
+
     private String parentPhoneNumber;
+
     @Column(nullable = false)
     private String password;
+
     @ManyToMany
     private List<Category> categories;
+
     @Enumerated(EnumType.STRING)
     private UserStatus userStatus;
+
     private LocalDate departure_date;
+
     private String departure_description;
+
     @Enumerated(EnumType.STRING)
     private Role role;
+
     @OneToOne
     private File file;
+
     @Enumerated(EnumType.STRING)
     private ChatStatus chatStatus;
 

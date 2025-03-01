@@ -19,7 +19,7 @@ public class CategoryDTO {
     @NotBlank(message = "Bush bulmasin")
     private String description;
 
-    private byte duration;
+    private int duration;
 
     private double price;
 

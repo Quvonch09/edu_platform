@@ -21,7 +21,9 @@ public class UserDTO {
 
     @NotBlank(message = "Bush bulmasin")
     private String phoneNumber;
+
     @Schema(hidden = true)
     private String role;
+
     private Long fileId;
 }
