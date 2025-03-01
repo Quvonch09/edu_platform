@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
     boolean existsByNameAndIdNot(String name, Long id);
-    boolean existsByName(String name);
+    boolean existsByNameAndActiveIsTrue(String name);
 
     @Query("select coalesce(count (c) , 0)  from Category c where c.active = 1 ")
     Integer countAllByCategory();

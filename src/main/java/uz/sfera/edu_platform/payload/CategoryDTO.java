@@ -24,7 +24,9 @@ public class CategoryDTO {
 
     @NotBlank(message = "Bush bulmasin")
     private double price;
+
     @Schema(hidden = true)
-    private boolean active;
+    private Boolean active;
+
     private Long fileId;
 }

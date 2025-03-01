@@ -95,7 +95,7 @@ public class GroupService {
             GraphicDay graphicDay = graphicDayRepository.findGraphicDay(group.getId()).orElse(null);
 
             List<String> days = group.getDays().getWeekDay().stream()
-                    .map(weekDay -> weekDay.name())
+                    .map(Enum::name)
                     .collect(Collectors.toList());
 
             return convertGroupToGroupDTO(group, days, graphicDay);
