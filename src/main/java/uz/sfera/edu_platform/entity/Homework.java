@@ -20,12 +20,10 @@ public class Homework extends AbsEntity {
     @OneToOne
     private File file;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @ManyToOne
     private User student;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @ManyToOne
     private Task task;
 
     private byte checked; // byte
