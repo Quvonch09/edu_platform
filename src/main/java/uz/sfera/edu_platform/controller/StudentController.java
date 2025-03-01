@@ -2,6 +2,7 @@ package uz.sfera.edu_platform.controller;
 
 import jakarta.validation.Valid;
 import uz.sfera.edu_platform.entity.User;
+import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.entity.enums.UserStatus;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.req.ReqStudent;
