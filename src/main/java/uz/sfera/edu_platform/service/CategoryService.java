@@ -39,7 +39,7 @@ public class CategoryService {
                 categoryDTO.getName(),
                 categoryDTO.getDescription(),
                 categoryDTO.getPrice(),
-                categoryDTO.getDuration(),
+                (byte) categoryDTO.getDuration(),
                 (byte) 1,
                 categoryDTO.getFileId() > 0 ?
                         fileRepository.findById(categoryDTO.getFileId()).orElse(null) : null
@@ -97,7 +97,7 @@ public class CategoryService {
 
         category.setName(categoryDTO.getName());
         category.setDescription(categoryDTO.getDescription());
-        category.setDuration(categoryDTO.getDuration());
+        category.setDuration((byte) categoryDTO.getDuration());
         category.setCoursePrice(categoryDTO.getPrice());
         category.setFile(fileRepository.findById(categoryDTO.getFileId()).orElse(null));
 
