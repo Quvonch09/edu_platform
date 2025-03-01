@@ -34,8 +34,8 @@ public class HomeworkService {
                             .answer(reqHomework.getAnswer())
                             .file(fileRepository.findById(reqHomework.getFileId()).orElse(null))
                             .task(task)
-                            .ball(0)
-                            .checked(false)
+                            .ball((byte) 0)
+                            .checked((byte) 0)
                             .student(user)
                             .build();
                     homeworkRepository.save(homework);
@@ -44,10 +44,10 @@ public class HomeworkService {
                 .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Task")));
     }
 
-    public ApiResponse checkHomework(Long homeworkId, Integer ball) {
+    public ApiResponse checkHomework(Long homeworkId, byte ball) {
         return homeworkRepository.findById(homeworkId)
                 .map(homework -> {
-                    homework.setChecked(true);
+                    homework.setChecked((byte) 1);
                     homework.setBall(ball);
                     homeworkRepository.save(homework);
                     return new ApiResponse("Homework tekshirildi");
@@ -57,9 +57,11 @@ public class HomeworkService {
 
     public ApiResponse getMyHomeworks(boolean isChecked, User student, Long taskId, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
+        byte checkedValue = (byte) (isChecked ? 1 : 0);
+
         Page<Homework> homeworks = (taskId == 0)
-                ? homeworkRepository.findByCheckedAndStudentId(isChecked, student.getId(), pageRequest)
-                : homeworkRepository.findByCheckedAndTaskId(isChecked, taskId, pageRequest);
+                ? homeworkRepository.findByCheckedAndStudentId(checkedValue, student.getId(), pageRequest)
+                : homeworkRepository.findByCheckedAndTaskId(checkedValue, taskId, pageRequest);
 
         return homeworks.isEmpty()
                 ? new ApiResponse(ResponseError.NOTFOUND("Homeworklar"))
@@ -68,15 +70,19 @@ public class HomeworkService {
     }
 
     public ApiResponse getHomeworks(boolean isChecked, Long id, boolean byStudent, int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        byte checkedValue = (byte) (isChecked ? 1 : 0);
+
         Page<Homework> homeworks = (byStudent
-                ? homeworkRepository.findByCheckedAndStudentId(isChecked, id, PageRequest.of(page, size))
-                : homeworkRepository.findByCheckedAndTaskId(isChecked, id, PageRequest.of(page, size)));
+                ? homeworkRepository.findByCheckedAndStudentId(checkedValue, id, pageRequest)
+                : homeworkRepository.findByCheckedAndTaskId(checkedValue, id, pageRequest));
 
         return homeworks.isEmpty()
                 ? new ApiResponse(ResponseError.NOTFOUND("Homeworklar"))
                 : new ApiResponse(new ResPageable(page, size, homeworks.getTotalPages(),
                 homeworks.getTotalElements(), homeworks.map(this::homeworkDTO).toList()));
     }
+
 
     public ApiResponse userStatistics(User student) {
         long totalTasks = taskRepository.count();

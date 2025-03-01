@@ -31,27 +31,31 @@ public class QuestionService {
     @Transactional
     public ApiResponse saveQuestion(QuestionEnum difficulty, ReqQuestion reqQuestion) {
         Quiz quiz = quizRepository.findById(reqQuestion.getQuizId()).orElse(null);
-        if (quiz == null) return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
+        if (quiz == null || quiz.getDeleted() == 1) return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
 
-        long correctAnswers = reqQuestion.getReqOptionList().stream().filter(ReqOption::isCorrect).count();
-        if (correctAnswers != 1) {
+        if (reqQuestion.getReqOptionList().stream().filter(ReqOption::isCorrect).count() != 1)
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Har bir savol uchun faqat 1 ta to'g'ri javob bo‘lishi kerak"));
-        }
 
-        Question question = Question.builder()
+        Question question = questionRepository.save(Question.builder()
                 .question(reqQuestion.getQuestionText())
                 .questionEnum(difficulty)
                 .quiz(quiz)
-                .build();
-        questionRepository.save(question);
-        optionService.saveOption(question.getId(), reqQuestion.getReqOptionList());
+                .build());
+
+        optionRepository.saveAll(reqQuestion.getReqOptionList().stream()
+                .map(opt -> Option.builder()
+                        .question(question)
+                        .name(opt.getText())
+                        .correct((byte) (opt.isCorrect() ? 1 : 0))
+                        .build())
+                .toList());
 
         return new ApiResponse("Savol yaratildi");
     }
 
     public ApiResponse getQuestionByQuiz(Long quizId) {
         Quiz quiz = quizRepository.findById(quizId).orElse(null);
-        if (quiz == null) return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
+        if (quiz == null || quiz.getDeleted() == 1) return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
 
         List<QuestionDTO> questionDTOList = questionRepository.findByQuizId(quizId).stream()
                 .filter(q -> q.getQuiz().getLesson().getModule().getCategory() != null)
@@ -76,30 +80,29 @@ public class QuestionService {
 
 
     public ApiResponse updateQuestion(Long questionId, QuestionEnum difficulty, ReqQuestion reqQuestion) {
-        return questionRepository.findById(questionId)
-                .map(question -> quizRepository.findById(reqQuestion.getQuizId())
-                        .map(quiz -> {
-                            question.setQuestion(reqQuestion.getQuestionText());
-                            question.setQuestionEnum(difficulty);
-                            question.setQuiz(quiz);
+        return questionRepository.findById(questionId).map(question ->
+                quizRepository.findById(reqQuestion.getQuizId()).map(quiz -> {
+                    question.setQuestion(reqQuestion.getQuestionText());
+                    question.setQuestionEnum(difficulty);
+                    question.setQuiz(quiz);
 
-                            optionRepository.deleteByQuestionId(questionId);
+                    optionRepository.deleteByQuestionId(questionId);
 
-                            int correctCount = (int) reqQuestion.getReqOptionList().stream()
-                                    .filter(ReqOption::isCorrect)
-                                    .count();
+                    if (reqQuestion.getReqOptionList().stream().filter(ReqOption::isCorrect).count() != 1)
+                        return new ApiResponse(ResponseError.DEFAULT_ERROR("Har bir savol uchun faqat 1 ta to‘g‘ri javob bo‘lishi kerak"));
 
-                            if (correctCount != 1) {
-                                return new ApiResponse(ResponseError.DEFAULT_ERROR("Har bir savol uchun faqat 1 ta to‘g‘ri javob bo‘lishi kerak"));
-                            }
+                    optionRepository.saveAll(reqQuestion.getReqOptionList().stream()
+                            .map(opt -> Option.builder()
+                                    .question(question)
+                                    .name(opt.getText())
+                                    .correct((byte) (opt.isCorrect() ? 1 : 0))
+                                    .build())
+                            .toList());
 
-                            optionService.saveOption(question.getId(), reqQuestion.getReqOptionList());
-                            questionRepository.save(question);
-
-                            return new ApiResponse("Question yangilandi");
-                        })
-                        .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Quiz"))))
-                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Question")));
+                    questionRepository.save(question);
+                    return new ApiResponse("Question yangilandi");
+                }).orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Quiz")))
+        ).orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Question")));
     }
 
     public QuestionDTO questionDTO(Question question,List<OptionDTO> optionList){

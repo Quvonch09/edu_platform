@@ -23,10 +23,7 @@ public class Result {
     private int totalQuestion;
 
     @Column(nullable = false)
-    private int correctAnswers;
-
-    @Column(nullable = false)
-    private Long timeTaken;
+    private long correctAnswers;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -34,7 +31,6 @@ public class Result {
     @Column(nullable = false)
     private LocalDateTime startTime;
 
-    @Column(nullable = false)
     private LocalDateTime endTime;
 
     @ManyToOne(fetch = FetchType.LAZY)

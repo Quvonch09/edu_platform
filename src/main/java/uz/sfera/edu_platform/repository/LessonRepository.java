@@ -10,13 +10,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface LessonRepository extends JpaRepository<Lesson,Long> {
-    List<Lesson> findByModuleIdAndDeletedFalse(Long moduleId);
-    long countByDeletedFalse();
-    long countByDeletedTrue();
-    long countByModuleIdAndDeletedFalse(Long moduleId);
-    long countByModuleIdAndDeletedTrue(Long moduleId);
-    Page<Lesson> findByNameAndDeletedFalse(String name, Pageable pageable);
-    Optional<Lesson> findByIdAndDeletedFalse(Long id);
+    List<Lesson> findByModuleIdAndDeleted(Long moduleId, byte deleted);
+    long countByDeleted(byte deleted);
+    long countByModuleIdAndDeleted(Long moduleId, byte deleted);
+    Page<Lesson> findByNameAndDeleted(String name, byte deleted, Pageable pageable);
+    Optional<Lesson> findByIdAndDeleted(Long id, byte deleted);
 
 
     @Query(value = "select coalesce(count(l.*) , 0) from lesson l join module m on l.module_id = m.id " +

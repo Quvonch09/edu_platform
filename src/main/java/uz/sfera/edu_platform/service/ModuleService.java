@@ -40,7 +40,7 @@ public class ModuleService {
         Module module = Module.builder()
                 .name(moduleRequest.getName())
                 .category(category)
-                .deleted(false)
+                .deleted((byte) 0)
                 .build();
         moduleRepository.save(module);
         return new ApiResponse("Modul yaratildi");
@@ -62,7 +62,7 @@ public class ModuleService {
             ));
         }
 
-        Page<Module> modules = moduleRepository.findByCategoryIdAndDeletedFalse(category.getId(), PageRequest.of(page, size));
+        Page<Module> modules = moduleRepository.findByCategoryIdAndDeleted(category.getId(),(byte) 0, PageRequest.of(page, size));
 
         return new ApiResponse(ResPageable.builder()
                 .page(page)
@@ -78,7 +78,7 @@ public class ModuleService {
     public ApiResponse searchModule(String name, int page, int size) {
         Page<Module> modules = (name == null || name.isBlank())
                 ? moduleRepository.findAll(PageRequest.of(page, size))
-                : moduleRepository.findByNameContainingIgnoreCaseAndDeletedFalse(name, PageRequest.of(page, size));
+                : moduleRepository.findByNameContainingIgnoreCaseAndDeleted(name, (byte) 0,PageRequest.of(page, size));
 
         return new ApiResponse(ResPageable.builder()
                 .page(page)
@@ -92,7 +92,7 @@ public class ModuleService {
 
 
     public ApiResponse getModule(Long moduleId) {
-        return moduleRepository.findByIdAndDeletedFalse(moduleId)
+        return moduleRepository.findByIdAndDeleted(moduleId, (byte) 0)
                 .map(module -> module.getCategory() != null
                         ? new ApiResponse(moduleDTO(module))
                         : new ApiResponse(ResponseError.DEFAULT_ERROR("Bu modulning kategoriyasi o‘chirilgan")))
@@ -100,7 +100,7 @@ public class ModuleService {
     }
 
     public ApiResponse update(Long moduleId,ModuleRequest moduleRequest){
-        Module module = moduleRepository.findByIdAndDeletedFalse(moduleId).orElse(null);
+        Module module = moduleRepository.findByIdAndDeleted(moduleId, (byte) 0).orElse(null);
         Category category = categoryRepository.findById(moduleRequest.getCategoryId()).orElse(null);
         if (module == null){
             return new ApiResponse(ResponseError.NOTFOUND("Modul"));
@@ -116,9 +116,9 @@ public class ModuleService {
     }
 
     public ApiResponse delete(Long moduleId) {
-        return moduleRepository.findByIdAndDeletedFalse(moduleId)
+        return moduleRepository.findByIdAndDeleted(moduleId, (byte) 0)
                 .map(module -> {
-                    module.setDeleted(true);
+                    module.setDeleted((byte) 1);
                     moduleRepository.save(module);
                     return new ApiResponse("Modul o‘chirildi");
                 })

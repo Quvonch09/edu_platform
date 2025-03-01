@@ -50,13 +50,4 @@ public class ResultController {
     public ResponseEntity<ApiResponse> deleteResult(@PathVariable Long resultId) {
         return ResponseEntity.ok(resultService.deleteResult(resultId));
     }
-
-    @GetMapping("/getExamStats/{groupId}")
-    public ResponseEntity<ApiResponse> getExamResults(
-            @PathVariable Long groupId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ){
-        return ResponseEntity.ok(resultService.getGroupResults(groupId, page, size));
-    }
 }

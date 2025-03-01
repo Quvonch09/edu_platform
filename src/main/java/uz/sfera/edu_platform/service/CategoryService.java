@@ -35,13 +35,13 @@ public class CategoryService {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Category"));
         }
 
+
         Category category = new Category(
                 categoryDTO.getName(),
                 categoryDTO.getDescription(),
                 categoryDTO.getPrice(),
                 categoryDTO.getDuration(),
-                true,
-                false,
+                (byte) 1,
                 fileRepository.findById(categoryDTO.getFileId()).orElse(null)
                 );
 
@@ -117,11 +117,11 @@ public class CategoryService {
         groups.forEach(group -> group.setCategory(null));
         groupRepository.saveAll(groups);
 
-        List<Module> modules = moduleRepository.findAllByCategoryIdAndDeletedFalse(category.getId());
+        List<Module> modules = moduleRepository.findAllByCategoryIdAndDeleted(category.getId(), (byte) 0);
         modules.forEach(module -> module.setCategory(null));
         moduleRepository.saveAll(modules);
 
-        category.setDeleted(true);
+        category.setActive((byte) 0);
         categoryRepository.save(category);
 
         return new ApiResponse("Category successfully deleted");
@@ -134,20 +134,30 @@ public class CategoryService {
         if (category == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Category"));
         }
-        category.setActive(active);
+
+        if (active){
+            category.setActive((byte) 1);
+        } else {
+            category.setActive((byte) 0);
+        }
+
         categoryRepository.save(category);
         return new ApiResponse("Category successfully updated");
     }
 
 
     private CategoryDTO convertCategoryToCategoryDTO(Category category) {
+        boolean active = false;
+        if (category.getActive() == 1){
+            active = true;
+        }
         return CategoryDTO.builder()
                 .id(category.getId())
                 .name(category.getName())
                 .description(category.getDescription())
                 .price(category.getCoursePrice())
                 .duration(category.getDuration())
-                .active(category.isActive())
+                .active(active)
                 .fileId(Optional.ofNullable(category.getFile()).map(File::getId).orElse(null))
                 .build();
     }

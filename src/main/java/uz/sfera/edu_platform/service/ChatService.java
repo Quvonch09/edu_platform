@@ -228,6 +228,7 @@ public class ChatService {
 
     public ChatDto saveMessage(ChatDto dto)
     {
+        log.info("service ga ham keldi");
         Chat existingChat = chatRepository.checkChat(dto.getSender(), dto.getReceiver());
         if (existingChat == null) {
             existingChat = chatRepository.checkChat(dto.getReceiver(), dto.getSender());

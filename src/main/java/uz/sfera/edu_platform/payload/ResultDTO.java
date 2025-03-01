@@ -15,8 +15,8 @@ public class ResultDTO {
     private Long quizId;
     private String userName;
     private int totalQuestion;
-    private int correctAnswers;
-    private Long timeTaken;
+    private long correctAnswers;
+    private long timeTaken;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private LocalDateTime createdAt;

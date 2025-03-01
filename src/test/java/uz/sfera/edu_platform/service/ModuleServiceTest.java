@@ -46,14 +46,14 @@ public class ModuleServiceTest {
         category.setName("Test Category");
         category.setDescription("Test Description");
         category.setCoursePrice(100.0);
-        category.setDuration(30);
-        category.setActive(true);
+        category.setDuration((byte) 30);
+        category.setActive((byte) 0);
 
         module = new Module();
         module.setId(1L);
         module.setName("Test Module");
         module.setCategory(category);
-        module.setDeleted(false);
+        module.setDeleted((byte) 0);
 
         moduleDTO = new ModuleDTO();
         moduleDTO.setId(1L);

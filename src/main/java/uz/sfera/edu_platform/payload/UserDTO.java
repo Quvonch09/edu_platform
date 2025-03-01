@@ -2,6 +2,9 @@ package uz.sfera.edu_platform.payload;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import uz.sfera.edu_platform.payload.res.ResCategory;
+
+import java.util.List;
 
 @Getter
 @Setter
