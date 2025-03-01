@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.controller;
 
+import jakarta.validation.Valid;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.AttendanceDto;
@@ -25,7 +26,7 @@ public class AttendanceController {
                     "studentId - bu esa qaysi studentni yoqlamasi uchun,\n" +
                     "date - default holatda today bo'lishi kerak, agarda teacher yoki admin yoqlama esdan chikib ketsa kechagi sanani kiritishi mumkin")
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse> create(@RequestBody List<AttendanceDto> attendanceDtos,
+    public ResponseEntity<ApiResponse> create(@Valid @RequestBody List<AttendanceDto> attendanceDtos,
                                              @RequestParam Long groupId){
         ApiResponse apiResponse = attendanceService.create(attendanceDtos, groupId);
         return ResponseEntity.ok(apiResponse);

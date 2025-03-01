@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.controller;
 
+import jakarta.validation.Valid;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.req.ReqHomework;
@@ -21,7 +22,7 @@ public class HomeworkController {
     @Operation(summary = "(STUDENT) homework saqlaydi")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     public ResponseEntity<ApiResponse> saveHomework(
-            @RequestBody ReqHomework reqHomework,
+            @Valid @RequestBody ReqHomework reqHomework,
             @CurrentUser User student
             ){
         return ResponseEntity.ok(homeworkService.createHomework(student,reqHomework));

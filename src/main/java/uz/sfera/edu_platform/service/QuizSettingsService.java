@@ -1,11 +1,9 @@
 package uz.sfera.edu_platform.service;
 
-import uz.sfera.edu_platform.entity.Quiz;
 import uz.sfera.edu_platform.entity.QuizSettings;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.QuizSettingsDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
-import uz.sfera.edu_platform.payload.req.ReqQuizSettings;
 import uz.sfera.edu_platform.repository.QuizRepository;
 import uz.sfera.edu_platform.repository.QuizSettingsRepository;
 import lombok.RequiredArgsConstructor;
