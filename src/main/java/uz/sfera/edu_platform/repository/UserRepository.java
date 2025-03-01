@@ -218,4 +218,29 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> searchForChat(@Param("fullName") String fullName,
                              @Param("phone") String phone,
                              @Param("roleName") String roleName);
+
+    @Query(value = """
+
+            SELECT
+                s.*
+             FROM groups g
+                 JOIN users u ON g.teacher_id = u.id
+                 LEFT JOIN groups_students gu ON gu.group_id = g.id  -- group_user jadvali, bu yerda studentlar va guruhlar bog‘langan
+                 LEFT JOIN users s ON s.id = gu.students_id AND s.user_status = 'UQIYABDI'  -- Studentlarning statusi
+        WHERE g.teacher_id = :teacherId
+          AND g.active = TRUE """ , nativeQuery = true
+    )
+    List<User> searchForUsers(@Param("teacherId") Long teacherId);
+
+    @Query(value = """
+
+            SELECT
+                u.*
+             FROM groups g
+                 JOIN users u ON g.teacher_id = u.id
+                 LEFT JOIN groups_students gu ON gu.group_id = g.id  -- group_user jadvali, bu yerda studentlar va guruhlar bog‘langan
+        WHERE gu.students_id = :studentId
+          AND g.active = TRUE """ , nativeQuery = true
+    )
+    List<User> searchForTeacher(@Param("studentId") Long studentId);
 }
