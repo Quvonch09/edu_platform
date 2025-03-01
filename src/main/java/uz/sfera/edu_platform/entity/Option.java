@@ -17,8 +17,7 @@ public class Option {
     @Column(nullable = false)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @ManyToOne
     private Question question;
 
     @Column(nullable = false)

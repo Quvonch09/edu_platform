@@ -16,8 +16,7 @@ public class Result {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @ManyToOne
     private User user;
 
     @Column(nullable = false)
@@ -34,8 +33,7 @@ public class Result {
 
     private LocalDateTime endTime;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @ManyToOne
     private Quiz quiz;
 
     @PrePersist
