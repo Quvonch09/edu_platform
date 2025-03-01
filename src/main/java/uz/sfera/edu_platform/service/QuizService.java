@@ -28,6 +28,7 @@ public class QuizService {
     private final ResultRepository resultRepository;
     private final QuizSettingsRepository quizSettingsRepository;
     private final OptionService optionService;
+    private final ResultService resultService;
 
     public ApiResponse createQuiz(ReqQuiz reqQuiz) {
         return lessonRepository.findById(reqQuiz.getLessonId())
@@ -100,14 +101,15 @@ public class QuizService {
                         (existing, replacement) -> existing
                 ));
 
-        long correctCount = passTestList.stream()
-                .filter(reqPassTest -> correctAnswersMap.getOrDefault(reqPassTest.getQuestionId(), -1L)
+        long incorrectCount = passTestList.stream()
+                .filter(reqPassTest -> !correctAnswersMap.getOrDefault(reqPassTest.getQuestionId(), -1L)
                         .equals(reqPassTest.getOptionId()))
                 .count();
+
         result.setEndTime(LocalDateTime.now());
-        result.setCorrectAnswers(correctCount);
-        resultRepository.save(result);
-        return new ApiResponse("Test muvaffaqiyatli o'tkazildi!");
+        result.setCorrectAnswers(incorrectCount);
+        Result result1 = resultRepository.save(result);
+        return new ApiResponse("Siz testni yakunladingiz!\nNATIJA:" + resultService.convertToDTO(result1));
     }
 
     public List<QuestionDTO> getRandomQuestionsForQuiz(Long quizId) {
