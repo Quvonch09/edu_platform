@@ -11,6 +11,6 @@ import lombok.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ExamResultDTO {
     private String studentName;
-    private byte ball;
+    private int ball;
     private String month;
 }

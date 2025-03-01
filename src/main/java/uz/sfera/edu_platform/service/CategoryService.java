@@ -31,7 +31,7 @@ public class CategoryService {
     private final ModuleRepository moduleRepository;
 
     public ApiResponse saveCategory(CategoryDTO categoryDTO) {
-        if (categoryRepository.existsByNameAndActiveIsTrue(categoryDTO.getName())) {
+        if (categoryRepository.existsByNameAndActive(categoryDTO.getName(), (byte) 1)) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Category"));
         }
 
