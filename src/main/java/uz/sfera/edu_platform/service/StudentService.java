@@ -24,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,7 +40,7 @@ public class StudentService {
 
     @Transactional
     public ApiResponse saveStudent(ReqStudent reqStudent) {
-        if (userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(reqStudent.getPhoneNumber(), Role.ROLE_STUDENT)) {
+        if (userRepository.existsByPhoneNumberAndEnabledIsTrue(reqStudent.getPhoneNumber())) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Student"));
         }
 
@@ -172,6 +173,7 @@ public class StudentService {
 
         user.setUserStatus(UserStatus.CHIQIB_KETGAN);
         user.setEnabled(false);
+        user.setPhoneNumber(user.getPhoneNumber() + LocalDateTime.now() + "_deleted");
         user.setDeparture_date(departureDate);
         user.setDeparture_description(departureDescription);
         return new ApiResponse("Successfully deleted student");

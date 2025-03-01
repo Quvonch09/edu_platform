@@ -24,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,7 +46,7 @@ public class UserService {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Iltimos ma'lumot kiriting"));
         }
 
-        if (userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(reqTeacher.getPhoneNumber(), Role.ROLE_TEACHER)) {
+        if (userRepository.existsByPhoneNumberAndEnabledIsTrue(reqTeacher.getPhoneNumber())) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu User"));
         }
 
@@ -186,6 +187,7 @@ public class UserService {
         }
 
         user.setEnabled(false);
+        user.setPhoneNumber(user.getPhoneNumber() + LocalDateTime.now() + "_deleted");
         userRepository.save(user);
         return new ApiResponse("User successfully deleted");
     }
@@ -194,7 +196,7 @@ public class UserService {
 
     //    Admin CRUD
     public ApiResponse saveAdmin(ReqAdmin reqAdmin){
-        boolean b = userRepository.existsByPhoneNumberAndRoleAndEnabledTrue(reqAdmin.getPhoneNumber(), Role.ROLE_ADMIN);
+        boolean b = userRepository.existsByPhoneNumberAndEnabledIsTrue(reqAdmin.getPhoneNumber());
         if (b) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu Admin"));
         }
