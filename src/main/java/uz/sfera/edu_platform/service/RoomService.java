@@ -1,6 +1,9 @@
 package uz.sfera.edu_platform.service;
 
-import uz.sfera.edu_platform.entity.GraphicDay;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.Room;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.ResponseError;
@@ -10,20 +13,13 @@ import uz.sfera.edu_platform.payload.res.ResPageable;
 import uz.sfera.edu_platform.payload.res.ResRoom;
 import uz.sfera.edu_platform.repository.GraphicDayRepository;
 import uz.sfera.edu_platform.repository.RoomRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class RoomService {
     private final RoomRepository roomRepository;
-    private final GraphicDayRepository graphicDayRepository;
 
 
     public ApiResponse saveRoom(ReqRoom reqRoom) {
@@ -47,8 +43,8 @@ public class RoomService {
 
 
     public ApiResponse getRooms(String name, String color, int page, int size){
-        PageRequest pageRequest = PageRequest.of(page, size);
-        Page<ResRoom> allRooms = roomRepository.getAllRooms(name, color, pageRequest);
+        Page<ResRoom> allRooms = roomRepository.getAllRooms(name, color, PageRequest.of(page, size));
+
         return new ApiResponse(ResPageable.builder()
                 .page(page)
                 .size(size)
@@ -60,21 +56,16 @@ public class RoomService {
 
 
     public ApiResponse getRoomsList() {
-        List<Room> allRooms = roomRepository.findAll();
-        Map<Long, GraphicDay> graphicDayMap = graphicDayRepository.findAll()
-                .stream()
-                .collect(Collectors.toMap(gd -> gd.getRoom().getId(), gd -> gd));
+        List<RoomDTO> resRooms = roomRepository.findAll().stream()
+                .map(room -> RoomDTO.builder()
+                        .id(room.getId())
+                        .name(room.getName())
+                        .color(room.getColor())
+                        .startTime(room.getStartTime())
+                        .endTime(room.getEndTime())
+                        .build())
+                .toList();
 
-        List<RoomDTO> resRooms = allRooms.stream().map(room -> {
-            GraphicDay graphicDay = graphicDayMap.get(room.getId());
-            return RoomDTO.builder()
-                    .id(room.getId())
-                    .name(room.getName())
-                    .color(room.getColor())
-                    .startTime(graphicDay != null ? graphicDay.getStartTime() : null)
-                    .endTime(graphicDay != null ? graphicDay.getEndTime() : null)
-                    .build();
-        }).collect(Collectors.toList());
 
         return new ApiResponse(resRooms);
     }
@@ -86,14 +77,13 @@ public class RoomService {
             return new ApiResponse(ResponseError.NOTFOUND("Room"));
         }
 
-        GraphicDay graphicDay = graphicDayRepository.findByRoomId(roomId).orElse(null);
 
         RoomDTO roomDTO = RoomDTO.builder()
                 .id(room.getId())
                 .name(room.getName())
                 .color(room.getColor())
-                .startTime(graphicDay != null ? graphicDay.getStartTime() : null)
-                .endTime(graphicDay != null ? graphicDay.getEndTime() : null)
+                .startTime(room.getStartTime())
+                .endTime(room.getEndTime())
                 .build();
 
         return new ApiResponse(roomDTO);

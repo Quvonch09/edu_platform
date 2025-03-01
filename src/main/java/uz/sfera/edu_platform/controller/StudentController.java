@@ -1,6 +1,5 @@
 package uz.sfera.edu_platform.controller;
 
-import jakarta.validation.Valid;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.entity.enums.UserStatus;
 import uz.sfera.edu_platform.payload.ApiResponse;
@@ -12,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import uz.sfera.edu_platform.service.UserService;
 
 import java.time.LocalDate;
 
@@ -20,11 +20,12 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class StudentController {
     private final StudentService studentService;
+    private final UserService userService;
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_TEACHER', 'ROLE_CEO')")
     @Operation(summary = "ADMIN/TEACHER student qushish")
     @PostMapping
-    public ResponseEntity<ApiResponse> saveStudent(@Valid @RequestBody ReqStudent reqStudent){
+    public ResponseEntity<ApiResponse> saveStudent(@RequestBody ReqStudent reqStudent){
         ApiResponse apiResponse = studentService.saveStudent(reqStudent);
         return ResponseEntity.ok(apiResponse);
     }

@@ -60,7 +60,7 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
     @Operation(summary = "CEO/ADMIN teacherni update qilish")
     @PutMapping("/updateTeacher/{teacherId}")
-    public ResponseEntity<ApiResponse> updateTeacher(@PathVariable Long teacherId, @RequestBody ReqTeacher reqTeacher) {
+    public ResponseEntity<ApiResponse> updateTeacher(@PathVariable Long teacherId, @Valid @RequestBody ReqTeacher reqTeacher) {
         ApiResponse apiResponse = userService.updateTeacher(teacherId, reqTeacher);
         return ResponseEntity.ok(apiResponse);
     }
@@ -89,7 +89,7 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ROLE_CEO')")
     @Operation(summary = "CEO admin qushish")
     @PostMapping("/saveAdmin")
-    public ResponseEntity<ApiResponse> saveAdmin(@RequestBody ReqAdmin reqAdmin) {
+    public ResponseEntity<ApiResponse> saveAdmin(@Valid @RequestBody ReqAdmin reqAdmin) {
         ApiResponse apiResponse = userService.saveAdmin(reqAdmin);
         return ResponseEntity.ok(apiResponse);
     }
@@ -108,7 +108,7 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ROLE_CEO')")
     @Operation(summary = "CEO/ADMIN teacherni update qilish")
     @PutMapping("/updateAdmin/{adminId}")
-    public ResponseEntity<ApiResponse> updateAdmin(@PathVariable Long adminId, @RequestBody ReqAdmin reqAdmin) {
+    public ResponseEntity<ApiResponse> updateAdmin(@PathVariable Long adminId, @Valid @RequestBody ReqAdmin reqAdmin) {
         ApiResponse apiResponse = userService.updateAdmin(adminId, reqAdmin);
         return ResponseEntity.ok(apiResponse);
     }
@@ -140,7 +140,7 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ROLE_STUDENT','ROLE_TEACHER', 'ROLE_ADMIN', 'ROLE_CEO')")
     @Operation(summary = "Barcha user uzini profilini update qilish")
     @PutMapping("/updateUser")
-    public ResponseEntity<ApiResponse> updateUser(@CurrentUser User user, @RequestBody UserDTO userDTO) {
+    public ResponseEntity<ApiResponse> updateUser(@CurrentUser User user,@Valid @RequestBody UserDTO userDTO) {
         ApiResponse apiResponse = userService.updateUser(user, userDTO);
         return ResponseEntity.ok(apiResponse);
     }

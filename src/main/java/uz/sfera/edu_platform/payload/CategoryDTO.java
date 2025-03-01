@@ -12,11 +12,17 @@ import lombok.*;
 public class CategoryDTO {
     @Schema(hidden = true)
     private Long id;
-    @NotBlank(message = "Nom bo'sh bo'lmasligi kerak")
+
+    @NotBlank(message = "Bush bulmasin")
     private String name;
+
+    @NotBlank(message = "Bush bulmasin")
     private String description;
+
+    @NotBlank(message = "Bush bulmasin")
     private byte duration;
-    @NotBlank(message = "Narx bo'sh bo'lmasligi kerak")
+
+    @NotBlank(message = "Bush bulmasin")
     private double price;
     @Schema(hidden = true)
     private boolean active;
