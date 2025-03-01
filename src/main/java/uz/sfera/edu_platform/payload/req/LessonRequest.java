@@ -13,6 +13,7 @@ public class LessonRequest {
     private String name;
     @NotBlank(message = "Tavsif bo‘sh bo‘lishi mumkin emas")
     private String description;
+    @NotBlank(message = "Dars qo'shish uchun modul tanlash zarur")
     private Long moduleId;
     private String videoLink;
 }
