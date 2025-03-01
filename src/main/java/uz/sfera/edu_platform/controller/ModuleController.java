@@ -75,4 +75,14 @@ public class ModuleController {
     ){
         return ResponseEntity.ok(moduleService.delete(moduleId));
     }
+
+
+
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    @Operation(summary = "STUDENT uziga ochilgan modullarni kurish")
+    @GetMapping("/openModules")
+    public ResponseEntity<ApiResponse> getOpenModules(@CurrentUser User user){
+        ApiResponse openModuleByStudent = moduleService.getOpenModuleByStudent(user);
+        return ResponseEntity.ok(openModuleByStudent);
+    }
 }
