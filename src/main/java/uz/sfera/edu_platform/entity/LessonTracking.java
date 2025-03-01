@@ -11,10 +11,8 @@ import uz.sfera.edu_platform.entity.template.AbsEntity;
 @Builder
 @Entity
 public class LessonTracking extends AbsEntity {
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @ManyToOne
     private Lesson lesson;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @ManyToOne
     private Group group;
 }

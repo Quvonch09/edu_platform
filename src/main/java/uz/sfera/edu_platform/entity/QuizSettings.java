@@ -18,7 +18,6 @@ public class QuizSettings {
 
     private Integer duration;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @OneToOne
     private Quiz quiz;
 }

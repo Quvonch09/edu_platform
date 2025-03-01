@@ -37,10 +37,12 @@ public class FeedbackService {
     public ApiResponse leaveFeedbackToTeacher(FeedbackDto feedbackDto, User student) {
         User teacher = userRepository.findById(feedbackDto.getTeacherId())
                 .orElseThrow(() -> new NotFoundException("teacher not found"));
+
         boolean exist = feedbackRepository.existsByCreatedByAndTeacherId(student.getId(), teacher.getId());
         if(exist) {
             throw new BadRequestException("feedback already exist");
         }
+
         Feedback feedback = Feedback.builder()
                 .feedback(feedbackDto.getFeedback())
                 .rating(feedbackDto.getRating())
@@ -54,10 +56,12 @@ public class FeedbackService {
     public ApiResponse leaveFeedbackToLesson(FeedbackDto feedbackDto, User student) {
         Lesson lesson = lessonRepository.findById(feedbackDto.getLessonId())
                 .orElseThrow(() -> new NotFoundException("lesson not found"));
+
         boolean exist = feedbackRepository.existsByCreatedByAndLessonId(student.getId(), lesson.getId());
         if(exist) {
             throw new BadRequestException("feedback already exist");
         }
+
         Feedback feedback = Feedback.builder()
                 .feedback(feedbackDto.getFeedback())
                 .rating(feedbackDto.getRating())
@@ -71,10 +75,12 @@ public class FeedbackService {
     public ApiResponse leaveFeedbackToQuiz(FeedbackDto feedbackDto, User student) {
         Quiz quiz = quizRepository.findById(feedbackDto.getQuizId())
                 .orElseThrow(() -> new NotFoundException("quiz not found"));
+
         boolean exist = feedbackRepository.existsByCreatedByAndQuizId(student.getId(), quiz.getId());
         if(exist) {
             throw new BadRequestException("feedback already exist");
         }
+
         Feedback feedback = Feedback.builder()
                 .feedback(feedbackDto.getFeedback())
                 .rating(feedbackDto.getRating())
@@ -88,9 +94,11 @@ public class FeedbackService {
     public ApiResponse editFeedback(String comment, int rating, Long feedbackId, User user) {
         Feedback feedback = feedbackRepository.findByIdAndCreatedBy(feedbackId, user.getId())
                 .orElseThrow(() -> new NotFoundException("Feedback not found"));
+
         feedback.setFeedback(comment);
         feedback.setRating(rating);
         feedbackRepository.save(feedback);
+
         return new ApiResponse("Feedback updated successfully");
     }
 

@@ -21,11 +21,11 @@ public class Lesson extends AbsEntity {
 
     private String videoLink;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(nullable = false)
     private Module module;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany
     private List<File> files;
 
     private byte deleted; // byte

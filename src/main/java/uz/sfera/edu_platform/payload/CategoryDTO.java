@@ -22,7 +22,9 @@ public class CategoryDTO {
     private byte duration;
 
     private double price;
+
     @Schema(hidden = true)
     private Boolean active;
+
     private Long fileId;
 }
