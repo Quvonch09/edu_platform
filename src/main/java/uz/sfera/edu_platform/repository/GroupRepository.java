@@ -94,7 +94,7 @@ WITH lessons_per_group AS (
              COALESCE(SUM(h.ball), 0) AS total_score
          FROM groups g
                   LEFT JOIN homework h ON h.student_id = :studentId
-         WHERE h.checked = TRUE
+         WHERE h.checked = 1 
          GROUP BY g.id
      ),
      ranking AS (
@@ -104,7 +104,7 @@ WITH lessons_per_group AS (
              RANK() OVER (ORDER BY SUM(ball) DESC) AS rank_position,
              COUNT(*) OVER () AS total_students
          FROM homework
-         WHERE checked = TRUE
+         WHERE checked = 1
          GROUP BY student_id
      )
 SELECT
@@ -161,7 +161,7 @@ WITH student_scores AS (
         COALESCE(SUM(h.ball), 0) AS total_score
     FROM groups_students gs
              JOIN users u ON gs.students_id = u.id
-             LEFT JOIN homework h ON h.student_id = u.id AND h.checked = TRUE
+             LEFT JOIN homework h ON h.student_id = u.id AND h.checked = 1 
     WHERE gs.group_id IN (
         SELECT group_id FROM groups_students WHERE students_id = :studentId
     )
@@ -188,7 +188,8 @@ ORDER BY r.rank_position;
 
 
 
-    @Query(value = "select distinct g.* from groups g join groups_students gsl on gsl.students_id = ?1 and gsl.group_id = g.id", nativeQuery = true)
+    @Query(value = "select distinct g.* from groups g join " +
+            "groups_students gsl on gsl.students_id = ?1 and gsl.group_id = g.id", nativeQuery = true)
     Optional<Group> findByStudentId(Long studentId);
 
     boolean existsByName(String name);
