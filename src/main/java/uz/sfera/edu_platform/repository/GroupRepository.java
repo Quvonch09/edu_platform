@@ -19,6 +19,7 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
     @Query("select  coalesce( count (g) , 0) from Group g where g.active = true ")
     Integer countAllByGroup();
+
     Integer countByTeacherId(Long teacherId);
 
 
