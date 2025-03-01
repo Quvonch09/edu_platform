@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.controller;
 
+import jakarta.validation.Valid;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.entity.enums.Role;
 import uz.sfera.edu_platform.payload.ApiResponse;
@@ -24,7 +25,7 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CEO')")
     @Operation(summary = "CEO/ADMIN teacher qushish")
     @PostMapping("/saveTeacher")
-    public ResponseEntity<ApiResponse> saveTeacher(@RequestBody ReqTeacher reqTeacher) {
+    public ResponseEntity<ApiResponse> saveTeacher(@Valid @RequestBody ReqTeacher reqTeacher) {
         ApiResponse apiResponse = userService.saveTeacher(reqTeacher);
         return ResponseEntity.ok(apiResponse);
     }

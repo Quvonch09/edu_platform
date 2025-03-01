@@ -17,7 +17,8 @@ public class Quiz {
     @Column(nullable = false)
     private String title;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private Lesson lesson;
 
     private byte deleted; // byte

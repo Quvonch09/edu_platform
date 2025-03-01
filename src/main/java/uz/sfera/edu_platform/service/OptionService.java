@@ -18,17 +18,6 @@ import java.util.List;
 public class OptionService {
     private final OptionRepository optionRepository;
     private final QuestionRepository questionRepository;
-//    public ApiResponse updateOption(Long optionId,ReqOption reqOption){
-//        Option option = optionRepository.findById(optionId).orElse(null);
-//        if (option == null){
-//            return new ApiResponse(ResponseError.NOTFOUND("Option"));
-//        }
-//        option.setName(reqOption.getText());
-//        option.setCorrect(reqOption.isCorrect());
-//        optionRepository.save(option);
-//
-//        return new ApiResponse("Option yangilandi");
-//    }
 
     public ApiResponse getByQuestion(Long questionId){
         Question question = questionRepository.findById(questionId).orElse(null);

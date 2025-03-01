@@ -21,7 +21,8 @@ public class Lesson extends AbsEntity {
 
     private String videoLink;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private Module module;
 
     @ManyToMany(fetch = FetchType.LAZY)
