@@ -122,7 +122,7 @@ SELECT
                         NULLIF(DATE_PART('day', g.end_date - g.created_at), 0))::numeric, 2
            )
        ELSE 100.0
-   END AS categoryPercentage
+   END AS categoryPercentage ,
    
 
     COALESCE(lw.watched_lessons, 0) || '/' || COALESCE(lp.total_lessons, 0) AS lessonsProgress,

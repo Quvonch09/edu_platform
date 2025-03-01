@@ -1,14 +1,17 @@
 package uz.sfera.edu_platform.controller;
 
+import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.entity.enums.UserStatus;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.req.ReqStudent;
+import uz.sfera.edu_platform.security.CurrentUser;
 import uz.sfera.edu_platform.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import uz.sfera.edu_platform.service.UserService;
 
 import java.time.LocalDate;
 

@@ -239,8 +239,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
              FROM groups g
                  JOIN users u ON g.teacher_id = u.id
                  LEFT JOIN groups_students gu ON gu.group_id = g.id  -- group_user jadvali, bu yerda studentlar va guruhlar bog‘langan
-        WHERE gu.student_id = :studentId
+        WHERE gu.students_id = :studentId
           AND g.active = TRUE """ , nativeQuery = true
     )
-    List<User> searchForTeacher(@Param("teacherId") Long studentId);
+    List<User> searchForTeacher(@Param("studentId") Long studentId);
 }
