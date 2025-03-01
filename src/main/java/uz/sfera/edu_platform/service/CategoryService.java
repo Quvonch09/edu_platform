@@ -31,7 +31,7 @@ public class CategoryService {
     private final ModuleRepository moduleRepository;
 
     public ApiResponse saveCategory(CategoryDTO categoryDTO) {
-        if (categoryRepository.existsByName(categoryDTO.getName())) {
+        if (categoryRepository.existsByNameAndActiveIsTrue(categoryDTO.getName())) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Category"));
         }
 
@@ -41,7 +41,9 @@ public class CategoryService {
                 categoryDTO.getPrice(),
                 categoryDTO.getDuration(),
                 (byte) 1,
-                fileRepository.findById(categoryDTO.getFileId()).orElse(null));
+                categoryDTO.getFileId() != null ?
+                        fileRepository.findById(categoryDTO.getFileId()).orElse(null) : null
+        );
 
         categoryRepository.save(category);
         return new ApiResponse("Category successfully saved");
