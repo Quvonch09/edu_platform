@@ -20,5 +20,5 @@ public class Quiz {
     @ManyToOne
     private Lesson lesson;
 
-    private boolean deleted; // byte
+    private byte deleted; // byte
 }

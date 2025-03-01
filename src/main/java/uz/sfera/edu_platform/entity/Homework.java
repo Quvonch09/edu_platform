@@ -18,7 +18,7 @@ public class Homework extends AbsEntity {
     @Column(nullable = false)
     private String answer;
 
-    private Integer ball; // 5 ball // byte
+    private byte ball; // 5 ball // byte
 
     @OneToOne
     private File file;
@@ -29,5 +29,5 @@ public class Homework extends AbsEntity {
     @ManyToOne
     private Task task;
 
-    private boolean checked; // byte
+    private byte checked; // byte
 }

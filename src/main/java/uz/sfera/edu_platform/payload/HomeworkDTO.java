@@ -12,7 +12,7 @@ import lombok.*;
 public class HomeworkDTO {
     private Long homeworkId;
     private String answer;
-    private Integer ball;
+    private byte ball;
     private String studentName;
     private Long taskId;
 }
