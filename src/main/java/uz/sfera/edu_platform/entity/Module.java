@@ -16,7 +16,8 @@ public class Module extends AbsEntity {
     @Column(nullable = false)
     private String name;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private Category category;
 
     private byte deleted; // byte

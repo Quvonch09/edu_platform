@@ -20,7 +20,7 @@ public class Task {
     @OneToOne
     private File file;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Lesson lesson;
 
     private byte deleted; // byte

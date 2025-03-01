@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.controller;
 
+import jakarta.validation.Valid;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.req.ModuleRequest;
@@ -21,7 +22,7 @@ public class ModuleController {
     @Operation(summary = "(TEACHER/ADMIN) Modul qo'shish")
     @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN')")
     public ResponseEntity<ApiResponse> create(
-            @RequestBody ModuleRequest moduleRequest
+            @Valid @RequestBody ModuleRequest moduleRequest
     ){
         return ResponseEntity.ok(moduleService.createModule(moduleRequest));
     }
@@ -61,7 +62,7 @@ public class ModuleController {
     @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN')")
     public ResponseEntity<ApiResponse> update(
             @PathVariable Long moduleId,
-            @RequestBody ModuleRequest moduleRequest
+            @Valid @RequestBody ModuleRequest moduleRequest
     ){
         return ResponseEntity.ok(moduleService.update(moduleId, moduleRequest));
     }

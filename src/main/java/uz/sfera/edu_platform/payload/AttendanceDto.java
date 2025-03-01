@@ -15,9 +15,13 @@ public class AttendanceDto {
 
     @Schema(hidden = true)
     private Long id;
+
     @Schema(hidden = true)
     private String fullName;
+
     private Long studentId;
+
     private boolean attendance;
+
     private LocalDate date;
 }

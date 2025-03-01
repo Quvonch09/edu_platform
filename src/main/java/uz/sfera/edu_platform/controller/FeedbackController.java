@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.controller;
 
+import jakarta.validation.Valid;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.FeedbackDto;
@@ -17,21 +18,21 @@ public class FeedbackController {
     private final FeedbackService feedbackService;
 
     @PostMapping("/leave/toTeacher")
-    public ResponseEntity<ApiResponse> leaveFeedbackToTeacher(@RequestBody FeedbackDto feedback,
+    public ResponseEntity<ApiResponse> leaveFeedbackToTeacher(@Valid @RequestBody FeedbackDto feedback,
                                                       @CurrentUser User user) {
         ApiResponse apiResponse = feedbackService.leaveFeedbackToTeacher(feedback, user);
         return ResponseEntity.ok(apiResponse);
     }
 
     @PostMapping("/leave/toLesson")
-    public ResponseEntity<ApiResponse> leaveFeedbackToLesson(@RequestBody FeedbackDto feedback,
+    public ResponseEntity<ApiResponse> leaveFeedbackToLesson(@Valid @RequestBody FeedbackDto feedback,
                                                              @CurrentUser User user) {
         ApiResponse apiResponse = feedbackService.leaveFeedbackToLesson(feedback, user);
         return ResponseEntity.ok(apiResponse);
     }
 
     @PostMapping("/leave/toQuiz")
-    public ResponseEntity<ApiResponse> leaveFeedbackToQuiz(@RequestBody FeedbackDto feedback,
+    public ResponseEntity<ApiResponse> leaveFeedbackToQuiz(@Valid @RequestBody FeedbackDto feedback,
                                                            @CurrentUser User user) {
         ApiResponse apiResponse = feedbackService.leaveFeedbackToQuiz(feedback, user);
         return ResponseEntity.ok(apiResponse);

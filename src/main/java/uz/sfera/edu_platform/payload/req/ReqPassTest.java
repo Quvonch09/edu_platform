@@ -8,6 +8,8 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class ReqPassTest {
+
     private Long questionId;
+
     private Long optionId;
 }

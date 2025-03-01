@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.controller;
 
+import jakarta.validation.Valid;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.req.ReqTask;
 import uz.sfera.edu_platform.service.TaskService;
@@ -19,7 +20,7 @@ public class TaskController {
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     @Operation(summary = "Task qo'shish")
     public ResponseEntity<ApiResponse> saveTask(
-            @RequestBody ReqTask reqTask
+            @Valid @RequestBody ReqTask reqTask
     ){
         return ResponseEntity.ok(taskService.saveTask(reqTask));
     }
@@ -45,7 +46,7 @@ public class TaskController {
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> updateTask(
             @PathVariable Long taskId,
-            @RequestBody ReqTask reqTask
+            @Valid @RequestBody ReqTask reqTask
     ){
         return ResponseEntity.ok(taskService.updateTask(taskId, reqTask));
     }

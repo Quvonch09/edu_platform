@@ -162,14 +162,29 @@ public class LessonService {
 
         List<File> files = fileRepository.findAllById(req.getFileIds());
         Set<Long> foundFileIds = files.stream().map(File::getId).collect(Collectors.toSet());
-        List<Long> notFoundFiles = req.getFileIds().stream().filter(id -> !foundFileIds.contains(id)).toList();
+        List<Long> notFoundFiles = req.getFileIds().stream()
+                .filter(id -> !foundFileIds.contains(id))
+                .toList();
 
-        if (isAdding) lesson.getFiles().addAll(files);
-        else lesson.getFiles().removeIf(file -> foundFileIds.contains(file.getId()));
+        boolean changed = false;
+
+        if (isAdding) {
+            int initialSize = lesson.getFiles().size();
+            lesson.getFiles().addAll(files);
+            changed = lesson.getFiles().size() > initialSize;
+        } else {
+            changed = lesson.getFiles().removeIf(file -> foundFileIds.contains(file.getId()));
+        }
+
+        if (!changed) {
+            return new ApiResponse(ResponseError.DEFAULT_ERROR(isAdding ? "Fayllar qo‘shilmadi" : "Fayllar o‘chirilmadi"));
+        }
 
         lessonRepository.save(lesson);
-        return new ApiResponse(isAdding ? "Fayllar qo'shildi" : "Fayllar o‘chirildi",ResponseError.NOTFOUND(notFoundFiles));
+        return new ApiResponse(isAdding ? "Fayllar muvaffaqiyatli qo‘shildi" : "Fayllar muvaffaqiyatli o‘chirildi",
+                notFoundFiles.isEmpty() ? null : ResponseError.NOTFOUND(notFoundFiles));
     }
+
 
     private LessonDTO lessonDTO(Lesson lesson) {
         return LessonDTO.builder()

@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.controller;
 
+import jakarta.validation.Valid;
 import uz.sfera.edu_platform.entity.enums.PaymentEnum;
 import uz.sfera.edu_platform.entity.enums.PaymentStatusEnum;
 import uz.sfera.edu_platform.payload.ApiResponse;
@@ -24,7 +25,7 @@ public class PaymentController {
     public ResponseEntity<ApiResponse> saveRipPayment(
             @RequestParam(required = false, value = "status")PaymentStatusEnum paymentStatus,
             @RequestParam PaymentEnum payType,
-            @RequestBody ReqPayment reqPayment
+            @Valid @RequestBody ReqPayment reqPayment
     ){
         ApiResponse ripPayment = paymentService.createRipPayment(paymentStatus, payType, reqPayment);
         return ResponseEntity.ok(ripPayment);
@@ -61,7 +62,7 @@ public class PaymentController {
             @PathVariable Long paymentId,
             @RequestParam(required = false, value = "status")PaymentStatusEnum paymentStatus,
             @RequestParam PaymentEnum payType,
-            @RequestBody ReqPayment reqPayment
+            @Valid @RequestBody ReqPayment reqPayment
     ){
         return ResponseEntity.ok(paymentService.updatePayment(paymentId, paymentStatus, payType, reqPayment));
     }

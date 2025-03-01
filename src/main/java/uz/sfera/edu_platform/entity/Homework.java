@@ -1,10 +1,7 @@
 package uz.sfera.edu_platform.entity;
 
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
 import uz.sfera.edu_platform.entity.template.AbsEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import lombok.*;
 
 @Getter
@@ -23,10 +20,12 @@ public class Homework extends AbsEntity {
     @OneToOne
     private File file;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private User student;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private Task task;
 
     private byte checked; // byte
