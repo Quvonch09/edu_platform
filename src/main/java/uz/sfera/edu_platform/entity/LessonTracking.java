@@ -1,10 +1,8 @@
 package uz.sfera.edu_platform.entity;
 
-import uz.sfera.edu_platform.entity.template.AbsEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.*;
+import uz.sfera.edu_platform.entity.template.AbsEntity;
 
 @Getter
 @Setter
@@ -13,8 +11,10 @@ import lombok.*;
 @Builder
 @Entity
 public class LessonTracking extends AbsEntity {
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private Lesson lesson;
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private Group group;
 }

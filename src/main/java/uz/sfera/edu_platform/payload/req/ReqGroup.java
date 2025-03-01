@@ -43,5 +43,5 @@ public class ReqGroup {
     @DateTimeFormat(pattern = "HH:mm")
     private LocalTime endTime;
 
-    private List<Long> dayIds;
+    private List<WeekDay> dayIds;
 }

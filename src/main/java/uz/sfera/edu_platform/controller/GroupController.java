@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.controller;
 
+import jakarta.validation.Valid;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.req.ReqGroup;
 import uz.sfera.edu_platform.service.GroupService;
@@ -20,7 +21,7 @@ public class GroupController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "ADMIN group qushish")
     @PostMapping
-    public ResponseEntity<ApiResponse> saveGroup(@RequestBody ReqGroup reqGroup){
+    public ResponseEntity<ApiResponse> saveGroup(@Valid @RequestBody ReqGroup reqGroup){
         ApiResponse apiResponse = groupService.saveGroup(reqGroup);
         return ResponseEntity.ok(apiResponse);
     }
@@ -70,7 +71,7 @@ public class GroupController {
     @PutMapping("/{groupId}")
     public ResponseEntity<ApiResponse> updateGroup(
             @PathVariable Long groupId,
-            @RequestBody ReqGroup reqGroup
+            @Valid @RequestBody ReqGroup reqGroup
     ){
         ApiResponse apiResponse = groupService.updateGroup(groupId, reqGroup);
         return ResponseEntity.ok(apiResponse);

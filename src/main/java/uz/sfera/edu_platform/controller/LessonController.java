@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.controller;
 
+import jakarta.validation.Valid;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.req.LessonRequest;
 import uz.sfera.edu_platform.payload.req.ReqLessonFiles;
@@ -23,7 +24,7 @@ public class LessonController {
     @Operation(summary = "O'qituvchi dars yaratish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> createLesson(
-            @RequestBody LessonRequest lessonRequest
+            @Valid @RequestBody LessonRequest lessonRequest
     ){
         return ResponseEntity.ok(lessonService.createLesson(lessonRequest));
     }
@@ -51,7 +52,7 @@ public class LessonController {
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> update(
             @PathVariable Long lessonId,
-            @RequestBody LessonRequest lessonRequest
+            @Valid @RequestBody LessonRequest lessonRequest
     ){
         return ResponseEntity.ok(lessonService.updateLesson(lessonId,lessonRequest));
     }
@@ -69,7 +70,7 @@ public class LessonController {
     @Operation(summary = "(TEACHER) Darsga ruxsat berish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> allowLesson(
-            @RequestBody ReqLessonTracking reqLessonTracking
+            @Valid @RequestBody ReqLessonTracking reqLessonTracking
             ){
         return ResponseEntity.ok(lessonService.allowLesson(reqLessonTracking));
     }
@@ -86,7 +87,7 @@ public class LessonController {
     @Operation(summary = "(TEACHER) Dars uchun fayl qo'shish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> manageFiles(
-            @RequestBody ReqLessonFiles reqLessonFiles
+            @Valid @RequestBody ReqLessonFiles reqLessonFiles
     ){
         return ResponseEntity.ok(lessonService.manageFiles(reqLessonFiles, true));
     }
@@ -95,7 +96,7 @@ public class LessonController {
     @Operation(summary = "(TEACHER) Darsga tegishli fayllarni o'chirish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> deleteFiles(
-            @RequestBody ReqLessonFiles reqLessonFiles
+            @Valid @RequestBody ReqLessonFiles reqLessonFiles
     ){
         return ResponseEntity.ok(lessonService.manageFiles(reqLessonFiles,false));
     }
