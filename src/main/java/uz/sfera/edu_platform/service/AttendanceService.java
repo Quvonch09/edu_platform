@@ -229,6 +229,4 @@ public class AttendanceService {
                 .filter(date -> weekDays.contains(WeekDay.valueOf(date.getDayOfWeek().name()))) // Java DayOfWeek ni WeekDay ga moslashtiramiz
                 .collect(Collectors.toList());
     }
-
-
 }
