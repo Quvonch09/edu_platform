@@ -29,7 +29,7 @@ public class ModuleController {
 
     @GetMapping("/get")
     @Operation(summary = "(TEACHER/ADMIN) name bo'yicha module qidirish")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_TEACHER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_TEACHER','ROLE_STUDENT')")
     public ResponseEntity<ApiResponse> searchModule(
             @RequestParam(required = false, value = "name") String name,
             @RequestParam(defaultValue = "0") int page,
@@ -39,8 +39,8 @@ public class ModuleController {
     }
 
     @GetMapping("/{moduleId}")
-    @Operation(summary = "(TEACHER/ADMIN/CEO) id bo'yicha modulni olish")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN' , 'ROLE_CEO', 'ROLE_TEACHER')")
+    @Operation(summary = "(TEACHER/ADMIN/CEO/STUDENT) id bo'yicha modulni olish")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN' , 'ROLE_CEO', 'ROLE_STUDENT')")
     public ResponseEntity<ApiResponse> getById(
             @PathVariable Long moduleId
     ){
