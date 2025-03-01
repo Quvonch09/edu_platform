@@ -33,7 +33,10 @@ public class QuestionService {
         Quiz quiz = quizRepository.findById(reqQuestion.getQuizId()).orElse(null);
         if (quiz == null) return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
 
-        long correctAnswers = reqQuestion.getReqOptionList().stream().filter(ReqOption::isCorrect).count();
+        long correctAnswers = reqQuestion.getReqOptionList().stream()
+                .filter(option -> option.getIsCorrect() == 1)
+                .count();
+
         if (correctAnswers != 1) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Har bir savol uchun faqat 1 ta to'g'ri javob bo‘lishi kerak"));
         }
@@ -48,6 +51,7 @@ public class QuestionService {
 
         return new ApiResponse("Savol yaratildi");
     }
+
 
     public ApiResponse getQuestionByQuiz(Long quizId) {
         Quiz quiz = quizRepository.findById(quizId).orElse(null);
@@ -86,7 +90,7 @@ public class QuestionService {
                             optionRepository.deleteByQuestionId(questionId);
 
                             int correctCount = (int) reqQuestion.getReqOptionList().stream()
-                                    .filter(ReqOption::isCorrect)
+                                    .filter(option -> option.getIsCorrect() == (byte) 1) // byte → boolean tekshiruvi
                                     .count();
 
                             if (correctCount != 1) {
@@ -101,6 +105,7 @@ public class QuestionService {
                         .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Quiz"))))
                 .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Question")));
     }
+
 
     public QuestionDTO questionDTO(Question question,List<OptionDTO> optionList){
         return QuestionDTO.builder()

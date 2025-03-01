@@ -11,6 +11,7 @@ import uz.sfera.edu_platform.repository.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +28,8 @@ public class QuizService {
     private final ResultRepository resultRepository;
     private final QuizSettingsRepository quizSettingsRepository;
     private final OptionService optionService;
-    private final QuizSessionRepository quizSessionRepository;
+
+    Map<Long,Long> resultMap;
 
     public ApiResponse createQuiz(ReqQuiz reqQuiz) {
         return lessonRepository.findById(reqQuiz.getLessonId())
@@ -39,7 +41,7 @@ public class QuizService {
                     Quiz quiz = quizRepository.save(Quiz.builder()
                             .title(reqQuiz.getTitle())
                             .lesson(lesson)
-                            .deleted(false)
+                            .deleted((byte) 0)
                             .build());
 
                     QuizSettings quizSettings = QuizSettings.builder()
@@ -62,44 +64,37 @@ public class QuizService {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
         }
 
-        QuizSession quizSession = quizSessionRepository.findByUserAndQuizAndActiveTrue(user, quiz);
-        if (quizSession == null) {
-            quizSession = QuizSession.builder()
-                    .user(user)
-                    .quiz(quiz)
-                    .active(true)
-                    .startTime(LocalDateTime.now())
-                    .build();
-            quizSessionRepository.save(quizSession);
-        }
-
+        Result result = Result.builder()
+                .startTime(LocalDateTime.now())
+                .endTime(null)
+                .quiz(quiz)
+                .totalQuestion(quizSettingsRepository.findByQuizId(quizId).getQuestionCount())
+                .correctAnswers(0)
+                .user(user)
+                .build();
+        Result save = resultRepository.save(result);
+        resultMap.put(save.getId(), user.getId());
         return new ApiResponse(getRandomQuestionsForQuiz(quizId));
     }
 
+    // passTestni qaytadan kurip chiqish
     public ApiResponse passTest(List<ReqPassTest> passTestList, User user, Long quizId) {
         Quiz quiz = quizRepository.findById(quizId).orElse(null);
         if (quiz == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
         }
 
-        QuizSession quizSession = quizSessionRepository.findByUserAndQuizAndActiveTrue(user, quiz);
-        if (quizSession == null) {
+
+        Result result = resultRepository.findResult(user.getId(), quiz.getId());
+        if (result == null) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Faol test sessiyasi topilmadi!"));
         }
 
-        quizSession.setEndTime(LocalDateTime.now());
-        quizSession.setActive(false);
-        quizSessionRepository.save(quizSession);
-
-        long timeTaken = Duration.between(quizSession.getStartTime(), quizSession.getEndTime()).getSeconds();
         QuizSettings settings = quizSettingsRepository.findByQuizId(quizId);
         if (settings == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz settings"));
         }
 
-        if (timeTaken > settings.getDuration() * 60) {
-            return new ApiResponse(ResponseError.DEFAULT_ERROR("Testni belgilangan vaqtdan ko'proq bajardingiz!"));
-        }
 
         Set<Long> questionIds = passTestList.stream().map(ReqPassTest::getQuestionId).collect(Collectors.toSet());
         Map<Long, Long> correctAnswersMap = optionRepository.findCorrectAnswersByQuestionIds(questionIds).stream()
@@ -113,18 +108,9 @@ public class QuizService {
                 .filter(reqPassTest -> correctAnswersMap.getOrDefault(reqPassTest.getQuestionId(), -1L)
                         .equals(reqPassTest.getOptionId()))
                 .count();
-
-        resultRepository.save(Result.builder()
-                .quiz(quiz)
-                .user(user)
-                .totalQuestion(passTestList.size())
-                .correctAnswers((int) correctCount)
-                .timeTaken(timeTaken)
-                .startTime(quizSession.getStartTime())
-                .endTime(quizSession.getEndTime())
-                .createdAt(LocalDateTime.now())
-                .build());
-
+        result.setEndTime(LocalDateTime.now());
+        result.setCorrectAnswers(correctCount);
+        resultRepository.save(result);
         return new ApiResponse("Test muvaffaqiyatli o'tkazildi!");
     }
 
@@ -179,7 +165,7 @@ public class QuizService {
         if (quiz == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
         }
-        quiz.setDeleted(true);
+        quiz.setDeleted((byte) 1);
         quizRepository.save(quiz);
         return new ApiResponse("Quiz o'chirildi");
     }
@@ -196,7 +182,7 @@ public class QuizService {
 
         quiz.setTitle(reqQuiz.getTitle());
         quiz.setLesson(lesson);
-        quiz.setDeleted(false);
+        quiz.setDeleted((byte) 0);
         quizRepository.save(quiz);
 
         QuizSettings settings = quizSettingsRepository.findByQuizId(quizId);

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.repository.*;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -62,50 +63,54 @@ public class ResultService {
 //
 //    }
 
-    public ApiResponse getGroupResults(Long groupId, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+//    public ApiResponse getGroupResults(Long groupId, int page, int size) {
+//        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+//
+//        List<Long> lessonIds = lessonTrackingRepository.findLessonIdsByGroupId(groupId);
+//        if (lessonIds.isEmpty()) return new ApiResponse(ResponseError.NOTFOUND("Guruhga tegishli darslar"));
+//
+//        List<Long> quizIds = quizRepository.findQuizIdsByLessonIds(lessonIds);
+//        if (quizIds.isEmpty()) return new ApiResponse(ResponseError.NOTFOUND("Guruhga tegishli testlar"));
+//
+//        Page<Result> resultsPage = resultRepository.findByQuizIdIn(quizIds, pageRequest);
+//        if (resultsPage.isEmpty()) return new ApiResponse(ResponseError.NOTFOUND("Guruh imtihon natijalari"));
+//
+//        Map<String, Integer> studentTotalScores = resultsPage.stream()
+//                .filter(Objects::nonNull) // Null bo'lgan resultlarni chiqarib tashlash
+//                .filter(result -> result.getUser() != null) // User null bo'lsa tashlab ketish
+//                .collect(Collectors.toMap(
+//                        result -> result.get().getFullName(), // Kalit (user ismi)
+//                        Result::getCorrectAnswers, // Qiymat (to‘g‘ri javoblar soni)
+//                        Integer::sum // Agar bir userning natijalari takrorlansa, ularni qo‘shish
+//                ));
+//
+//        AtomicInteger rank = new AtomicInteger(1);
+//        List<Map<String, Object>> rankedResults = studentTotalScores.entrySet().stream()
+//                .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())) // Eng katta ball tepaga
+//                .map(entry -> {
+//                    Map<String, Object> studentData = new HashMap<>();
+//                    studentData.put("rank", rank.getAndIncrement()); // Reyting berish
+//                    studentData.put("userName", entry.getKey()); // Talaba ismi
+//                    studentData.put("totalScore", entry.getValue()); // Jami ball
+//                    return studentData;
+//                })
+//                .toList();
+//
+//        return new ApiResponse(rankedResults);
+//    }
 
-        List<Long> lessonIds = lessonTrackingRepository.findLessonIdsByGroupId(groupId);
-        if (lessonIds.isEmpty()) return new ApiResponse(ResponseError.NOTFOUND("Guruhga tegishli darslar"));
-
-        List<Long> quizIds = quizRepository.findQuizIdsByLessonIds(lessonIds);
-        if (quizIds.isEmpty()) return new ApiResponse(ResponseError.NOTFOUND("Guruhga tegishli testlar"));
-
-        Page<Result> resultsPage = resultRepository.findByQuizIdIn(quizIds, pageRequest);
-        if (resultsPage.isEmpty()) return new ApiResponse(ResponseError.NOTFOUND("Guruh imtihon natijalari"));
-
-        Map<String, Integer> studentTotalScores = resultsPage.stream()
-                .collect(Collectors.toMap(
-                        result -> result.getUser().getFullName(),
-                        Result::getCorrectAnswers,
-                        Integer::sum
-                ));
-
-        AtomicInteger rank = new AtomicInteger(1);
-        List<Map<String, Object>> rankedResults = studentTotalScores.entrySet().stream()
-                .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder()))
-                .map(entry -> {
-                    Map<String, Object> studentData = new HashMap<>();
-                    studentData.put("rank", rank.getAndIncrement());
-                    studentData.put("userName", entry.getKey());
-                    studentData.put("totalScore", entry.getValue());
-                    return studentData;
-                })
-                .toList();
-
-        return new ApiResponse(rankedResults);
-    }
 
 
 
     private ResultDTO convertToDTO(Result result) {
+        long timeTakenMinutes = Duration.between(result.getStartTime(), result.getEndTime()).toMinutes();
         return ResultDTO.builder()
                 .id(result.getId())
                 .userId(result.getUser().getId())
                 .quizId(result.getQuiz().getId())
                 .totalQuestion(result.getTotalQuestion())
                 .correctAnswers(result.getCorrectAnswers())
-                .timeTaken(result.getTimeTaken())
+                .timeTaken(timeTakenMinutes)
                 .startTime(result.getStartTime())
                 .endTime(result.getEndTime())
                 .createdAt(result.getCreatedAt())

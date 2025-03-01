@@ -13,11 +13,11 @@ public interface HomeworkRepository extends JpaRepository<Homework,Long> {
     @Query("SELECT COALESCE(SUM(h.ball), 0) FROM Homework h WHERE h.student = :student")
     int sumBallByStudent(@Param("student") User student);
 
-    @Query(value = "select count(h.ball) from homework h where h.student_id = ?1 and h.checked = true", nativeQuery = true)
+    @Query(value = "select count(h.ball) from homework h where h.student_id = ?1 and h.checked = 1", nativeQuery = true)
     Double countByBall(Long studentId);
 
-    Page<Homework> findByCheckedAndStudentId(boolean isChecked, Long studentId, Pageable pageable);
-    Page<Homework> findByCheckedAndTaskId(boolean isChecked, Long taskId, Pageable pageable);
+    Page<Homework> findByCheckedAndStudentId(byte isChecked, Long studentId, Pageable pageable);
+    Page<Homework> findByCheckedAndTaskId(byte isChecked, Long taskId, Pageable pageable);
 
 }
 

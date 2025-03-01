@@ -22,7 +22,7 @@ public class Result extends AbsEntity {
     private int totalQuestion;
 
     @Column(nullable = false)
-    private int correctAnswers;
+    private long correctAnswers;
 
     @Column(nullable = false)
     private LocalDateTime startTime;
