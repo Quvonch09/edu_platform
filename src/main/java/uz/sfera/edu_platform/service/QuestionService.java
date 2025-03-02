@@ -68,6 +68,7 @@ public class QuestionService {
                 : new ApiResponse(questionDTOList);
     }
 
+    @Transactional
     public ApiResponse deleteQuiz(Long questionId) {
         return questionRepository.findById(questionId)
                 .map(question -> {
@@ -79,6 +80,7 @@ public class QuestionService {
     }
 
 
+    @Transactional
     public ApiResponse updateQuestion(Long questionId, QuestionEnum difficulty, ReqQuestion reqQuestion) {
         return questionRepository.findById(questionId).map(question ->
                 quizRepository.findById(reqQuestion.getQuizId()).map(quiz -> {
