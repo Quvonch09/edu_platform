@@ -29,7 +29,7 @@ public class ModuleController {
 
     @GetMapping("/get")
     @Operation(summary = "(TEACHER/ADMIN) name bo'yicha module qidirish")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_TEACHER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_TEACHER','ROLE_STUDENT')")
     public ResponseEntity<ApiResponse> searchModule(
             @RequestParam(required = false, value = "name") String name,
             @RequestParam(defaultValue = "0") int page,
