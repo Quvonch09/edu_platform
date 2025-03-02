@@ -25,5 +25,5 @@ public class ExamResult {
     private Month month;
 
     @Column(nullable = false)
-    private byte ball;
+    private int ball;
 }

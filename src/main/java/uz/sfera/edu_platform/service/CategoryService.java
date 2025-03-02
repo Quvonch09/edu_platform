@@ -31,19 +31,19 @@ public class CategoryService {
     private final ModuleRepository moduleRepository;
 
     public ApiResponse saveCategory(CategoryDTO categoryDTO) {
-        if (categoryRepository.existsByName(categoryDTO.getName())) {
+        if (categoryRepository.existsByNameAndActive(categoryDTO.getName(), (byte) 1)) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Category"));
         }
-
 
         Category category = new Category(
                 categoryDTO.getName(),
                 categoryDTO.getDescription(),
                 categoryDTO.getPrice(),
-                categoryDTO.getDuration(),
+                (byte) categoryDTO.getDuration(),
                 (byte) 1,
-                fileRepository.findById(categoryDTO.getFileId()).orElse(null)
-                );
+                categoryDTO.getFileId() > 0 ?
+                        fileRepository.findById(categoryDTO.getFileId()).orElse(null) : null
+        );
 
         categoryRepository.save(category);
         return new ApiResponse("Category successfully saved");
@@ -97,7 +97,7 @@ public class CategoryService {
 
         category.setName(categoryDTO.getName());
         category.setDescription(categoryDTO.getDescription());
-        category.setDuration(categoryDTO.getDuration());
+        category.setDuration((byte) categoryDTO.getDuration());
         category.setCoursePrice(categoryDTO.getPrice());
         category.setFile(fileRepository.findById(categoryDTO.getFileId()).orElse(null));
 
@@ -109,9 +109,8 @@ public class CategoryService {
 
     public ApiResponse deleteCategory(Long categoryId) {
         Category category = categoryRepository.findById(categoryId).orElse(null);
-        if (category == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Category"));
-        }
+
+        if (category == null) return new ApiResponse(ResponseError.NOTFOUND("Category"));
 
         List<Group> groups = groupRepository.findAllByCategoryId(category.getId());
         groups.forEach(group -> group.setCategory(null));
@@ -131,33 +130,23 @@ public class CategoryService {
 
     public ApiResponse updateActiveCategory(Long categoryId, boolean active) {
         Category category = categoryRepository.findById(categoryId).orElse(null);
-        if (category == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Category"));
-        }
 
-        if (active){
-            category.setActive((byte) 1);
-        } else {
-            category.setActive((byte) 0);
-        }
+        if (category == null) return new ApiResponse(ResponseError.NOTFOUND("Category"));
 
+        category.setActive(active ? (byte) 1 : 0);
         categoryRepository.save(category);
         return new ApiResponse("Category successfully updated");
     }
 
 
     private CategoryDTO convertCategoryToCategoryDTO(Category category) {
-        boolean active = false;
-        if (category.getActive() == 1){
-            active = true;
-        }
         return CategoryDTO.builder()
                 .id(category.getId())
                 .name(category.getName())
                 .description(category.getDescription())
                 .price(category.getCoursePrice())
                 .duration(category.getDuration())
-                .active(active)
+                .active(category.getActive() == 1)
                 .fileId(Optional.ofNullable(category.getFile()).map(File::getId).orElse(null))
                 .build();
     }
