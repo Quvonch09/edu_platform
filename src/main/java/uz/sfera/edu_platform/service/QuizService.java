@@ -63,6 +63,11 @@ public class QuizService {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
         }
 
+        Result oldResult = resultRepository.findResult(user.getId(), quiz.getId());
+        if (oldResult.getEndTime() == null){
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Yakunlanmagan testlarni yakunlashingiz kerak"));
+        }
+
         Result result = Result.builder()
                 .startTime(LocalDateTime.now())
                 .endTime(null)
