@@ -34,7 +34,7 @@ public class PaymentService {
                                         PaymentEnum paymentType,
                                         ReqPayment reqPayment){
         User user = userRepository.findById(reqPayment.getUserId()).orElse(null);
-        if(user == null){
+        if(user == null && paymentType.equals(PaymentEnum.TUSHUM)){
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
 
@@ -46,15 +46,28 @@ public class PaymentService {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Status null bulishi mumkin emas"));
         }
 
-        Payment payment = Payment.builder()
-                .student(user)
-                .price(reqPayment.getPrice())
-                .paymentDate(reqPayment.getPaymentDate())
-                .paymentStatus(paymentStatus)
-                .paymentType(paymentType)
-                .build();
+        if (!paymentStatus.equals(PaymentStatusEnum.AVANS) && paymentStatus.equals(PaymentStatusEnum.OYLIK)){
+            Payment payment = Payment.builder()
+                    .student(null)
+                    .price(reqPayment.getPrice())
+                    .paymentDate(reqPayment.getPaymentDate())
+                    .paymentStatus(paymentStatus)
+                    .paymentType(paymentType)
+                    .build();
+            paymentRepository.save(payment);
+        } else {
+            Payment payment = Payment.builder()
+                    .student(user)
+                    .price(reqPayment.getPrice())
+                    .paymentDate(reqPayment.getPaymentDate())
+                    .paymentStatus(paymentStatus)
+                    .paymentType(paymentType)
+                    .build();
+            paymentRepository.save(payment);
+        }
 
-        paymentRepository.save(payment);
+
+
         return new ApiResponse("Successfully saved");
     }
 

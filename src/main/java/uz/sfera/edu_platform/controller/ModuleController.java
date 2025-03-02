@@ -39,8 +39,8 @@ public class ModuleController {
     }
 
     @GetMapping("/{moduleId}")
-    @Operation(summary = "(TEACHER/ADMIN/CEO) id bo'yicha modulni olish")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN' , 'ROLE_CEO', 'ROLE_TEACHER')")
+    @Operation(summary = "(TEACHER/ADMIN/CEO/STUDENT) id bo'yicha modulni olish")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN' , 'ROLE_CEO', 'ROLE_STUDENT')")
     public ResponseEntity<ApiResponse> getById(
             @PathVariable Long moduleId
     ){
@@ -74,5 +74,15 @@ public class ModuleController {
             @PathVariable Long moduleId
     ){
         return ResponseEntity.ok(moduleService.delete(moduleId));
+    }
+
+
+
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    @Operation(summary = "STUDENT uziga ochilgan modullarni kurish")
+    @GetMapping("/openModules")
+    public ResponseEntity<ApiResponse> getOpenModules(@CurrentUser User user){
+        ApiResponse openModuleByStudent = moduleService.getOpenModuleByStudent(user);
+        return ResponseEntity.ok(openModuleByStudent);
     }
 }
