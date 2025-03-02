@@ -67,7 +67,7 @@ public class QuizService {
                 .startTime(LocalDateTime.now())
                 .endTime(null)
                 .quiz(quiz)
-                .totalQuestion(quizSettingsRepository.findByQuizId(quizId).getQuestionCount())
+                .totalQuestion(getRandomQuestionsForQuiz(quiz.getId()).size())
                 .correctAnswers(0)
                 .user(user)
                 .build();
