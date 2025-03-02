@@ -109,7 +109,7 @@ public class QuizService {
         result.setEndTime(LocalDateTime.now());
         result.setCorrectAnswers(incorrectCount);
         Result result1 = resultRepository.save(result);
-        return new ApiResponse("Siz testni yakunladingiz!\nNATIJA:" + resultService.convertToDTO(result1));
+        return new ApiResponse(resultService.convertToDTO(result1));
     }
 
     public List<QuestionDTO> getRandomQuestionsForQuiz(Long quizId) {

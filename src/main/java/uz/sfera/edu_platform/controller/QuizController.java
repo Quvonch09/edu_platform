@@ -41,7 +41,7 @@ public class QuizController {
 
     @GetMapping("/getByLesson/{lessonId}")
     @Operation(summary = "(TEACHER,ADMIN) Lesson bo'yicha quizlarni olish")
-    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN', 'ROLE_STUDENT')")
     public ResponseEntity<ApiResponse> getByLesson(
             @PathVariable Long lessonId
     ) {
