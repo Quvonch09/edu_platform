@@ -68,6 +68,7 @@ public class QuizService {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Yakunlanmagan testlarni yakunlashingiz kerak"));
         }
 
+
         Result result = Result.builder()
                 .startTime(LocalDateTime.now())
                 .endTime(null)
