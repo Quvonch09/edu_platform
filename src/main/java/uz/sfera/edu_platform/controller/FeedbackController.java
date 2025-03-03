@@ -20,21 +20,21 @@ public class FeedbackController {
     @PostMapping("/leave/toTeacher")
     public ResponseEntity<ApiResponse> leaveFeedbackToTeacher(@Valid @RequestBody FeedbackDto feedback,
                                                       @CurrentUser User user) {
-        ApiResponse apiResponse = feedbackService.leaveFeedbackToTeacher(feedback, user);
+        ApiResponse apiResponse = feedbackService.leaveFeedback(feedback, user, FeedbackService.FeedbackType.TEACHER);
         return ResponseEntity.ok(apiResponse);
     }
 
     @PostMapping("/leave/toLesson")
     public ResponseEntity<ApiResponse> leaveFeedbackToLesson(@Valid @RequestBody FeedbackDto feedback,
                                                              @CurrentUser User user) {
-        ApiResponse apiResponse = feedbackService.leaveFeedbackToLesson(feedback, user);
+        ApiResponse apiResponse = feedbackService.leaveFeedback(feedback, user, FeedbackService.FeedbackType.LESSON);
         return ResponseEntity.ok(apiResponse);
     }
 
     @PostMapping("/leave/toQuiz")
     public ResponseEntity<ApiResponse> leaveFeedbackToQuiz(@Valid @RequestBody FeedbackDto feedback,
                                                            @CurrentUser User user) {
-        ApiResponse apiResponse = feedbackService.leaveFeedbackToQuiz(feedback, user);
+        ApiResponse apiResponse = feedbackService.leaveFeedback(feedback, user, FeedbackService.FeedbackType.QUIZ);
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -51,23 +51,16 @@ public class FeedbackController {
     public ResponseEntity<ApiResponse> getFeedbackByTeacherId(@RequestParam Long teacherId,
                                                               @RequestParam(defaultValue = "0") int page,
                                                               @RequestParam(defaultValue = "10") int size) {
-        ApiResponse feedbacks = feedbackService.getAllByTeacherId(teacherId, page, size);
+        ApiResponse feedbacks = feedbackService.getAllFeedback(teacherId, page, size, FeedbackService.FeedbackType.TEACHER);
         return ResponseEntity.ok(feedbacks);
     }
 
-    @GetMapping("/getByStudentId")
-    public ResponseEntity<ApiResponse> getFeedbackByStudentId(@RequestParam Long studentId,
-                                                              @RequestParam(defaultValue = "0") int page,
-                                                              @RequestParam(defaultValue = "10") int size) {
-        ApiResponse feedbacks = feedbackService.getAllByUserId(studentId, page, size);
-        return ResponseEntity.ok(feedbacks);
-    }
 
     @GetMapping("/getByLessonId")
     public ResponseEntity<ApiResponse> getFeedbackByLessonId(@RequestParam Long lessonId,
                                                              @RequestParam(defaultValue = "0") int page,
                                                              @RequestParam(defaultValue = "10") int size) {
-        ApiResponse feedbacks = feedbackService.getAllByLessonId(lessonId, page, size);
+        ApiResponse feedbacks = feedbackService.getAllFeedback(lessonId, page, size, FeedbackService.FeedbackType.LESSON);
         return ResponseEntity.ok(feedbacks);
     }
 
@@ -75,7 +68,7 @@ public class FeedbackController {
     public ResponseEntity<ApiResponse> getFeedbackByQuizId(@RequestParam Long quizId,
                                                            @RequestParam(defaultValue = "0") int page,
                                                            @RequestParam(defaultValue = "10") int size) {
-        ApiResponse feedbacks = feedbackService.getAllByQuizId(quizId, page, size);
+        ApiResponse feedbacks = feedbackService.getAllFeedback(quizId, page, size, FeedbackService.FeedbackType.QUIZ);
         return ResponseEntity.ok(feedbacks);
     }
 }

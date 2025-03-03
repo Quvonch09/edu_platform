@@ -3,9 +3,7 @@ package uz.sfera.edu_platform.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import uz.sfera.edu_platform.entity.Category;
 import uz.sfera.edu_platform.entity.ExamResult;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.payload.ApiResponse;
@@ -28,9 +26,9 @@ public class ExamResultService {
 
     public ApiResponse createExamResult(Month month,ExamResultRequest examResultRequest){
         User student = userRepository.findById(examResultRequest.getStudentId()).orElse(null);
-        if (student == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Student"));
-        }
+
+        if (student == null) return new ApiResponse(ResponseError.NOTFOUND("Student"));
+
         ExamResult examResult = ExamResult.builder()
                 .student(student)
                 .ball(examResultRequest.getBall())
@@ -44,9 +42,7 @@ public class ExamResultService {
         Page<ExamResult> pages = examResultRepository.searchResult
                 (teacher.getId(),month != null ? month.name() : LocalDate.now().getMonth().name(), studentId, PageRequest.of(page, size));
 
-        if (pages.isEmpty()) {
-            return new ApiResponse(ResponseError.NOTFOUND("Imtihon natijalari"));
-        }
+        if (pages.isEmpty()) return new ApiResponse(ResponseError.NOTFOUND("Imtihon natijalari topilmadi"));
 
         List<ExamResultDTO> resultDTOPage = pages.map(this::examResultDTO).toList();
 

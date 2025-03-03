@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.repository;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import uz.sfera.edu_platform.entity.Module;
@@ -30,5 +31,9 @@ public interface ModuleRepository extends JpaRepository<Module,Long> {
     boolean checkOpenModulesByStudent(@Param("groupId") Long groupId, @Param("moduleId") Long moduleId);
 
     Page<Module> findByDeleted(byte deleted,Pageable pageable);
+
+    @Modifying
+    @Query("UPDATE Module m SET m.deleted = 1 WHERE m.id = :moduleId AND m.deleted = 0")
+    int softDeleteById(@Param("moduleId") Long moduleId);
 
 }
