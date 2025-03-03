@@ -31,7 +31,6 @@ public class QuizService {
     private final OptionService optionService;
     private final ResultService resultService;
 
-    //todo bu joyda endi @Transtactional ishlatish kerak?
     @Transactional
     public ApiResponse createQuiz(ReqQuiz reqQuiz) {
         return lessonRepository.findById(reqQuiz.getLessonId())
@@ -110,8 +109,15 @@ public class QuizService {
                         Option::getId
                 ));
 
+        long correctCount = passTestList.stream()
+                .filter(reqPassTest ->
+                        correctAnswersMap.containsKey(reqPassTest.getQuestionId()) && // Savol bazada mavjud bo‘lishi kerak
+                                correctAnswersMap.get(reqPassTest.getQuestionId()).equals(reqPassTest.getOptionId()) // Variant to‘g‘ri bo‘lishi kerak
+                )
+                .count();
+
         result.setEndTime(LocalDateTime.now());
-        result.setCorrectAnswers(correctAnswersMap.size());
+        result.setCorrectAnswers(correctCount);
         Result result1 = resultRepository.save(result);
         return new ApiResponse(resultService.convertToDTO(result1));
     }
