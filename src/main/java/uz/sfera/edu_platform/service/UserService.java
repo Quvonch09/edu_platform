@@ -9,9 +9,7 @@ import uz.sfera.edu_platform.payload.*;
 import uz.sfera.edu_platform.payload.auth.ResponseLogin;
 import uz.sfera.edu_platform.payload.req.ReqAdmin;
 import uz.sfera.edu_platform.payload.req.ReqTeacher;
-import uz.sfera.edu_platform.payload.res.ResCategory;
-import uz.sfera.edu_platform.payload.res.ResPageable;
-import uz.sfera.edu_platform.payload.res.ResStudentCount;
+import uz.sfera.edu_platform.payload.res.*;
 import uz.sfera.edu_platform.repository.CategoryRepository;
 import uz.sfera.edu_platform.repository.FileRepository;
 import uz.sfera.edu_platform.repository.GroupRepository;
@@ -85,7 +83,6 @@ public class UserService {
         List<TeacherDTO> teacherList = allTeachers.stream()
                 .map(user -> convertUserToTeacherDTO(user,
                         user.getCategories().stream()
-                                .filter(category -> category != null && category.getActive() == 1)
                                 .map(category -> new ResCategory(category.getId(), category.getName()))
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());
@@ -287,7 +284,13 @@ public class UserService {
     }
 
     private TeacherDTO convertUserToTeacherDTO(User user, List<ResCategory> categoryIds) {
-        Group group = groupRepository.findGroup(user.getId());
+
+
+        List<Group> groups = groupRepository.findGroup(user.getId());
+        List<ResGroupDto> list = new ArrayList<>();
+        if (!groups.isEmpty()) {
+             list = groups.stream().map(this::getDto).toList();
+        }
 
         return TeacherDTO.builder()
                 .id(user.getId())
@@ -295,10 +298,8 @@ public class UserService {
                 .phoneNumber(user.getPhoneNumber())
                 .categories(categoryIds)
                 .active(user.isEnabled())
-                .groupCount(groupRepository.countByTeacherId(user.getId()) != 0 ?
-                        groupRepository.countByTeacherId(user.getId()) : null)
-                .groupId(group != null ? group.getId() : null)
-                .groupName(group != null ? group.getName() : null)
+                .groupCount(groups.size())
+                .groupList(list)
                 .fileId(user.getFile() != null ? user.getFile().getId() : null)
                 .build();
     }
@@ -317,6 +318,13 @@ public class UserService {
                 .fullName(user.getFullName())
                 .phoneNumber(user.getPhoneNumber())
                 .fileId(user.getFile() != null ? user.getFile().getId() : null)
+                .build();
+    }
+
+    public ResGroupDto getDto(Group group) {
+        return ResGroupDto.builder()
+                .groupId(group.getId())
+                .groupName(group.getName())
                 .build();
     }
 

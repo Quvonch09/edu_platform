@@ -7,6 +7,7 @@ import uz.sfera.edu_platform.entity.enums.UserStatus;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.StudentDTO;
+import uz.sfera.edu_platform.payload.UserDTO;
 import uz.sfera.edu_platform.payload.auth.ResponseLogin;
 import uz.sfera.edu_platform.payload.req.ReqStudent;
 import uz.sfera.edu_platform.payload.res.ResPageable;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -137,7 +139,7 @@ public class StudentService {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
 
-        Group oldGroup = groupRepository.findGroup(user.getId());
+        Group oldGroup = groupRepository.findByStudentId(user.getId()).orElse(null);
         if (oldGroup != null) {
             oldGroup.getStudents().remove(user);
         }
@@ -208,8 +210,21 @@ public class StudentService {
 
     public ApiResponse getTeacherByStudnet(User user){
         List<User> users = userRepository.searchForUsers(user.getId());
-        List<StudentDTO> list = users.stream().map(this::getDto).toList();
+        if ( users == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Student"));
+
+        }
+        List<UserDTO> list = users.stream().filter(Objects::nonNull).map(this::getStudentDTO).toList();
         return new ApiResponse(list);
+    }
+
+    public UserDTO getStudentDTO(User user) {
+        return UserDTO.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .phoneNumber(user.getPhoneNumber())
+                .fileId(user.getFile() != null ? user.getFile().getId() : null)
+                .build();
     }
 
 }
