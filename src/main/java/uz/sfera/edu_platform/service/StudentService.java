@@ -63,11 +63,11 @@ public class StudentService {
                 .accountNonLocked(true)
                 .accountNonExpired(true)
                 .build();
+        User save = userRepository.save(student);
 
-        group.getStudents().add(student);
+        group.getStudents().add(save);
         groupRepository.save(group);
 
-        userRepository.save(student);
         return new ApiResponse("Successfully saved student");
     }
 

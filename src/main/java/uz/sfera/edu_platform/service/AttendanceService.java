@@ -149,8 +149,6 @@ public class AttendanceService {
     }
 
 
-
-
 //    public ApiResponse getAttendanceByStudent(User user, int month) {
 //        LocalDate startOfMonth = LocalDate.of(LocalDate.now().getYear(), Month.of(month), 1);
 //        LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
@@ -229,6 +227,4 @@ public class AttendanceService {
                 .filter(date -> weekDays.contains(WeekDay.valueOf(date.getDayOfWeek().name()))) // Java DayOfWeek ni WeekDay ga moslashtiramiz
                 .collect(Collectors.toList());
     }
-
-
 }

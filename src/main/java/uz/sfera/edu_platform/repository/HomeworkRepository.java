@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface HomeworkRepository extends JpaRepository<Homework,Long> {
     long countByStudentId(Long studentId);
+
     @Query("SELECT COALESCE(SUM(h.ball), 0) FROM Homework h WHERE h.student = :student")
     int sumBallByStudent(@Param("student") User student);
 
@@ -17,6 +18,7 @@ public interface HomeworkRepository extends JpaRepository<Homework,Long> {
     Double countByBall(Long studentId);
 
     Page<Homework> findByCheckedAndStudentId(byte isChecked, Long studentId, Pageable pageable);
+
     Page<Homework> findByCheckedAndTaskId(byte isChecked, Long taskId, Pageable pageable);
 
 }
