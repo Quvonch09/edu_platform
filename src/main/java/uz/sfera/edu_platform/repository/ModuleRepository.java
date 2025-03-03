@@ -30,6 +30,8 @@ public interface ModuleRepository extends JpaRepository<Module,Long> {
             nativeQuery = true)
     boolean checkOpenModulesByStudent(@Param("groupId") Long groupId, @Param("moduleId") Long moduleId);
 
+    Page<Module> findByDeleted(byte deleted,Pageable pageable);
+
     @Modifying
     @Query("UPDATE Module m SET m.deleted = 1 WHERE m.id = :moduleId AND m.deleted = 0")
     int softDeleteById(@Param("moduleId") Long moduleId);

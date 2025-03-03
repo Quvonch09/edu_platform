@@ -53,35 +53,26 @@ public class ModuleService {
         return new ApiResponse("Modul yaratildi");
     }
 
+    @Transactional
+    public ApiResponse getByCategory(Long categoryId, User user, int page, int size) {
+        Page<Module> modules = (categoryId != null)
+                ? moduleRepository.findByCategoryIdAndDeleted(categoryId, (byte) 0, PageRequest.of(page, size))
+                : moduleRepository.findByDeleted((byte) 0, PageRequest.of(page, size)); // Agar categoryId null bo‘lsa, barcha modullar
 
-//    @Transactional
-//    public ApiResponse getByCategory(Long categoryId, User user, int page, int size) {
-//        Category category = (user.getRole().equals(Role.ROLE_STUDENT))
-//                ? Optional.ofNullable(groupRepository.findGroup(user.getId()))
-//                .map(Group::getCategory)
-//                .orElse(null)
-//                : (categoryId == null)
-//                ? null
-//                : categoryRepository.findById(categoryId).orElse(null);
-//
-//        if (category == null) {
-//            return new ApiResponse(ResponseError.NOTFOUND(
-//                    user.getRole().equals(Role.ROLE_STUDENT) ? "Foydalanuvchiga bog‘liq kategoriya" : "Kategoriya"
-//            ));
-//        }
-//
-//        Page<Module> modules = moduleRepository.findByCategoryIdAndDeleted(category.getId(),(byte) 0, PageRequest.of(page, size));
-//
-//        return new ApiResponse(ResPageable.builder()
-//                .page(page)
-//                .size(size)
-//                .totalPage(modules.getTotalPages())
-//                .totalElements(modules.getTotalElements())
-//                .body(moduleDTOList(modules))
-//                .build());
-//    }
+        return new ApiResponse(ResPageable.builder()
+                .page(page)
+                .size(size)
+                .totalPage(modules.getTotalPages())
+                .totalElements(modules.getTotalElements())
+                .body(moduleDTOList(modules))
+                .build());
+    }
 
 
+
+
+    //todo bu yerda nma qilib yuribdi @Transactional?
+    @Transactional
     public ApiResponse searchModule(String name, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
@@ -155,7 +146,7 @@ public class ModuleService {
                 .map(module -> ResModule.builder()
                         .id(module.getId())
                         .name(module.getName())
-                        .categoryId(module.getCategory().getId())
+                        .categoryId(module.getCategory() != null ? module.getCategory().getId() : null)
                         .isOpen(moduleRepository.checkOpenModulesByStudent(group != null ? group.getId() : null, module.getId()))
                         .build())
                 .collect(Collectors.toList());

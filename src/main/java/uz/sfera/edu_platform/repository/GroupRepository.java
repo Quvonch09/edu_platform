@@ -245,11 +245,14 @@ GROUP BY g.name;
     Integer countGroupLessons(Long groupId);
 
 
-    @Query(value = "select g.* from groups g join groups_students gs on gs.group_id = g.id where g.teacher_id = ?1 ", nativeQuery = true)
+    @Query(value = "select g.* from groups g  where g.teacher_id = ?1 ", nativeQuery = true)
     List<Group> findGroup(Long userId);
 
 
 
     List<Group> findAllByCategoryId(Long categoryId);
+
+    @Query("SELECT g FROM Group g JOIN g.students s WHERE s.id = :userId")
+    Group find(@Param("userId") Long userId);
 
 }

@@ -87,6 +87,7 @@ public class StatisticService {
     }
 
 
+    //todo bu annotatsiyani olib tashla degandim
     @Transactional
     public ApiResponse getStudentStatisticByGroup(Long groupId, User user) {
         Group group;

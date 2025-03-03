@@ -53,6 +53,7 @@ public class GroupService {
     }
 
 
+    //todo olib tashla degandimku bu annotatsiyani????
     @Transactional
     public ApiResponse search(String groupName, String teacherName, LocalDate startDate,
                               LocalDate endDate, Long categoryId, int page, int size) {
@@ -200,7 +201,8 @@ public class GroupService {
                 .active(group.isActive())
                 .studentCount(group.getStudents().size())
                 .countEndMonth(calculateCountEndMonth(group.getEndDate()))
-                .countAllLessons(lessonRepository.countLessonsByCategoryId(group.getCategory().getId()))
+                .countAllLessons( group.getCategory() != null ?
+                        lessonRepository.countLessonsByCategoryId(group.getCategory().getId()) : 0)
                 .countGroupLessons(groupRepository.countGroupLessons(group.getId()))
                 .departureStudentCount(groupRepository.countGroup(group.getId()))
                 .weekDays(weekDays)

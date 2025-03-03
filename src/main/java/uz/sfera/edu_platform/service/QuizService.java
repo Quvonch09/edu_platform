@@ -1,6 +1,7 @@
 package uz.sfera.edu_platform.service;
 
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.*;
@@ -30,6 +31,8 @@ public class QuizService {
     private final OptionService optionService;
     private final ResultService resultService;
 
+    //todo bu joyda endi @Transtactional ishlatish kerak?
+    @Transactional
     public ApiResponse createQuiz(ReqQuiz reqQuiz) {
         return lessonRepository.findById(reqQuiz.getLessonId())
                 .map(lesson -> {
@@ -64,8 +67,9 @@ public class QuizService {
         }
 
         Result oldResult = resultRepository.findResult(user.getId(), quiz.getId());
-        if (oldResult.getEndTime() == null){
-            return new ApiResponse(ResponseError.DEFAULT_ERROR("Yakunlanmagan testlarni yakunlashingiz kerak"));
+
+        if (oldResult != null){
+                return new ApiResponse(ResponseError.DEFAULT_ERROR("Yakunlanmagan testlarni yakunlashingiz kerak"));
         }
 
 
@@ -77,7 +81,7 @@ public class QuizService {
                 .correctAnswers(0)
                 .user(user)
                 .build();
-        Result save = resultRepository.save(result);
+        resultRepository.save(result);
         return new ApiResponse(getRandomQuestionsForQuiz(quizId));
     }
 
@@ -99,21 +103,15 @@ public class QuizService {
         }
 
 
-        Set<Long> questionIds = passTestList.stream().map(ReqPassTest::getQuestionId).collect(Collectors.toSet());
+        List<Long> questionIds = passTestList.stream().map(ReqPassTest::getQuestionId).collect(Collectors.toList());
         Map<Long, Long> correctAnswersMap = optionRepository.findCorrectAnswersByQuestionIds(questionIds).stream()
                 .collect(Collectors.toMap(
                         option -> option.getQuestion().getId(),
-                        Option::getId,
-                        (existing, replacement) -> existing
+                        Option::getId
                 ));
 
-        long incorrectCount = passTestList.stream()
-                .filter(reqPassTest -> !correctAnswersMap.getOrDefault(reqPassTest.getQuestionId(), -1L)
-                        .equals(reqPassTest.getOptionId()))
-                .count();
-
         result.setEndTime(LocalDateTime.now());
-        result.setCorrectAnswers(incorrectCount);
+        result.setCorrectAnswers(correctAnswersMap.size());
         Result result1 = resultRepository.save(result);
         return new ApiResponse(resultService.convertToDTO(result1));
     }

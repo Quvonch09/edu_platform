@@ -51,7 +51,7 @@ public class LessonService {
         return new ApiResponse("Dars muvaffaqiyatli yaratildi");
     }
 
-
+    //todo  ??
     @Transactional
     public ApiResponse getLessonInModule(Long moduleId) {
         moduleRepository.findByIdAndDeleted(moduleId, (byte) 0)
@@ -121,6 +121,7 @@ public class LessonService {
                 lessons.getTotalElements(), lessons.map(this::lessonDTO).toList()));
     }
 
+    //todo ??
     @Transactional
     public ApiResponse getOpenLessonsInGroup(Long groupId) {
         List<LessonDTO> lessons = lessonTrackingRepository.findOpenLessonsByGroupId(groupId)
