@@ -57,6 +57,27 @@ public class ExamResultService {
         return new ApiResponse(resPageable);
     }
 
+    public ApiResponse getAllStudent(User student, Month month, int page, int size) {
+        Page<ExamResult> pages = examResultRepository.searchResultStudent(month != null ? month.name() : null,
+                student.getId(), PageRequest.of(page, size));
+
+        if (pages.isEmpty()) return new ApiResponse(ResponseError.NOTFOUND("Imtihon natijalari topilmadi"));
+
+        List<ExamResultDTO> resultDTOPage = pages.map(this::examResultDTO).toList();
+
+        ResPageable resPageable = ResPageable.builder()
+                .page(page)
+                .size(size)
+                .totalPage(pages.getTotalPages())
+                .totalElements(pages.getTotalElements())
+                .body(resultDTOPage)
+                .build();
+
+        return new ApiResponse(resPageable);
+    }
+
+
+
     private ExamResultDTO examResultDTO(ExamResult examResult){
         return ExamResultDTO.builder()
                 .studentName(examResult.getStudent().getFullName())
