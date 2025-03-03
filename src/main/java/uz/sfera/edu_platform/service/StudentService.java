@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -209,13 +210,12 @@ public class StudentService {
 
     public ApiResponse getTeacherByStudnet(User user){
         List<User> users = userRepository.searchForUsers(user.getId());
-        if ( users != null && !users.isEmpty()) {
-            List<UserDTO> list = users.stream().map(this::getStudentDTO).toList();
-            return new ApiResponse(list);
+        if ( users == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Student"));
+
         }
-
-        return new ApiResponse(ResponseError.NOTFOUND("Student"));
-
+        List<UserDTO> list = users.stream().filter(Objects::nonNull).map(this::getStudentDTO).toList();
+        return new ApiResponse(list);
     }
 
     public UserDTO getStudentDTO(User user) {
