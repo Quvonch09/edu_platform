@@ -27,7 +27,7 @@ public interface ExamResultRepository extends JpaRepository<ExamResult,Long> {
                                   @Param("studentId") Long studentId, Pageable pageable);
 
     @Query(value = "select ex.* from exam_result ex where \n" +
-            "(:month IS NULL OR ex.month = :month) and ex.student_id = :studentId order by ex. desc", nativeQuery = true)
+            "(:month IS NULL OR ex.month = :month) and ex.student_id = :studentId order by ex.id desc", nativeQuery = true)
     Page<ExamResult> searchResultStudent(
                                           @Param("month") String month,
                                           @Param("studentId") Long studentId, Pageable pageable);
