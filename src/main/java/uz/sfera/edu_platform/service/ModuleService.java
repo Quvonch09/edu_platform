@@ -50,28 +50,10 @@ public class ModuleService {
 
     @Transactional
     public ApiResponse getByCategory(Long categoryId, User user, int page, int size) {
-        if (user.getRole().equals(Role.ROLE_STUDENT)) {
-            Group group = groupRepository.find(user.getId());
-            if (group == null) {
-                return new ApiResponse(ResponseError.NOTFOUND("Guruh"));
-            }
-            categoryId = group.getCategory().getId(); // Student uchun categoryId o‘zgaradi
-        }
-
-        Category category = (categoryId != null) ? categoryRepository.findById(categoryId).orElse(null) : null;
-        if (categoryId != null && category == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Kategoriya"));
-        }
-
         Page<Module> modules = (categoryId != null)
                 ? moduleRepository.findByCategoryIdAndDeleted(categoryId, (byte) 0, PageRequest.of(page, size))
                 : moduleRepository.findByDeleted((byte) 0, PageRequest.of(page, size)); // Agar categoryId null bo‘lsa, barcha modullar
 
-        return buildResponse(page, size, modules);
-    }
-
-    // Umumiy javob yaratish metodi
-    private ApiResponse buildResponse(int page, int size, Page<Module> modules) {
         return new ApiResponse(ResPageable.builder()
                 .page(page)
                 .size(size)
@@ -80,6 +62,7 @@ public class ModuleService {
                 .body(moduleDTOList(modules))
                 .build());
     }
+
 
 
 
