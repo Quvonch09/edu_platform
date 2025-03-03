@@ -52,6 +52,6 @@ public class ExamResultController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-        return ResponseEntity.ok(examResultService.getAll(null,month, student.getId(), page,size));
+        return ResponseEntity.ok(examResultService.getAllStudent(student, month, page, size));
     }
 }
