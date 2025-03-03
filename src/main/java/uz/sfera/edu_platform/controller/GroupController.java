@@ -1,8 +1,10 @@
 package uz.sfera.edu_platform.controller;
 
 import jakarta.validation.Valid;
+import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.req.ReqGroup;
+import uz.sfera.edu_platform.security.CurrentUser;
 import uz.sfera.edu_platform.service.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,17 @@ public class GroupController {
     public ResponseEntity<ApiResponse> saveGroup(@Valid @RequestBody ReqGroup reqGroup){
         ApiResponse apiResponse = groupService.saveGroup(reqGroup);
         return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/getByTeacher")
+    @Operation(summary = "Teacher o'ziga tegishli guruhlarni ko'rish")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    public ResponseEntity<ApiResponse> getByTeacher(
+            @CurrentUser User teacher,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        return ResponseEntity.ok(groupService.search(null,teacher.getFullName(),null,null,null,page,size));
     }
 
 
