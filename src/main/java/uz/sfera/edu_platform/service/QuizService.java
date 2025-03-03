@@ -63,11 +63,17 @@ public class QuizService {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
         }
 
+        Result oldResult = resultRepository.findResult(user.getId(), quiz.getId());
+        if (oldResult.getEndTime() == null){
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Yakunlanmagan testlarni yakunlashingiz kerak"));
+        }
+
+
         Result result = Result.builder()
                 .startTime(LocalDateTime.now())
                 .endTime(null)
                 .quiz(quiz)
-                .totalQuestion(quizSettingsRepository.findByQuizId(quizId).getQuestionCount())
+                .totalQuestion(getRandomQuestionsForQuiz(quiz.getId()).size())
                 .correctAnswers(0)
                 .user(user)
                 .build();
@@ -109,7 +115,7 @@ public class QuizService {
         result.setEndTime(LocalDateTime.now());
         result.setCorrectAnswers(incorrectCount);
         Result result1 = resultRepository.save(result);
-        return new ApiResponse("Siz testni yakunladingiz!\nNATIJA:" + resultService.convertToDTO(result1));
+        return new ApiResponse(resultService.convertToDTO(result1));
     }
 
     public List<QuestionDTO> getRandomQuestionsForQuiz(Long quizId) {

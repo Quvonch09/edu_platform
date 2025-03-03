@@ -47,15 +47,15 @@ public class ModuleController {
         return ResponseEntity.ok(moduleService.getModule(moduleId));
     }
 
-    @GetMapping("getByCategory")
-    @Operation(summary = "Categorydagi modullarni ko'rish")
-    public ResponseEntity<ApiResponse> getByCategory(
-            @RequestParam(required = false) Long categoryId,
-            @CurrentUser User user,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(moduleService.getByCategory(categoryId, user, page, size));
-    }
+//    @GetMapping("/getByCategory")
+//    @Operation(summary = "Categorydagi modullarni ko'rish")
+//    public ResponseEntity<ApiResponse> getByCategory(
+//            @RequestParam(required = false) Long categoryId,
+//            @CurrentUser User user,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "10") int size) {
+//        return ResponseEntity.ok(moduleService.getByCategory(categoryId, user, page, size));
+//    }
 
     @PutMapping("/update/{moduleId}")
     @Operation(summary = "(TEACHER/ADMIN) Modulni yangilash")
