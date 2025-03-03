@@ -1,0 +1,8 @@
+2025-03-03T12:07:22.703+05:00  INFO 2052 --- [Edu_platform] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-03-03T12:07:22.942+05:00  INFO 2052 --- [Edu_platform] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-03-03T12:07:22.944+05:00  INFO 2052 --- [Edu_platform] [SpringApplicationShutdownHook] o.s.m.s.b.SimpleBrokerMessageHandler     : Stopping...
+2025-03-03T12:07:22.944+05:00  INFO 2052 --- [Edu_platform] [SpringApplicationShutdownHook] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@20286a6b]]
+2025-03-03T12:07:22.944+05:00  INFO 2052 --- [Edu_platform] [SpringApplicationShutdownHook] o.s.m.s.b.SimpleBrokerMessageHandler     : Stopped.
+2025-03-03T12:07:22.952+05:00  INFO 2052 --- [Edu_platform] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-03-03T12:07:22.954+05:00  INFO 2052 --- [Edu_platform] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-03-03T12:07:22.963+05:00  INFO 2052 --- [Edu_platform] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
