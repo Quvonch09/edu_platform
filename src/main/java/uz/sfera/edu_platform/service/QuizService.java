@@ -1,6 +1,7 @@
 package uz.sfera.edu_platform.service;
 
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.*;
@@ -31,6 +32,7 @@ public class QuizService {
     private final ResultService resultService;
 
     //todo bu joyda endi @Transtactional ishlatish kerak?
+    @Transactional
     public ApiResponse createQuiz(ReqQuiz reqQuiz) {
         return lessonRepository.findById(reqQuiz.getLessonId())
                 .map(lesson -> {
@@ -65,8 +67,9 @@ public class QuizService {
         }
 
         Result oldResult = resultRepository.findResult(user.getId(), quiz.getId());
-        if (oldResult.getEndTime() == null){
-            return new ApiResponse(ResponseError.DEFAULT_ERROR("Yakunlanmagan testlarni yakunlashingiz kerak"));
+
+        if (oldResult != null){
+                return new ApiResponse(ResponseError.DEFAULT_ERROR("Yakunlanmagan testlarni yakunlashingiz kerak"));
         }
 
 
@@ -78,7 +81,7 @@ public class QuizService {
                 .correctAnswers(0)
                 .user(user)
                 .build();
-        Result save = resultRepository.save(result);
+        resultRepository.save(result);
         return new ApiResponse(getRandomQuestionsForQuiz(quizId));
     }
 
