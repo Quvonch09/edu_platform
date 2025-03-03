@@ -67,6 +67,7 @@ public class StudentService {
                 .build();
         User save = userRepository.save(student);
 
+        //todo gruppaga userni bunday qoshih xato, query yozib qo'shih kerak
         group.getStudents().add(save);
         groupRepository.save(group);
 
@@ -83,6 +84,7 @@ public class StudentService {
 
         PageRequest pageRequest = PageRequest.of(page, size);
 
+        //todo bu code ham juda tushunarsiz
         Page<ResStudent> users = userRepository.searchStudents(
                 fullName, phoneNumber,
                 Optional.ofNullable(userStatus).map(Enum::name).orElse(null),
@@ -149,11 +151,12 @@ public class StudentService {
         user.setParentPhoneNumber(reqStudent.getParentPhoneNumber());
         user.setAge(reqStudent.getAge());
         user.setFile(fileRepository.findById(reqStudent.getFileId()).orElse(null));
-
+        //todo password update qilish alohida api bo'lishi kerak
         if (reqStudent.getPassword() != null && !reqStudent.getPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(reqStudent.getPassword()));
         }
 
+        //todo user gruppaga bunday qoshilmaydi
         newGroup.getStudents().add(user);
 
         userRepository.save(user);
@@ -166,6 +169,7 @@ public class StudentService {
 
 
 
+    //todo @Transactional bu yerga shartmas
     @Transactional
     public ApiResponse deleteStudent(Long studentId, LocalDate departureDate, String departureDescription){
         User user = userRepository.findById(studentId).orElse(null);
@@ -181,6 +185,8 @@ public class StudentService {
         return new ApiResponse("Successfully deleted student");
     }
 
+
+    //todo bu yerga nma uchun kerak bu @Transtactional?
     @Transactional
     public ApiResponse getStudentGroupBy(Long groupId){
 

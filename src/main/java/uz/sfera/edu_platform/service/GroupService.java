@@ -84,6 +84,7 @@ public class GroupService {
 
 
 
+    //todo olib tashla degandimku bu annotatsiyani????
     @Transactional
     public ApiResponse search(String groupName, String teacherName, LocalDate startDate,
                               LocalDate endDate, Long categoryId, int page, int size) {

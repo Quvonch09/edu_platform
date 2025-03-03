@@ -76,6 +76,7 @@ public class ModuleService {
 //    }
 
 
+    //todo bu yerda nma qilib yuribdi @Transactional?
     @Transactional
     public ApiResponse searchModule(String name, int page, int size) {
         Page<Module> modules = (name == null || name.isBlank())
