@@ -85,7 +85,8 @@ public class UserService {
         List<TeacherDTO> teacherList = allTeachers.stream()
                 .map(user -> convertUserToTeacherDTO(user,
                         user.getCategories().stream()
-                                .map(category -> category != null ? new ResCategory(category.getId(), category.getName()):null)
+                                .filter(category -> category != null && category.getActive() == 1)
+                                .map(category -> new ResCategory(category.getId(), category.getName()))
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());
 
