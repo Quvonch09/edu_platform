@@ -103,21 +103,15 @@ public class QuizService {
         }
 
 
-        Set<Long> questionIds = passTestList.stream().map(ReqPassTest::getQuestionId).collect(Collectors.toSet());
+        List<Long> questionIds = passTestList.stream().map(ReqPassTest::getQuestionId).collect(Collectors.toList());
         Map<Long, Long> correctAnswersMap = optionRepository.findCorrectAnswersByQuestionIds(questionIds).stream()
                 .collect(Collectors.toMap(
                         option -> option.getQuestion().getId(),
-                        Option::getId,
-                        (existing, replacement) -> existing
+                        Option::getId
                 ));
 
-        long incorrectCount = passTestList.stream()
-                .filter(reqPassTest -> !correctAnswersMap.getOrDefault(reqPassTest.getQuestionId(), -1L)
-                        .equals(reqPassTest.getOptionId()))
-                .count();
-
         result.setEndTime(LocalDateTime.now());
-        result.setCorrectAnswers(incorrectCount);
+        result.setCorrectAnswers(correctAnswersMap.size());
         Result result1 = resultRepository.save(result);
         return new ApiResponse(resultService.convertToDTO(result1));
     }
