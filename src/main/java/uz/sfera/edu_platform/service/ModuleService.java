@@ -48,32 +48,39 @@ public class ModuleService {
         return new ApiResponse("Modul yaratildi");
     }
 
-//    @Transactional
-//    public ApiResponse getByCategory(Long categoryId, User user, int page, int size) {
-//        Category category = (user.getRole().equals(Role.ROLE_STUDENT))
-//                ? Optional.ofNullable(groupRepository.findGroup(user.getId()))
-//                .map(Group::getCategory)
-//                .orElse(null)
-//                : (categoryId == null)
-//                ? null
-//                : categoryRepository.findById(categoryId).orElse(null);
-//
-//        if (category == null) {
-//            return new ApiResponse(ResponseError.NOTFOUND(
-//                    user.getRole().equals(Role.ROLE_STUDENT) ? "Foydalanuvchiga bog‘liq kategoriya" : "Kategoriya"
-//            ));
-//        }
-//
-//        Page<Module> modules = moduleRepository.findByCategoryIdAndDeleted(category.getId(),(byte) 0, PageRequest.of(page, size));
-//
-//        return new ApiResponse(ResPageable.builder()
-//                .page(page)
-//                .size(size)
-//                .totalPage(modules.getTotalPages())
-//                .totalElements(modules.getTotalElements())
-//                .body(moduleDTOList(modules))
-//                .build());
-//    }
+    @Transactional
+    public ApiResponse getByCategory(Long categoryId, User user, int page, int size) {
+        if (user.getRole().equals(Role.ROLE_STUDENT)) {
+            Group group = groupRepository.find(user.getId());
+            if (group == null) {
+                return new ApiResponse(ResponseError.NOTFOUND("Guruh"));
+            }
+            categoryId = group.getCategory().getId(); // Student uchun categoryId o‘zgaradi
+        }
+
+        Category category = (categoryId != null) ? categoryRepository.findById(categoryId).orElse(null) : null;
+        if (categoryId != null && category == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Kategoriya"));
+        }
+
+        Page<Module> modules = (categoryId != null)
+                ? moduleRepository.findByCategoryIdAndDeleted(categoryId, (byte) 0, PageRequest.of(page, size))
+                : moduleRepository.findByDeleted((byte) 0, PageRequest.of(page, size)); // Agar categoryId null bo‘lsa, barcha modullar
+
+        return buildResponse(page, size, modules);
+    }
+
+    // Umumiy javob yaratish metodi
+    private ApiResponse buildResponse(int page, int size, Page<Module> modules) {
+        return new ApiResponse(ResPageable.builder()
+                .page(page)
+                .size(size)
+                .totalPage(modules.getTotalPages())
+                .totalElements(modules.getTotalElements())
+                .body(moduleDTOList(modules))
+                .build());
+    }
+
 
 
     @Transactional

@@ -29,4 +29,6 @@ public interface ModuleRepository extends JpaRepository<Module,Long> {
             nativeQuery = true)
     boolean checkOpenModulesByStudent(@Param("groupId") Long groupId, @Param("moduleId") Long moduleId);
 
+    Page<Module> findByDeleted(byte deleted,Pageable pageable);
+
 }
