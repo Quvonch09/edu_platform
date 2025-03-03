@@ -17,8 +17,9 @@ public interface ExamResultRepository extends JpaRepository<ExamResult,Long> {
     Page<ExamResult> findByMonthAndStudentId(Month month, Long student_id, Pageable pageable);
 
 
-    @Query(value = "select * from exam_result  er where\n" +
-            "            (:month IS NULL OR er.month = :month)\n" +
-            "            and (:studentId IS NULL OR er.student_id = :studentId)  order by er.id desc", nativeQuery = true)
-    Page<ExamResult> searchResult(@Param("month") String month, @Param("studentId") Long studentId, Pageable pageable);
+    @Query(value = "select ex.* from exam_result ex left join groups g on g.teacher_id = :teacherId \n" +
+            "    left join groups_students gs on g.id = gs.group_id\n" +
+            "and gs.students_id  = ex.student_id where \n" +
+            "(:month IS NULL OR ex.month = :month) and (:studentId IS NULL OR ex.student_id = :studentId) order by ex.id desc", nativeQuery = true)
+    Page<ExamResult> searchResult(@Param("teacherId") Long teacherId, @Param("month") String month, @Param("studentId") Long studentId, Pageable pageable);
 }
