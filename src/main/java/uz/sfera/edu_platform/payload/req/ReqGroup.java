@@ -27,21 +27,18 @@ public class ReqGroup {
     @NotNull(message = "Bush bulmasin")
     private Long teacherId;
 
-    @NotBlank(message = "Bush bulmasin")
     private LocalDate startDate;
 
     @NotNull(message = "Bush bulmasin")
     private Long roomId;
 
-    @NotBlank(message = "Bush bulmasin")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     @DateTimeFormat(pattern = "HH:mm")
     private LocalTime startTime;
 
-    @NotBlank(message = "Bush bulmasin")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     @DateTimeFormat(pattern = "HH:mm")
     private LocalTime endTime;
 
-    private List<WeekDay> dayIds;
+    private List<Long> dayIds;
 }

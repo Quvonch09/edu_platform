@@ -72,7 +72,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 """ , nativeQuery = true)
     List<ResCEODiagram> getLeaveStudent();
 
-    boolean existsByPhoneNumberAndRoleAndEnabledTrue(String phone, Role role);
+    boolean existsByPhoneNumberAndEnabledIsTrue(String phone);
 
 
     @Query(value = "select distinct u.* from users u  left join groups g on u.id = g.teacher_id where\n" +
@@ -220,15 +220,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
                              @Param("roleName") String roleName);
 
     @Query(value = """
-
-            SELECT
-                s.*
-             FROM groups g
-                 JOIN users u ON g.teacher_id = u.id
-                 LEFT JOIN groups_students gu ON gu.group_id = g.id  -- group_user jadvali, bu yerda studentlar va guruhlar bog‘langan
-                 LEFT JOIN users s ON s.id = gu.students_id AND s.user_status = 'UQIYABDI'  -- Studentlarning statusi
-        WHERE g.teacher_id = :teacherId
-          AND g.active = TRUE """ , nativeQuery = true
+            SELECT s.*
+            FROM users s
+            JOIN groups_students gs ON s.id = gs.students_id
+            JOIN groups g ON gs.group_id = g.id
+            WHERE g.teacher_id = :teacherId and g.active = true and s.user_status = 'UQIYAPDI'
+         """ , nativeQuery = true
     )
     List<User> searchForUsers(@Param("teacherId") Long teacherId);
 

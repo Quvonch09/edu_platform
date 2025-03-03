@@ -60,7 +60,7 @@ public class GroupService {
         GraphicDay day = graphicDayRepository.save(
                 GraphicDay.builder()
                         .room(room)
-                        .weekDay(reqGroup.getDayIds())
+                        .weekDay(weekDayList(reqGroup.getDayIds()))
                         .startTime(reqGroup.getStartTime())
                         .endTime(reqGroup.getEndTime())
                         .build()
@@ -179,7 +179,7 @@ public class GroupService {
             }
 
             if (graphicDay != null) {
-                graphicDay.setWeekDay(reqGroup.getDayIds());
+                graphicDay.setWeekDay(weekDayList(reqGroup.getDayIds()));
                 graphicDay.setStartTime(reqGroup.getStartTime());
                 graphicDay.setEndTime(reqGroup.getEndTime());
                 graphicDayRepository.save(graphicDay);
@@ -248,5 +248,22 @@ public class GroupService {
             return 3;
         }
     }
+
+    private List<WeekDay> weekDayList(List<Long> daysId) {
+        return daysId.stream()
+                .map(id -> switch (id.intValue()) {
+                    case 1 -> WeekDay.MONDAY;
+                    case 2 -> WeekDay.TUESDAY;
+                    case 3 -> WeekDay.WEDNESDAY;
+                    case 4 -> WeekDay.THURSDAY;
+                    case 5 -> WeekDay.FRIDAY;
+                    case 6 -> WeekDay.SATURDAY;
+                    case 7 -> WeekDay.SUNDAY;
+                    default -> null; // Noto'g'ri ID kiritilganda null bo'ladi
+                })
+                .filter(Objects::nonNull) // null qiymatlarni chiqarib tashlaydi
+                .collect(Collectors.toList());
+    }
+
 
 }

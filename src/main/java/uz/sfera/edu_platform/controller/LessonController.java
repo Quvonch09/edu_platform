@@ -40,7 +40,7 @@ public class LessonController {
 
     @GetMapping("/getByModule/{moduleId}")
     @Operation(summary = "(TEACHER,ADMIN,CEO) Moduldagi darslarni ko'rish")
-    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_CEO')")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_CEO', 'ROLE_STUDENT')")
     public ResponseEntity<ApiResponse> getLessons(
             @PathVariable Long moduleId
     ){

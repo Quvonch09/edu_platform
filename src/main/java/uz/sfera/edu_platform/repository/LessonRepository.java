@@ -11,9 +11,13 @@ import java.util.Optional;
 
 public interface LessonRepository extends JpaRepository<Lesson,Long> {
     List<Lesson> findByModuleIdAndDeleted(Long moduleId, byte deleted);
+
     long countByDeleted(byte deleted);
+
     long countByModuleIdAndDeleted(Long moduleId, byte deleted);
+
     Page<Lesson> findByNameAndDeleted(String name, byte deleted, Pageable pageable);
+
     Optional<Lesson> findByIdAndDeleted(Long id, byte deleted);
 
 

@@ -12,18 +12,9 @@ import java.util.List;
 
 @Repository
 public interface ResultRepository extends JpaRepository<Result, Long> {
-    List<Result> findByUserId(Long userId);
+
     Page<Result> findByUserId(Long userId, Pageable pageable);
-    @Query("SELECT r FROM Result r JOIN FETCH r.user WHERE r.quiz.id IN :quizIds")
-    Page<Result> findByQuizIdInWithUser(@Param("quizIds") List<Long> quizIds, Pageable pageable);
 
-
-//    @Query("SELECT r FROM Result r WHERE r.user.id = :userId AND r.quiz.id = :quizId AND DATE(r.startTime) = CURRENT_DATE")
-//    Result findTodayResultByUserAndQuiz(@Param("userId") Long userId, @Param("quizId") Long quizId);
-
-    @Query(value = "SELECT r.* FROM result r WHERE r.user_id = :userId AND r.quiz_id = :quizId AND r.end_time IS NULL", nativeQuery = true)
+    @Query(value = "SELECT r.* FROM result r WHERE r.user_id = :userId AND r.quiz_id = :quizId AND r.end_time IS NULL LIMIT 1 ", nativeQuery = true)
     Result findResult(@Param("userId") Long userId, @Param("quizId") Long quizId);
-
-
-
 }

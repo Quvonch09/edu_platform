@@ -112,7 +112,7 @@ public class AttendanceService {
 
     @Transactional
     public ApiResponse getAttendanceByUser(User user, int year, int month) {
-        Group group = groupRepository.findGroup(user.getId());
+        Group group = groupRepository.findByStudentId(user.getId()).orElse(null);
         if (group == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Attendance not found"));
         }
@@ -147,8 +147,6 @@ public class AttendanceService {
                 .date(date)
                 .build();
     }
-
-
 
 
 //    public ApiResponse getAttendanceByStudent(User user, int month) {
@@ -229,6 +227,4 @@ public class AttendanceService {
                 .filter(date -> weekDays.contains(WeekDay.valueOf(date.getDayOfWeek().name()))) // Java DayOfWeek ni WeekDay ga moslashtiramiz
                 .collect(Collectors.toList());
     }
-
-
 }

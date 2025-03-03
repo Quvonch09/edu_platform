@@ -90,7 +90,7 @@ public class StudentController {
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     @Operation(summary = "Teacher ning o'zining studentlari listi")
     @GetMapping("/for-teacher")
-    public ResponseEntity<ApiResponse> getStudents(@CurrentUser User user){
+    public ResponseEntity<ApiResponse> getStudents( @CurrentUser User user){
         ApiResponse apiResponse = studentService.getTeacherByStudnet(user);
         return ResponseEntity.ok(apiResponse);
     }

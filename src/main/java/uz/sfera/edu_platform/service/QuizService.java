@@ -28,6 +28,7 @@ public class QuizService {
     private final ResultRepository resultRepository;
     private final QuizSettingsRepository quizSettingsRepository;
     private final OptionService optionService;
+    private final ResultService resultService;
 
     public ApiResponse createQuiz(ReqQuiz reqQuiz) {
         return lessonRepository.findById(reqQuiz.getLessonId())
@@ -62,11 +63,17 @@ public class QuizService {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
         }
 
+        Result oldResult = resultRepository.findResult(user.getId(), quiz.getId());
+        if (oldResult.getEndTime() == null){
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Yakunlanmagan testlarni yakunlashingiz kerak"));
+        }
+
+
         Result result = Result.builder()
                 .startTime(LocalDateTime.now())
                 .endTime(null)
                 .quiz(quiz)
-                .totalQuestion(quizSettingsRepository.findByQuizId(quizId).getQuestionCount())
+                .totalQuestion(getRandomQuestionsForQuiz(quiz.getId()).size())
                 .correctAnswers(0)
                 .user(user)
                 .build();
@@ -100,14 +107,15 @@ public class QuizService {
                         (existing, replacement) -> existing
                 ));
 
-        long correctCount = passTestList.stream()
-                .filter(reqPassTest -> correctAnswersMap.getOrDefault(reqPassTest.getQuestionId(), -1L)
+        long incorrectCount = passTestList.stream()
+                .filter(reqPassTest -> !correctAnswersMap.getOrDefault(reqPassTest.getQuestionId(), -1L)
                         .equals(reqPassTest.getOptionId()))
                 .count();
+
         result.setEndTime(LocalDateTime.now());
-        result.setCorrectAnswers(correctCount);
-        resultRepository.save(result);
-        return new ApiResponse("Test muvaffaqiyatli o'tkazildi!");
+        result.setCorrectAnswers(incorrectCount);
+        Result result1 = resultRepository.save(result);
+        return new ApiResponse(resultService.convertToDTO(result1));
     }
 
     public List<QuestionDTO> getRandomQuestionsForQuiz(Long quizId) {

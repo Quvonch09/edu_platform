@@ -9,7 +9,4 @@ import java.util.List;
 
 public interface QuizRepository extends JpaRepository<Quiz,Long> {
     List<Quiz> findByLessonId(Long lessonId);
-    @Query("SELECT q.id FROM Quiz q WHERE q.lesson.id IN :lessonIds")
-    List<Long> findQuizIdsByLessonIds(@Param("lessonIds") List<Long> lessonIds);
-
 }
