@@ -34,12 +34,13 @@ public class ExamResultController {
     @Operation(summary = "(TEACHER) Filter orqali imtihon natijalarini olish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> getExams(
+            @CurrentUser User teacher,
             @RequestParam(required = false) Long studentId,
             @RequestParam(required = false) Month month,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-        return ResponseEntity.ok(examResultService.getAll(month, studentId, page, size));
+        return ResponseEntity.ok(examResultService.getAll(teacher,month, studentId, page, size));
     }
 
     @GetMapping("/myExamResults")
@@ -51,6 +52,6 @@ public class ExamResultController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-        return ResponseEntity.ok(examResultService.getAll(month, student.getId(), page,size));
+        return ResponseEntity.ok(examResultService.getAll(null,month, student.getId(), page,size));
     }
 }

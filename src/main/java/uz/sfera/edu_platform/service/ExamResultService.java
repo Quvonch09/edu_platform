@@ -40,9 +40,9 @@ public class ExamResultService {
         return new ApiResponse("Imtihon natijasi saqlandi");
     }
 
-    public ApiResponse getAll(Month month, Long studentId, int page, int size) {
+    public ApiResponse getAll(User teacher, Month month, Long studentId, int page, int size) {
         Page<ExamResult> pages = examResultRepository.searchResult
-                (month != null ? month.name() : LocalDate.now().getMonth().name(), studentId, PageRequest.of(page, size));
+                (teacher.getId(),month != null ? month.name() : LocalDate.now().getMonth().name(), studentId, PageRequest.of(page, size));
 
         if (pages.isEmpty()) {
             return new ApiResponse(ResponseError.NOTFOUND("Imtihon natijalari"));
