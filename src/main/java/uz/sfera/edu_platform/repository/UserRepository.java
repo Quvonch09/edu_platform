@@ -224,7 +224,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             FROM users s
             JOIN groups_students gs ON s.id = gs.students_id
             JOIN groups g ON gs.group_id = g.id
-            WHERE g.teacher_id = :teacherId and g.active = true and s.user_status = 'UQIYABDI'
+            WHERE g.teacher_id = :teacherId and g.active = true and s.user_status = 'UQIYAPDI'
          """ , nativeQuery = true
     )
     List<User> searchForUsers(@Param("teacherId") Long teacherId);
