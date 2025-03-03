@@ -47,7 +47,7 @@ public class ModuleController {
         return ResponseEntity.ok(moduleService.getModule(moduleId));
     }
 
-    @GetMapping("getByCategory")
+    @GetMapping("/getByCategory")
     @Operation(summary = "Categorydagi modullarni ko'rish")
     public ResponseEntity<ApiResponse> getByCategory(
             @RequestParam(required = false) Long categoryId,
