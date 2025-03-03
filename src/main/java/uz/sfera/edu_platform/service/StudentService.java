@@ -7,6 +7,7 @@ import uz.sfera.edu_platform.entity.enums.UserStatus;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.StudentDTO;
+import uz.sfera.edu_platform.payload.UserDTO;
 import uz.sfera.edu_platform.payload.auth.ResponseLogin;
 import uz.sfera.edu_platform.payload.req.ReqStudent;
 import uz.sfera.edu_platform.payload.res.ResPageable;
@@ -208,8 +209,22 @@ public class StudentService {
 
     public ApiResponse getTeacherByStudnet(User user){
         List<User> users = userRepository.searchForUsers(user.getId());
-        List<StudentDTO> list = users.stream().map(this::getDto).toList();
-        return new ApiResponse(list);
+        if (!users.isEmpty()) {
+            List<UserDTO> list = users.stream().map(this::getStudentDTO).toList();
+            return new ApiResponse(list);
+        }
+
+        return new ApiResponse(ResponseError.NOTFOUND("Student"));
+
+    }
+
+    public UserDTO getStudentDTO(User user) {
+        return UserDTO.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .phoneNumber(user.getPhoneNumber())
+                .fileId(user.getFile() != null ? user.getFile().getId() : null)
+                .build();
     }
 
 }
