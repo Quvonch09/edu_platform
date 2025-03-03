@@ -209,7 +209,7 @@ public class StudentService {
 
     public ApiResponse getTeacherByStudnet(User user){
         List<User> users = userRepository.searchForUsers(user.getId());
-        if (!users.isEmpty()) {
+        if ( users != null && !users.isEmpty()) {
             List<UserDTO> list = users.stream().map(this::getStudentDTO).toList();
             return new ApiResponse(list);
         }
