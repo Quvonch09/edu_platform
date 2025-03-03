@@ -12,10 +12,12 @@ import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.ExamResultDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.req.ExamResultRequest;
+import uz.sfera.edu_platform.payload.res.ResPageable;
 import uz.sfera.edu_platform.repository.ExamResultRepository;
 import uz.sfera.edu_platform.repository.UserRepository;
 
 import java.time.Month;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -38,25 +40,23 @@ public class ExamResultService {
     }
 
     public ApiResponse getAll(Month month, Long studentId, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-
-        Page<ExamResult> pages;
-        if (month == null && studentId == null) {
-            pages = examResultRepository.findAll(pageRequest);
-        } else if (month == null) {
-            pages = examResultRepository.findByStudentId(studentId, pageRequest);
-        } else if (studentId == null) {
-            pages = examResultRepository.findByMonth(month, pageRequest);
-        } else {
-            pages = examResultRepository.findByMonthAndStudentId(month, studentId, pageRequest);
-        }
+        Page<ExamResult> pages = examResultRepository.searchResult(month != null ? month.name() : null, studentId, PageRequest.of(page, size));
 
         if (pages.isEmpty()) {
             return new ApiResponse(ResponseError.NOTFOUND("Imtihon natijalari topilmadi"));
         }
 
-        Page<ExamResultDTO> resultDTOPage = pages.map(this::examResultDTO);
-        return new ApiResponse(resultDTOPage);
+        List<ExamResultDTO> resultDTOPage = pages.map(this::examResultDTO).toList();
+
+        ResPageable resPageable = ResPageable.builder()
+                .page(page)
+                .size(size)
+                .totalPage(pages.getTotalPages())
+                .totalElements(pages.getTotalElements())
+                .body(resultDTOPage)
+                .build();
+
+        return new ApiResponse(resPageable);
     }
 
     private ExamResultDTO examResultDTO(ExamResult examResult){

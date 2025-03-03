@@ -119,16 +119,16 @@ public class ChatService {
             throw new BadRequestException("Invalid input parameters");
         }
 
-        Chat existingChat = chatRepository.checkChat(sender, receiver);
-        if (existingChat == null) {
-            existingChat = chatRepository.checkChat(receiver, sender);
-        }
-
-        if (existingChat != null) {
-            saveChat(existingChat.getSender(), existingChat.getReceiver(), new Chat(), message);
-        } else {
-            saveChat(receiver, sender, new Chat(), message);
-        }
+//        Chat existingChat = chatRepository.checkChat(sender, receiver);
+//        if (existingChat == null) {
+//            existingChat = chatRepository.checkChat(receiver, sender);
+//        }
+//
+//        if (existingChat != null) {
+//            saveChat(existingChat.getSender(), existingChat.getReceiver(), new Chat(), message);
+//        } else {
+            saveChat(sender, receiver, new Chat(), message);
+//        }
 
         return new ApiResponse("Success");
     }
@@ -229,15 +229,15 @@ public class ChatService {
     public ChatDto saveMessage(ChatDto dto)
     {
         log.info("service ga ham keldi");
-        Chat existingChat = chatRepository.checkChat(dto.getSender(), dto.getReceiver());
-        if (existingChat == null) {
-            existingChat = chatRepository.checkChat(dto.getReceiver(), dto.getSender());
-        }
-
-        if (existingChat != null) {
-            dto.setReceiver(existingChat.getReceiver());
-            dto.setSender(existingChat.getSender());
-        }
+//        Chat existingChat = chatRepository.checkChat(dto.getSender(), dto.getReceiver());
+//        if (existingChat == null) {
+//            existingChat = chatRepository.checkChat(dto.getReceiver(), dto.getSender());
+//        }
+//
+//        if (existingChat != null) {
+//            dto.setReceiver(existingChat.getReceiver());
+//            dto.setSender(existingChat.getSender());
+//        }
 
         return saveMessageBody(dto, new Chat());
     }

@@ -20,4 +20,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
             "            and (?2 IS NULL OR LOWER(c.description) LIKE LOWER(CONCAT('%', ?2, '%'))) and c.active = 1 order by c.id desc", nativeQuery = true)
     Page<Category> getAllCategory(String name, String description, Pageable pageable);
 
+    List<Category> findAllByActive(byte active);
+
 }

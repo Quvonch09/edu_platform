@@ -57,7 +57,7 @@ public class CategoryService {
 
 
     public ApiResponse getAllList(){
-        List<Category> categories = categoryRepository.findAll();
+        List<Category> categories = categoryRepository.findAllByActive((byte) 1);
         return new ApiResponse(categories.stream().map(this::convertCategoryToCategoryDTO).toList());
     }
 
