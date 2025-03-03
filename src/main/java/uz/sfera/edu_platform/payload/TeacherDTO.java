@@ -3,6 +3,7 @@ package uz.sfera.edu_platform.payload;
 import uz.sfera.edu_platform.payload.res.ResCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import uz.sfera.edu_platform.payload.res.ResGroupDto;
 
 import java.util.List;
 
@@ -19,7 +20,7 @@ public class TeacherDTO {
     private List<ResCategory> categories;
     @Schema(hidden = true)
     private Integer groupCount;
-    private Long groupId;
+    private List<ResGroupDto> groupList;
     private String groupName;
     private Long fileId;
     private Boolean active;

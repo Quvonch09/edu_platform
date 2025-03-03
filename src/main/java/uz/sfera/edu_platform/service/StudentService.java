@@ -137,7 +137,7 @@ public class StudentService {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
 
-        Group oldGroup = groupRepository.findGroup(user.getId());
+        Group oldGroup = groupRepository.findByStudentId(user.getId()).orElse(null);
         if (oldGroup != null) {
             oldGroup.getStudents().remove(user);
         }
