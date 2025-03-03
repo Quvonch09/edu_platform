@@ -6,11 +6,22 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface GraphicDayRepository extends JpaRepository<GraphicDay, Long> {
     @Query(value = "select gd.* from graphic_day gd join groups g on gd.id = g.days_id where g.id = ?1 limit 1", nativeQuery = true)
     Optional<GraphicDay> findGraphicDay(Long id);
+
+
+    @Query(value = """
+    SELECT gd.* 
+    FROM graphic_day gd 
+    JOIN groups g ON gd.id = g.days_id 
+    WHERE g.id IN :groupIds
+""", nativeQuery = true)
+    List<GraphicDay> findAllByGroupIds(@Param("groupIds") List<Long> groupIds);
+
 
     @Query(value = "SELECT EXISTS ( " +
             "SELECT 1 FROM graphic_day g " +

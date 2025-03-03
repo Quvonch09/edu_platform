@@ -1,10 +1,15 @@
 package uz.sfera.edu_platform.service;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.sfera.edu_platform.entity.Category;
 import uz.sfera.edu_platform.entity.Group;
 import uz.sfera.edu_platform.entity.Module;
 import uz.sfera.edu_platform.entity.User;
-import uz.sfera.edu_platform.entity.enums.Role;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.ModuleDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
@@ -14,13 +19,7 @@ import uz.sfera.edu_platform.payload.res.ResPageable;
 import uz.sfera.edu_platform.repository.CategoryRepository;
 import uz.sfera.edu_platform.repository.GroupRepository;
 import uz.sfera.edu_platform.repository.ModuleRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,21 +31,28 @@ public class ModuleService {
     private final CategoryRepository categoryRepository;
     private final GroupRepository groupRepository;
 
-    public ApiResponse createModule(ModuleRequest moduleRequest){
-        Category category = categoryRepository.findById(moduleRequest.getCategoryId()).orElse(null);
-        if (category == null){
+    public ApiResponse createModule(ModuleRequest moduleRequest) {
+        if (!categoryRepository.existsById(moduleRequest.getCategoryId())) {
             return new ApiResponse(ResponseError.NOTFOUND("Kategoriya"));
-        } else if (moduleRepository.existsByName(moduleRequest.getName())) {
+        }
+
+        if (moduleRepository.existsByName(moduleRequest.getName())) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Modul"));
         }
+
+        Category category = categoryRepository.findById(moduleRequest.getCategoryId()).orElseThrow();
+
         Module module = Module.builder()
                 .name(moduleRequest.getName())
                 .category(category)
                 .deleted((byte) 0)
                 .build();
+
         moduleRepository.save(module);
+
         return new ApiResponse("Modul yaratildi");
     }
+
 
 //    @Transactional
 //    public ApiResponse getByCategory(Long categoryId, User user, int page, int size) {
@@ -76,55 +82,66 @@ public class ModuleService {
 //    }
 
 
-    @Transactional
     public ApiResponse searchModule(String name, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
         Page<Module> modules = (name == null || name.isBlank())
-                ? moduleRepository.findAll(PageRequest.of(page, size))
-                : moduleRepository.findByNameContainingIgnoreCaseAndDeleted(name, (byte) 0,PageRequest.of(page, size));
+                ? moduleRepository.findAll(pageable)
+                : moduleRepository.findByNameContainingIgnoreCaseAndDeleted(name, (byte) 0, pageable);
 
-        return new ApiResponse(ResPageable.builder()
-                .page(page)
-                .size(size)
-                .totalPage(modules.getTotalPages())
-                .totalElements(modules.getTotalElements())
-                .body(moduleDTOList(modules))
-                .build());
+        return new ApiResponse(
+                ResPageable.builder()
+                        .page(page)
+                        .size(size)
+                        .totalPage(modules.getTotalPages())
+                        .totalElements(modules.getTotalElements())
+                        .body(moduleDTOList(modules))
+                        .build()
+        );
     }
-
 
 
     public ApiResponse getModule(Long moduleId) {
         return moduleRepository.findByIdAndDeleted(moduleId, (byte) 0)
-                .map(module -> module.getCategory() != null
-                        ? new ApiResponse(moduleDTO(module))
-                        : new ApiResponse(ResponseError.DEFAULT_ERROR("Bu modulning kategoriyasi o‘chirilgan")))
-                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Modul")));
+                .filter(module -> module.getCategory() != null)  // Kategoriyasi o‘chirilmaganligini tekshiramiz
+                .map(module -> new ApiResponse(moduleDTO(module)))
+                .orElseGet(() -> new ApiResponse(ResponseError.DEFAULT_ERROR("Bu modul topilmadi yoki kategoriyasi o‘chirilgan")));
     }
 
-    public ApiResponse update(Long moduleId,ModuleRequest moduleRequest){
-        Module module = moduleRepository.findByIdAndDeleted(moduleId, (byte) 0).orElse(null);
-        Category category = categoryRepository.findById(moduleRequest.getCategoryId()).orElse(null);
-        if (module == null){
+
+    public ApiResponse update(Long moduleId, ModuleRequest moduleRequest) {
+        Optional<Module> optionalModule = moduleRepository.findByIdAndDeleted(moduleId, (byte) 0);
+        Optional<Category> optionalCategory = categoryRepository.findById(moduleRequest.getCategoryId());
+
+        if (optionalModule.isEmpty()) {
             return new ApiResponse(ResponseError.NOTFOUND("Modul"));
-        } else if (moduleRepository.existsByName(moduleRequest.getName())) {
-            return new ApiResponse(ResponseError.ALREADY_EXIST("Modul"));
-        } else if (category == null) {
+        }
+        if (optionalCategory.isEmpty()) {
             return new ApiResponse(ResponseError.NOTFOUND("Kategoriya"));
         }
+
+        Module module = optionalModule.get();
+        Category category = optionalCategory.get();
+
+        // Modul nomi o‘zgarayotgan bo‘lsa va u nom allaqachon mavjud bo‘lsa, xatolik qaytaramiz
+        if (!module.getName().equals(moduleRequest.getName()) && moduleRepository.existsByName(moduleRequest.getName())) {
+            return new ApiResponse(ResponseError.ALREADY_EXIST("Modul"));
+        }
+
         module.setName(moduleRequest.getName());
         module.setCategory(category);
         moduleRepository.save(module);
+
         return new ApiResponse("Modul yangilandi");
     }
 
+
+    @Transactional
     public ApiResponse delete(Long moduleId) {
-        return moduleRepository.findByIdAndDeleted(moduleId, (byte) 0)
-                .map(module -> {
-                    module.setDeleted((byte) 1);
-                    moduleRepository.save(module);
-                    return new ApiResponse("Modul o‘chirildi");
-                })
-                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Modul")));
+        int updatedRows = moduleRepository.softDeleteById(moduleId);
+        return updatedRows > 0
+                ? new ApiResponse("Modul o‘chirildi")
+                : new ApiResponse(ResponseError.NOTFOUND("Modul"));
     }
 
 
@@ -147,22 +164,17 @@ public class ModuleService {
     }
 
 
-    private ModuleDTO moduleDTO(Module module){
+    private ModuleDTO moduleDTO(Module module) {
         return ModuleDTO.builder()
                 .id(module.getId())
                 .name(module.getName())
-                .category(module.getCategory().getName())
+                .category(Optional.ofNullable(module.getCategory()).map(Category::getName).orElse("No Category"))
                 .build();
     }
 
-    private List<ModuleDTO> moduleDTOList(Page<Module> modules){
-        return modules.stream()
-                .filter(module -> module.getCategory() != null)
-                .map(module -> ModuleDTO.builder()
-                        .id(module.getId())
-                        .name(module.getName())
-                        .category(module.getCategory().getName())
-                        .build())
+    private List<ModuleDTO> moduleDTOList(Page<Module> modules) {
+        return modules.getContent().stream()
+                .map(this::moduleDTO)
                 .toList();
     }
 }
