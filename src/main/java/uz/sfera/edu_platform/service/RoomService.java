@@ -27,7 +27,6 @@ public class RoomService {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu nomli xona"));
         }
 
-
         Room room = roomRepository.save(Room.builder()
                 .name(reqRoom.getName())
                 .color(reqRoom.getColor())
@@ -35,7 +34,6 @@ public class RoomService {
                 .endTime(reqRoom.getEndTime())
                 .build());
         roomRepository.save(room);
-
 
         return new ApiResponse("Successfully saved");
     }

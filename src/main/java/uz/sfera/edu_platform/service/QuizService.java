@@ -30,6 +30,7 @@ public class QuizService {
     private final OptionService optionService;
     private final ResultService resultService;
 
+    //todo bu joyda endi @Transtactional ishlatish kerak?
     public ApiResponse createQuiz(ReqQuiz reqQuiz) {
         return lessonRepository.findById(reqQuiz.getLessonId())
                 .map(lesson -> {
