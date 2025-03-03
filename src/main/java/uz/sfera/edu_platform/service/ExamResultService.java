@@ -16,6 +16,7 @@ import uz.sfera.edu_platform.payload.res.ResPageable;
 import uz.sfera.edu_platform.repository.ExamResultRepository;
 import uz.sfera.edu_platform.repository.UserRepository;
 
+import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
 
@@ -40,10 +41,11 @@ public class ExamResultService {
     }
 
     public ApiResponse getAll(Month month, Long studentId, int page, int size) {
-        Page<ExamResult> pages = examResultRepository.searchResult(month != null ? month.name() : null, studentId, PageRequest.of(page, size));
+        Page<ExamResult> pages = examResultRepository.searchResult
+                (month != null ? month.name() : LocalDate.now().getMonth().name(), studentId, PageRequest.of(page, size));
 
         if (pages.isEmpty()) {
-            return new ApiResponse(ResponseError.NOTFOUND("Imtihon natijalari topilmadi"));
+            return new ApiResponse(ResponseError.NOTFOUND("Imtihon natijalari"));
         }
 
         List<ExamResultDTO> resultDTOPage = pages.map(this::examResultDTO).toList();

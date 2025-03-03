@@ -252,4 +252,7 @@ GROUP BY g.name;
 
     List<Group> findAllByCategoryId(Long categoryId);
 
+    @Query("SELECT g FROM Group g JOIN g.students s WHERE s.id = :userId")
+    Group find(@Param("userId") Long userId);
+
 }
