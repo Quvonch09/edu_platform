@@ -5,13 +5,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.Room;
+import uz.sfera.edu_platform.exception.NotFoundException;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.RoomDTO;
 import uz.sfera.edu_platform.payload.req.ReqRoom;
 import uz.sfera.edu_platform.payload.res.ResPageable;
 import uz.sfera.edu_platform.payload.res.ResRoom;
-import uz.sfera.edu_platform.repository.GraphicDayRepository;
 import uz.sfera.edu_platform.repository.RoomRepository;
 
 import java.util.List;
@@ -27,17 +27,17 @@ public class RoomService {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu nomli xona"));
         }
 
-        Room room = roomRepository.save(Room.builder()
+        Room room = Room.builder()
                 .name(reqRoom.getName())
                 .color(reqRoom.getColor())
                 .startTime(reqRoom.getStartTime())
                 .endTime(reqRoom.getEndTime())
-                .build());
+                .build();
+
         roomRepository.save(room);
 
         return new ApiResponse("Successfully saved");
     }
-
 
 
     public ApiResponse getRooms(String name, String color, int page, int size){
@@ -55,13 +55,7 @@ public class RoomService {
 
     public ApiResponse getRoomsList() {
         List<RoomDTO> resRooms = roomRepository.findAll().stream()
-                .map(room -> RoomDTO.builder()
-                        .id(room.getId())
-                        .name(room.getName())
-                        .color(room.getColor())
-                        .startTime(room.getStartTime())
-                        .endTime(room.getEndTime())
-                        .build())
+                .map(this::roomDTO)
                 .toList();
 
 
@@ -69,51 +63,62 @@ public class RoomService {
     }
 
 
-    public ApiResponse getRoomById(Long roomId){
-        Room room = roomRepository.findById(roomId).orElse(null);
-        if (room == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Room"));
-        }
+    public ApiResponse getRoomById(Long roomId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Room"))));
+
+        return new ApiResponse(roomDTO(room));
+    }
 
 
-        RoomDTO roomDTO = RoomDTO.builder()
+    public RoomDTO roomDTO(Room room) {
+        return RoomDTO.builder()
                 .id(room.getId())
                 .name(room.getName())
                 .color(room.getColor())
                 .startTime(room.getStartTime())
                 .endTime(room.getEndTime())
                 .build();
-
-        return new ApiResponse(roomDTO);
     }
 
 
+    public ApiResponse updateRoom(Long roomId, ReqRoom reqRoom) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Room"))));
 
+        boolean isUpdated = false;
 
-    public ApiResponse updateRoom(Long roomId,ReqRoom reqRoom){
-        Room room = roomRepository.findById(roomId).orElse(null);
-        if (room == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Room"));
+        if (!room.getName().equals(reqRoom.getName())) {
+            room.setName(reqRoom.getName());
+            isUpdated = true;
         }
-        room.setName(reqRoom.getName());
-        room.setColor(reqRoom.getColor());
-        room.setStartTime(reqRoom.getStartTime());
-        room.setEndTime(reqRoom.getEndTime());
+        if (!room.getColor().equals(reqRoom.getColor())) {
+            room.setColor(reqRoom.getColor());
+            isUpdated = true;
+        }
+        if (!room.getStartTime().equals(reqRoom.getStartTime())) {
+            room.setStartTime(reqRoom.getStartTime());
+            isUpdated = true;
+        }
+        if (!room.getEndTime().equals(reqRoom.getEndTime())) {
+            room.setEndTime(reqRoom.getEndTime());
+            isUpdated = true;
+        }
 
-        roomRepository.save(room);
+        if (isUpdated) {
+            roomRepository.save(room);
+        }
 
         return new ApiResponse("Successfully updated");
     }
 
-
-    public ApiResponse deleteRoom(Long roomId){
-        Room room = roomRepository.findById(roomId).orElse(null);
-        if (room == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Room"));
-        }
+    public ApiResponse deleteRoom(Long roomId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Room"))));
 
         roomRepository.delete(room);
         return new ApiResponse("Successfully deleted");
     }
+
 
 }

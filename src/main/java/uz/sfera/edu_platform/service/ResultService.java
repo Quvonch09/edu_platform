@@ -1,23 +1,20 @@
 package uz.sfera.edu_platform.service;
 
-import uz.sfera.edu_platform.entity.Result;
-import uz.sfera.edu_platform.entity.User;
-import uz.sfera.edu_platform.payload.ApiResponse;
-import uz.sfera.edu_platform.payload.ResultDTO;
-import uz.sfera.edu_platform.payload.ResponseError;
-import uz.sfera.edu_platform.payload.res.ResPageable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import uz.sfera.edu_platform.repository.*;
+import uz.sfera.edu_platform.entity.Result;
+import uz.sfera.edu_platform.payload.ApiResponse;
+import uz.sfera.edu_platform.payload.ResponseError;
+import uz.sfera.edu_platform.payload.ResultDTO;
+import uz.sfera.edu_platform.payload.res.ResPageable;
+import uz.sfera.edu_platform.repository.LessonTrackingRepository;
+import uz.sfera.edu_platform.repository.QuizRepository;
+import uz.sfera.edu_platform.repository.ResultRepository;
+import uz.sfera.edu_platform.repository.UserRepository;
 
-import java.io.Serializable;
 import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,14 +28,17 @@ public class ResultService {
     public ApiResponse getUserResults(Long userId, int page, int size) {
         return userRepository.findById(userId)
                 .map(user -> {
-                    Page<Result> resultsPage = resultRepository.findByUserId(userId, PageRequest.of(page, size));
-                    return resultsPage.isEmpty() ?
-                            new ApiResponse(ResponseError.NOTFOUND("Natijalar")) :
+                    Page<ResultDTO> resultsPage = resultRepository.findByUserId(userId, PageRequest.of(page, size))
+                            .map(this::convertToDTO);
+
+                    return resultsPage.hasContent() ?
                             new ApiResponse(new ResPageable(page, size, resultsPage.getTotalPages(),
-                                    resultsPage.getTotalElements(), resultsPage.map(this::convertToDTO).toList()));
+                                    resultsPage.getTotalElements(), resultsPage.getContent())) :
+                            new ApiResponse(ResponseError.NOTFOUND("Natijalar"));
                 })
                 .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("User")));
     }
+
 
     public ApiResponse getResultById(Long resultId) {
         return resultRepository.findById(resultId)
@@ -47,29 +47,18 @@ public class ResultService {
     }
 
     public ApiResponse deleteResult(Long resultId) {
-        Result result = resultRepository.findById(resultId).orElse(null);
-        if (result == null) {
+        if (!resultRepository.existsById(resultId)) {
             return new ApiResponse(ResponseError.NOTFOUND("Result"));
         }
-        resultRepository.delete(result);
+        resultRepository.deleteById(resultId);
         return new ApiResponse("Result deleted successfully");
     }
 
-    public ResultDTO convertToDTO(Result result) {
-        if (result.getStartTime() == null || result.getEndTime() == null) {
-            return ResultDTO.builder()
-                    .id(result.getId())
-                    .userId(result.getUser().getId())
-                    .quizId(result.getQuiz().getId())
-                    .totalQuestion(result.getTotalQuestion())
-                    .correctAnswers(result.getCorrectAnswers())
-                    .timeTaken(0) // Agar vaqt null bo‘lsa, 0 daqiqa
-                    .startTime(result.getStartTime())
-                    .endTime(result.getEndTime())
-                    .build();
-        }
 
-        long timeTakenMinutes = Duration.between(result.getStartTime(), result.getEndTime()).toMinutes();
+    public ResultDTO convertToDTO(Result result) {
+        long timeTakenMinutes = (result.getStartTime() != null && result.getEndTime() != null)
+                ? Duration.between(result.getStartTime(), result.getEndTime()).toMinutes()
+                : 0; // Agar vaqtlardan biri null bo‘lsa, 0 daqiqa
 
         return ResultDTO.builder()
                 .id(result.getId())
@@ -82,5 +71,6 @@ public class ResultService {
                 .endTime(result.getEndTime())
                 .build();
     }
+
 
 }

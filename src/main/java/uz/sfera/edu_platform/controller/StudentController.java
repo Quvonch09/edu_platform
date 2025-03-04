@@ -91,7 +91,7 @@ public class StudentController {
     @Operation(summary = "Teacher ning o'zining studentlari listi")
     @GetMapping("/for-teacher")
     public ResponseEntity<ApiResponse> getStudents( @CurrentUser User user){
-        ApiResponse apiResponse = studentService.getTeacherByStudnet(user);
+        ApiResponse apiResponse = studentService.getTeacherByStudent(user);
         return ResponseEntity.ok(apiResponse);
     }
 
