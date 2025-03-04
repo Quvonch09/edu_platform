@@ -28,8 +28,6 @@ public class ReqStudent {
     private Long groupId;
 
     @NotBlank(message = "Bo‘sh bo‘lishi mumkin emas")
-    @Pattern(regexp = "^998([0-9][012345789]|[0-9][125679]|7[01234569])[0-9]{7}$",
-            message = "Noto‘g‘ri O‘zbekiston telefon raqami")
     private String parentPhoneNumber;
 
     private Long fileId;
