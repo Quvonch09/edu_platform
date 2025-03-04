@@ -14,6 +14,5 @@ public class ReqLessonFiles {
     @NotNull(message = "Lesson tanlanishi kk")
     private Long lessonId;
 
-    @NotBlank(message = "Fayllar bo'sh bo'lishi ")
     private List<Long> fileIds;
 }
