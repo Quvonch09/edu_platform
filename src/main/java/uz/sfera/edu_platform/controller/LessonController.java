@@ -32,10 +32,11 @@ public class LessonController {
     @GetMapping("/get")
     public ResponseEntity<ApiResponse> search(
             @RequestParam(required = false, value = "name") String name,
+            @RequestParam(required = false) Long id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-        return ResponseEntity.ok(lessonService.search(name, size, page));
+        return ResponseEntity.ok(lessonService.search(name,id, size, page));
     }
 
     @GetMapping("/getByModule/{moduleId}")

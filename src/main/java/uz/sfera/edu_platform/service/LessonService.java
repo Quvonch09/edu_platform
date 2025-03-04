@@ -112,7 +112,14 @@ public class LessonService {
 
 
     @Transactional
-    public ApiResponse search(String name, int size, int page) {
+    public ApiResponse search(String name,Long id, int size, int page) {
+        if (id != null){
+            Lesson lesson = lessonRepository.findById(id).orElse(null);
+            if (lesson == null){
+                return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+            }
+            return new ApiResponse(lessonDTO(lesson));
+        }
         Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1));
         Page<Lesson> lessons = (name == null || name.trim().isEmpty())
                 ? lessonRepository.findAll(pageable)
