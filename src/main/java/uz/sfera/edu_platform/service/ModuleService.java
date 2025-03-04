@@ -21,6 +21,7 @@ import uz.sfera.edu_platform.repository.GroupRepository;
 import uz.sfera.edu_platform.repository.ModuleRepository;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -136,19 +137,22 @@ public class ModuleService {
     }
 
 
-    public ApiResponse getOpenModuleByStudent(User user){
-
+    public ApiResponse getOpenModuleByStudent(User user) {
         Group group = groupRepository.findByStudentId(user.getId()).orElse(null);
 
         List<Module> all = moduleRepository.findAll();
 
         List<ResModule> resModules = all.stream()
-                .map(module -> ResModule.builder()
-                        .id(module.getId())
-                        .name(module.getName())
-                        .categoryId(module.getCategory() != null ? module.getCategory().getId() : null)
-                        .isOpen(moduleRepository.checkOpenModulesByStudent(group != null ? group.getId() : null, module.getId()))
-                        .build())
+                .map(module -> {
+                    boolean isOpen = moduleRepository.checkOpenModulesByStudent(group != null ? group.getId() : null, module.getId());
+                    return isOpen ? ResModule.builder()
+                            .id(module.getId())
+                            .name(module.getName())
+                            .categoryId(module.getCategory() != null ? module.getCategory().getId() : null)
+                            .isOpen(true)
+                            .build() : null;
+                })
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
         return new ApiResponse(resModules);

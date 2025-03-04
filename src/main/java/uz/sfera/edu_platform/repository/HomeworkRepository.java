@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.repository;
 
+import org.springframework.stereotype.Repository;
 import uz.sfera.edu_platform.entity.Homework;
 import uz.sfera.edu_platform.entity.User;
 import org.springframework.data.domain.Page;
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+@Repository
 public interface HomeworkRepository extends JpaRepository<Homework,Long> {
     long countByStudentId(Long studentId);
 

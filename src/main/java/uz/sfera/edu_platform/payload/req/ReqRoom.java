@@ -25,13 +25,13 @@ public class ReqRoom {
     @NotBlank(message = "Bush bulmasin")
     private String color;
 
-    @Schema(description = "HH:mm formatda vaqt", example = "09:15")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
-    @DateTimeFormat(pattern = "HH:mm")
+    @Schema(description = "HH:mm:ss formatda vaqt", example = "09:15:23")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
+    @DateTimeFormat(pattern = "HH:mm:ss")
     private LocalTime startTime;
 
-    @Schema(description = "HH:mm formatda vaqt", example = "22:00")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
-    @DateTimeFormat(pattern = "HH:mm")
+    @Schema(description = "HH:mm:ss formatda vaqt", example = "22:00:34")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
+    @DateTimeFormat(pattern = "HH:mm:ss")
     private LocalTime endTime;
 }

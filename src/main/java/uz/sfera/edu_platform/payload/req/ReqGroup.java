@@ -32,12 +32,12 @@ public class ReqGroup {
     @NotNull(message = "Bush bulmasin")
     private Long roomId;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
-    @DateTimeFormat(pattern = "HH:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
+    @DateTimeFormat(pattern = "HH:mm:ss")
     private LocalTime startTime;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
-    @DateTimeFormat(pattern = "HH:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
+    @DateTimeFormat(pattern = "HH:mm:ss")
     private LocalTime endTime;
 
     private List<Long> dayIds;

@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.repository;
 
+import org.springframework.stereotype.Repository;
 import uz.sfera.edu_platform.entity.Group;
 import uz.sfera.edu_platform.payload.res.ResCEODiagram;
 import uz.sfera.edu_platform.payload.res.ResStudentCount;
@@ -15,13 +16,11 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
 
     @Query("select  coalesce( count (g) , 0) from Group g where g.active = true ")
     Integer countAllByGroup();
-
-    Integer countByTeacherId(Long teacherId);
-
 
     @Query(value = """
         WITH months AS (
@@ -43,7 +42,6 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 """ , nativeQuery = true)
     List<ResCEODiagram> findByMonthlyStatistic();
 
-
     @Query(value = """
         WITH months AS (
             SELECT generate_series(
@@ -64,10 +62,8 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 """ , nativeQuery = true)
     List<ResCEODiagram> findByGroupEndDate();
 
-
     @Query("select coalesce( count(g) ,0) from  Group g where g.active is true  and g.teacher.id = ?1 ")
     Integer countAllByGroup(Long teacherId);
-
 
     @Query(value = """
 WITH lessons_per_group AS (
@@ -148,10 +144,6 @@ LIMIT 1;
 """, nativeQuery = true)
     ResStudentStatistic findGroupByStudentId(@Param("studentId") Long studentId);
 
-
-
-
-
     @Query(value = """
 WITH student_scores AS (
     SELECT
@@ -187,13 +179,11 @@ ORDER BY r.rank_position;
     List<ResStudentRank> findAllByStudentRank(@Param("studentId") Long studentId);
 
 
-
     @Query(value = "select distinct g.* from groups g join " +
             "groups_students gsl on gsl.students_id = ?1 and gsl.group_id = g.id", nativeQuery = true)
     Optional<Group> findByStudentId(Long studentId);
 
     boolean existsByName(String name);
-
 
     @Query(value = "select g.* from groups g join users u on g.teacher_id = u.id  where\n" +
             "            (:name IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :name, '%')))\n" +
@@ -207,8 +197,6 @@ ORDER BY r.rank_position;
                             @Param("startDate")  LocalDate startDate,
                             @Param("endDate") LocalDate endDate,
                             @Param("categoryId") Long categoryId, Pageable pageable);
-
-
 
     @Query(value = "select coalesce(count(*) ,0) from groups g join groups_students gs on g.id = gs.group_id " +
             "join users u on gs.students_id = u.id\n" +
@@ -245,15 +233,6 @@ ORDER BY r.rank_position;
     @Query(value = "select coalesce(count(g.*) , 0) from groups g join lesson_tracking lt on g.id = lt.group_id", nativeQuery = true)
     Integer countGroupLessons(Long groupId);
 
-
     @Query(value = "select g.* from groups g  where g.teacher_id = ?1 ", nativeQuery = true)
     List<Group> findGroup(Long userId);
-
-
-
-    List<Group> findAllByCategoryId(Long categoryId);
-
-    @Query("SELECT g FROM Group g JOIN g.students s WHERE s.id = :userId")
-    Group find(@Param("userId") Long userId);
-
 }

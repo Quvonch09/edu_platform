@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.repository;
 
+import org.springframework.stereotype.Repository;
 import uz.sfera.edu_platform.entity.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,9 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
+@Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
-    boolean existsByNameAndIdNot(String name, Long id);
-
     boolean existsByNameAndActive(String name, byte active);
 
     @Query("select coalesce(count (c) , 0)  from Category c where c.active = 1 ")
