@@ -128,7 +128,7 @@ public class ModuleService {
                 .map(module -> ResModule.builder()
                         .id(module.getId())
                         .name(module.getName())
-                        .categoryId(module.getCategory().getId())
+                        .categoryId(module.getCategory() != null ? module.getCategory().getId() : null)
                         .isOpen(moduleRepository.checkOpenModulesByStudent(group != null ? group.getId() : null, module.getId()))
                         .build())
                 .collect(Collectors.toList());
