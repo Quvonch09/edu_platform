@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.repository;
 
+import org.springframework.stereotype.Repository;
 import uz.sfera.edu_platform.entity.GraphicDay;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -9,6 +10,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface GraphicDayRepository extends JpaRepository<GraphicDay, Long> {
     @Query(value = "select gd.* from graphic_day gd join groups g on gd.id = g.days_id where g.id = ?1 limit 1", nativeQuery = true)
     Optional<GraphicDay> findGraphicDay(Long id);

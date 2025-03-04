@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.repository;
 
+import org.springframework.stereotype.Repository;
 import uz.sfera.edu_platform.entity.Feedback;
 
 import org.springframework.data.domain.Page;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 
+@Repository
 public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
 
     Optional<Feedback> findByIdAndCreatedBy(long id, long createdBy);
