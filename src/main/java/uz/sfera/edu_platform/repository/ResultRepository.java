@@ -13,7 +13,8 @@ import java.util.List;
 @Repository
 public interface ResultRepository extends JpaRepository<Result, Long> {
 
-    Page<Result> findByUserId(Long userId, Pageable pageable);
+    @Query("SELECT r FROM Result r WHERE r.user.id = :userId ORDER BY r.createdAt DESC")
+    Page<Result> findByUserId(@Param("userId") Long userId, Pageable pageable);
 
     @Query(value = "SELECT r.* FROM result r WHERE r.user_id = :userId AND r.quiz_id = :quizId AND r.end_time IS NULL LIMIT 1 ", nativeQuery = true)
     Result findResult(@Param("userId") Long userId, @Param("quizId") Long quizId);

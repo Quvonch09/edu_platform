@@ -65,23 +65,27 @@ public class QuizService {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
         }
 
+        QuizSettings quizSettings = quizSettingsRepository.findByQuizId(quizId);
+
         Result oldResult = resultRepository.findResult(user.getId(), quiz.getId());
 
         if (oldResult != null){
-                return new ApiResponse(ResponseError.DEFAULT_ERROR("Yakunlanmagan testlarni yakunlashingiz kerak"));
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Yakunlanmagan testlarni yakunlashingiz kerak"));
         }
 
+        List<QuestionDTO> questions = getRandomQuestionsForQuiz(quiz.getId());
 
         Result result = Result.builder()
                 .startTime(LocalDateTime.now())
                 .endTime(null)
                 .quiz(quiz)
-                .totalQuestion(getRandomQuestionsForQuiz(quiz.getId()).size())
+                .totalQuestion(questions.size())
                 .correctAnswers(0)
                 .user(user)
                 .build();
         resultRepository.save(result);
-        return new ApiResponse(getRandomQuestionsForQuiz(quizId));
+        StartTestDTO responseDTO = new StartTestDTO(questions, quizSettings.getDuration());
+        return new ApiResponse(responseDTO);
     }
 
     public ApiResponse passTest(List<ReqPassTest> passTestList, User user, Long quizId) {
