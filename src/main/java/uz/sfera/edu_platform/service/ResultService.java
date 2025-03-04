@@ -56,7 +56,21 @@ public class ResultService {
     }
 
     public ResultDTO convertToDTO(Result result) {
+        if (result.getStartTime() == null || result.getEndTime() == null) {
+            return ResultDTO.builder()
+                    .id(result.getId())
+                    .userId(result.getUser().getId())
+                    .quizId(result.getQuiz().getId())
+                    .totalQuestion(result.getTotalQuestion())
+                    .correctAnswers(result.getCorrectAnswers())
+                    .timeTaken(0) // Agar vaqt null bo‘lsa, 0 daqiqa
+                    .startTime(result.getStartTime())
+                    .endTime(result.getEndTime())
+                    .build();
+        }
+
         long timeTakenMinutes = Duration.between(result.getStartTime(), result.getEndTime()).toMinutes();
+
         return ResultDTO.builder()
                 .id(result.getId())
                 .userId(result.getUser().getId())
@@ -68,4 +82,5 @@ public class ResultService {
                 .endTime(result.getEndTime())
                 .build();
     }
+
 }
