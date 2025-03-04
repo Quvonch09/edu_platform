@@ -161,6 +161,7 @@ public class LessonService {
     }
 
 
+    @Transactional
     public ApiResponse manageFiles(ReqLessonFiles req, boolean isAdding) {
         Lesson lesson = lessonRepository.findById(req.getLessonId()).orElse(null);
         if (lesson == null) return new ApiResponse(ResponseError.NOTFOUND("Lesson"));

@@ -25,7 +25,7 @@ public class Lesson extends AbsEntity {
     @JoinColumn(nullable = false)
     private Module module;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<File> files;
 
     private byte deleted; // byte
