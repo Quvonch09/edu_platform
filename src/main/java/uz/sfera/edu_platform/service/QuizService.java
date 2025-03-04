@@ -6,10 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.*;
 import uz.sfera.edu_platform.exception.NotFoundException;
-import uz.sfera.edu_platform.payload.ApiResponse;
-import uz.sfera.edu_platform.payload.QuestionDTO;
-import uz.sfera.edu_platform.payload.QuizDTO;
-import uz.sfera.edu_platform.payload.ResponseError;
+import uz.sfera.edu_platform.payload.*;
 import uz.sfera.edu_platform.payload.req.ReqPassTest;
 import uz.sfera.edu_platform.payload.req.ReqQuiz;
 import uz.sfera.edu_platform.repository.*;
@@ -66,12 +63,14 @@ public class QuizService {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
         }
 
+        QuizSettings quizSettings = quizSettingsRepository.findByQuizId(quizId);
+
         Result oldResult = resultRepository.findResult(user.getId(), quiz.getId());
         if (oldResult != null) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Yakunlanmagan testlarni yakunlashingiz kerak"));
         }
 
-        List<QuestionDTO> questions = getRandomQuestionsForQuiz(quizId);
+        List<QuestionDTO> questions = getRandomQuestionsForQuiz(quiz.getId());
 
         Result result = Result.builder()
                 .startTime(LocalDateTime.now())
@@ -83,7 +82,8 @@ public class QuizService {
                 .build();
 
         resultRepository.save(result);
-        return new ApiResponse(questions);
+        StartTestDTO responseDTO = new StartTestDTO(questions, quizSettings.getDuration());
+        return new ApiResponse(responseDTO);
     }
 
 

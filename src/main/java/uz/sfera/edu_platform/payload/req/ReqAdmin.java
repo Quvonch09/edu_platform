@@ -3,6 +3,7 @@ package uz.sfera.edu_platform.payload.req;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Getter
@@ -15,6 +16,7 @@ public class ReqAdmin {
     private Long id;
 
     @NotBlank(message = "Bush bulmasin")
+    @Size(max = 32,message = "Ism maksimal 32 ta belgi bo'lishi kerak")
     private String fullName;
 
     @NotBlank(message = "Bush bulmasin")
@@ -23,6 +25,7 @@ public class ReqAdmin {
     private String phoneNumber;
 
     @NotBlank(message = "Bush bulmasin")
+    @Size(max = 10,message = "Parol maksimal 10 ta bo'lsin")
     private String password;
     private Long fileId;
 }
