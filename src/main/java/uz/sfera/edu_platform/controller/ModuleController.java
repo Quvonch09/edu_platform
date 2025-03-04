@@ -49,6 +49,7 @@ public class ModuleController {
 
     @GetMapping("/getByCategory")
     @Operation(summary = "Categorydagi modullarni ko'rish")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> getByCategory(
             @RequestParam(required = false) Long categoryId,
             @CurrentUser User user,
