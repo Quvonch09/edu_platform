@@ -25,13 +25,22 @@ public interface GraphicDayRepository extends JpaRepository<GraphicDay, Long> {
     List<GraphicDay> findAllByGroupIds(@Param("groupIds") List<Long> groupIds);
 
 
-    @Query(value = "SELECT EXISTS ( " +
-            "SELECT 1 FROM graphic_day g " +
-            "JOIN groups gr ON gr.days_id = g.id " +  // Group jadvalidagi graphicDay bilan bog‘lash
-            "WHERE g.room_id = :roomId " +
-            "AND (:startTime >= g.start_time AND :endTime <= g.end_time) " +
-            ") ", nativeQuery = true)
+    @Query(value = """
+    SELECT EXISTS (
+        SELECT 1 
+        FROM graphic_day g 
+        JOIN groups gr ON gr.days_id = g.id
+        WHERE g.room_id = :roomId
+        AND (
+            (:startTime BETWEEN g.start_time AND g.end_time) OR
+            (:endTime BETWEEN g.start_time AND g.end_time) OR
+            (g.start_time BETWEEN :startTime AND :endTime) OR
+            (g.end_time BETWEEN :startTime AND :endTime)
+        )
+    )
+    """, nativeQuery = true)
     boolean existsByGraphicDayInGroup(@Param("roomId") Long roomId,
                                       @Param("startTime") LocalTime startTime,
                                       @Param("endTime") LocalTime endTime);
+
 }
