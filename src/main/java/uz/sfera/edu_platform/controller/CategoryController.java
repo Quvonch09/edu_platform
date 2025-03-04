@@ -1,8 +1,10 @@
 package uz.sfera.edu_platform.controller;
 
 import jakarta.validation.Valid;
+import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.CategoryDTO;
+import uz.sfera.edu_platform.security.CurrentUser;
 import uz.sfera.edu_platform.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -57,6 +59,15 @@ public class CategoryController {
     @GetMapping("/list")
     public ResponseEntity<ApiResponse> getCategoryList() {
         ApiResponse categoryById = categoryService.getAllList();
+        return ResponseEntity.ok(categoryById);
+    }
+
+
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @Operation(summary = "Teacher uzini categorylarini listini kurish")
+    @GetMapping("/byTeacher")
+    public ResponseEntity<ApiResponse> getCategoryByTeacher(@CurrentUser User user) {
+        ApiResponse categoryById = categoryService.getCategoryByTeacher(user.getId());
         return ResponseEntity.ok(categoryById);
     }
 
