@@ -111,6 +111,7 @@ public class LessonService {
     }
 
 
+    @Transactional
     public ApiResponse search(String name, int size, int page) {
         Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1));
         Page<Lesson> lessons = (name == null || name.trim().isEmpty())
@@ -170,7 +171,7 @@ public class LessonService {
                 .toList();
 
         if (files.isEmpty()) {
-            return new ApiResponse(ResponseError.NOTFOUND("Fayllar topilmadi"));
+            return new ApiResponse(ResponseError.NOTFOUND("Fayllar"));
         }
 
         boolean changed;

@@ -59,13 +59,18 @@ public class FileService {
 
 
     //  GetFile uchun
-    public ResFile loadFileAsResource(Long id)
-    {
+    public ResFile loadFileAsResource(Long id) {
         try {
             Optional<File> videoFileOptional = videoFileRepository.findById(id);
             if (videoFileOptional.isPresent()) {
                 File videoFile = videoFileOptional.get();
+                if (videoFile.getFilepath() == null || videoFile.getFileName() == null || videoFile.getContentType() == null) {
+                    throw new NotFoundException(new ApiResponse(ResponseError.DEFAULT_ERROR("File data is missing")));
+                }
                 java.io.File file = new java.io.File(videoFile.getFilepath());
+                if (!file.exists()) {
+                    throw new NotFoundException(new ApiResponse(ResponseError.DEFAULT_ERROR("File not found")));
+                }
                 Resource resource = new UrlResource(file.toURI());
                 ResFile resFile = new ResFile();
                 resFile.setFillName(videoFile.getFileName());
@@ -73,14 +78,11 @@ public class FileService {
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.parseMediaType(videoFile.getContentType()));
                 headers.setContentLength(videoFile.getSize());
-
                 resFile.setHeaders(headers);
-
                 return resFile;
             }
-            return null;
+            throw new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("File not found")));
         } catch (IOException e) {
-            e.fillInStackTrace();
             throw new NotFoundException(new ApiResponse(ResponseError.DEFAULT_ERROR(e.getMessage())));
         }
     }

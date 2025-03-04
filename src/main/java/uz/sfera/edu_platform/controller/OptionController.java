@@ -18,7 +18,8 @@ public class OptionController {
     private final OptionService optionService;
 
     @GetMapping("/getByQuestion/{questionId}")
-    @Operation(summary = "Question bo'yicha optionlarni ko'rish")
+    @Operation(summary = "(TEACHER) Question bo'yicha optionlarni ko'rish")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> getByQuestion(
             @PathVariable Long questionId
     ){

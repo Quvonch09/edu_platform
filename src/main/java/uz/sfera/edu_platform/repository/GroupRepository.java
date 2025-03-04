@@ -229,15 +229,16 @@ ORDER BY r.rank_position;
     Integer countStudentByTeacherId(@Param("teacherId") Long teacherId);
 
     @Query(value = """
-SELECT
-    g.name  as groupName,
-    COALESCE(COUNT(s.id), 0) AS studentCount
-FROM groups g
-    LEFT JOIN groups_students gu ON gu.group_id = g.id
-    LEFT JOIN users s ON s.id = gu.students_id AND s.user_status = 'UQIYABDI'
-WHERE g.teacher_id = :teacherId
-    AND g.active = TRUE
-GROUP BY g.name;
+
+            SELECT
+                    g.name AS groupName,
+                    COUNT(gu.students_id) AS studentCount
+                FROM groups g
+                LEFT JOIN groups_students gu ON gu.group_id = g.id
+                LEFT JOIN users s ON s.id = gu.students_id AND s.user_status = 'UQIYABDI'
+                WHERE g.teacher_id = :teacherId
+                    AND g.active = TRUE
+                GROUP BY g.name;
            """ , nativeQuery = true)
     List<ResStudentCount> findAllStudentsByTeacherId(@Param("teacherId") Long teacherId);
 
