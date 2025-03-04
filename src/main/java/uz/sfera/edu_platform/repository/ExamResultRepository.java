@@ -5,17 +5,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 import uz.sfera.edu_platform.entity.ExamResult;
 
 import java.time.Month;
 
+@Repository
 public interface ExamResultRepository extends JpaRepository<ExamResult,Long> {
-    Page<ExamResult> findByMonth(Month month,Pageable pageable);
-
-    Page<ExamResult> findByStudentId(Long studentId,Pageable pageable);
-
-    Page<ExamResult> findByMonthAndStudentId(Month month, Long student_id, Pageable pageable);
-
 
     @Query(value = "select ex.* from exam_result ex left join groups g on g.teacher_id = :teacherId \n" +
             "    left join groups_students gs on g.id = gs.group_id\n" +

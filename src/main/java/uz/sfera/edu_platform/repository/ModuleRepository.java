@@ -20,9 +20,6 @@ public interface ModuleRepository extends JpaRepository<Module,Long> {
 
     Optional<Module> findByIdAndDeleted(Long id,byte deleted);
 
-    List<Module> findAllByCategoryIdAndDeleted(Long categoryId, byte deleted);
-
-
     @Query(value = "SELECT EXISTS (SELECT 1 FROM module m\n" +
             "                        JOIN lesson l ON l.module_id = m.id\n" +
             "                        JOIN lesson_tracking lt ON lt.lesson_id = l.id\n" +

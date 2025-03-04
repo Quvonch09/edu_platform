@@ -68,7 +68,7 @@ public class CategoryService {
     public ApiResponse updateCategory(Long categoryId, CategoryDTO categoryDTO) {
         return categoryRepository.findById(categoryId)
                 .map(category -> {
-                    if (categoryRepository.existsByNameAndIdNot(categoryDTO.getName(), categoryId)) {
+                    if (categoryRepository.existsByNameAndActive(categoryDTO.getName(), (byte) 1)) {
                         return new ApiResponse(ResponseError.ALREADY_EXIST("Category"));
                     }
                     save(category, categoryDTO);

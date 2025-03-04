@@ -14,19 +14,18 @@ import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByPhoneNumber(String phoneNumber);
+
     @Query(value = "select * from users u join groups_students gs on u.id=gs.students_id where gs.group_id = :groupId",nativeQuery=true)
     List<User> findAllByGroupId(Long groupId);
 
     @Query("select u from User u where u.phoneNumber = ?1 and u.enabled = true")
     User getUserAndEnabledTrue(String phone);
 
-
     @Query(" select  coalesce(count (u) ,0)  from User u  where  u.role = 'ROLE_TEACHER' and u.enabled = true ")
     Integer countAllByTeacher();
 
     @Query(value = "select count(*) from users where role = 'ROLE_STUDENT' and enabled = true and user_status = 'UQIYAPDI'", nativeQuery = true )
     Integer countAllByStudent();
-
 
     @Query(value = """
        WITH months AS (
@@ -48,7 +47,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
        ORDER BY m.month_start;
 """ , nativeQuery = true)
     List<ResCEODiagram> getCEODiagrams();
-
 
     @Query(value = """
         WITH months AS (
@@ -74,7 +72,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByPhoneNumberAndEnabledIsTrue(String phone);
 
-
     @Query(value = "select distinct u.* from users u  left join groups g on u.id = g.teacher_id where\n" +
             "                                                (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%')))\n" +
             "                                                and (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%')))\n" +
@@ -97,7 +94,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
           AND g.active = TRUE """ , nativeQuery = true
     )
     Integer countAllByStudent(Long teacherId);
-
 
     @Query(
             value = """
@@ -187,9 +183,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                     AND EXTRACT(YEAR FROM p2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
                 ))
             )
-    """,
-            nativeQuery = true
-    )
+    """, nativeQuery = true)
     Page<ResStudent> searchStudents(
             @Param("fullName") String fullName,
             @Param("phoneNumber") String phoneNumber,
@@ -199,18 +193,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("startAge") Integer startAge,
             @Param("endAge") Integer endAge,
             @Param("hasPaid") Boolean hasPaid,
-            Pageable pageable
-    );
-
-
-
-
+            Pageable pageable);
 
 
     @Query(value = "select coalesce(count(u.*) , 0) from users u join payment p on u.id = p.student_id and u.role = 'ROLE_STUDENT'" +
             "and EXTRACT(month from p.payment_date) = EXTRACT(month from current_date)", nativeQuery = true)
     Integer countStudentsHasPaid();
-
 
     List<User> findAllByRole( Role role);
 
