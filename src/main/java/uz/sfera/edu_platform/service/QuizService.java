@@ -110,8 +110,15 @@ public class QuizService {
                         Option::getId
                 ));
 
+        long correctCount = passTestList.stream()
+                .filter(reqPassTest ->
+                        correctAnswersMap.containsKey(reqPassTest.getQuestionId()) && // Savol bazada mavjud bo‘lishi kerak
+                                correctAnswersMap.get(reqPassTest.getQuestionId()).equals(reqPassTest.getOptionId()) // Variant to‘g‘ri bo‘lishi kerak
+                )
+                .count();
+
         result.setEndTime(LocalDateTime.now());
-        result.setCorrectAnswers(correctAnswersMap.size());
+        result.setCorrectAnswers(correctCount);
         Result result1 = resultRepository.save(result);
         return new ApiResponse(resultService.convertToDTO(result1));
     }
