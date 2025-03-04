@@ -5,17 +5,18 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.*;
-import uz.sfera.edu_platform.payload.*;
+import uz.sfera.edu_platform.exception.NotFoundException;
+import uz.sfera.edu_platform.payload.ApiResponse;
+import uz.sfera.edu_platform.payload.QuestionDTO;
+import uz.sfera.edu_platform.payload.QuizDTO;
+import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.req.ReqPassTest;
 import uz.sfera.edu_platform.payload.req.ReqQuiz;
 import uz.sfera.edu_platform.repository.*;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,29 +34,29 @@ public class QuizService {
 
     @Transactional
     public ApiResponse createQuiz(ReqQuiz reqQuiz) {
-        return lessonRepository.findById(reqQuiz.getLessonId())
-                .map(lesson -> {
-                    if (lesson.getModule().getCategory() == null) {
-                        return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu lessonning categoriyasi o‘chirilgan"));
-                    }
+        Lesson lesson = lessonRepository.findById(reqQuiz.getLessonId())
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
 
-                    Quiz quiz = quizRepository.save(Quiz.builder()
-                            .title(reqQuiz.getTitle())
-                            .lesson(lesson)
-                            .deleted((byte) 0)
-                            .build());
+        if (lesson.getModule() == null || lesson.getModule().getCategory() == null) {
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu lessonning categoriyasi o‘chirilgan"));
+        }
 
-                    QuizSettings quizSettings = QuizSettings.builder()
-                            .quiz(quiz)
-                            .questionCount(reqQuiz.getQuestionCount())
-                            .duration(reqQuiz.getDuration())
-                            .build();
+        Quiz quiz = Quiz.builder()
+                .title(reqQuiz.getTitle())
+                .lesson(lesson)
+                .deleted((byte) 0)
+                .build();
 
-                    quizSettingsRepository.save(quizSettings);
+        QuizSettings quizSettings = QuizSettings.builder()
+                .quiz(quiz)
+                .questionCount(reqQuiz.getQuestionCount())
+                .duration(reqQuiz.getDuration())
+                .build();
 
-                    return new ApiResponse("Quiz yaratildi");
-                })
-                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Lesson")));
+        quizRepository.save(quiz);
+        quizSettingsRepository.save(quizSettings);
+
+        return new ApiResponse("Quiz yaratildi");
     }
 
 
@@ -68,8 +69,7 @@ public class QuizService {
         QuizSettings quizSettings = quizSettingsRepository.findByQuizId(quizId);
 
         Result oldResult = resultRepository.findResult(user.getId(), quiz.getId());
-
-        if (oldResult != null){
+        if (oldResult != null) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Yakunlanmagan testlarni yakunlashingiz kerak"));
         }
 
@@ -83,17 +83,18 @@ public class QuizService {
                 .correctAnswers(0)
                 .user(user)
                 .build();
+
         resultRepository.save(result);
         StartTestDTO responseDTO = new StartTestDTO(questions, quizSettings.getDuration());
         return new ApiResponse(responseDTO);
     }
+
 
     public ApiResponse passTest(List<ReqPassTest> passTestList, User user, Long quizId) {
         Quiz quiz = quizRepository.findById(quizId).orElse(null);
         if (quiz == null || quiz.getDeleted() == 1) {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
         }
-
 
         Result result = resultRepository.findResult(user.getId(), quiz.getId());
         if (result == null) {
@@ -105,26 +106,29 @@ public class QuizService {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz settings"));
         }
 
+        List<Long> questionIds = passTestList.stream()
+                .map(ReqPassTest::getQuestionId)
+                .toList();
 
-        List<Long> questionIds = passTestList.stream().map(ReqPassTest::getQuestionId).collect(Collectors.toList());
         Map<Long, Long> correctAnswersMap = optionRepository.findCorrectAnswersByQuestionIds(questionIds).stream()
                 .collect(Collectors.toMap(
                         option -> option.getQuestion().getId(),
-                        Option::getId
+                        Option::getId,
+                        (existing, replacement) -> existing // Agar bir xil savol uchun bir nechta bo‘lsa, birinchisini olamiz
                 ));
 
         long correctCount = passTestList.stream()
-                .filter(reqPassTest ->
-                        correctAnswersMap.containsKey(reqPassTest.getQuestionId()) && // Savol bazada mavjud bo‘lishi kerak
-                                correctAnswersMap.get(reqPassTest.getQuestionId()).equals(reqPassTest.getOptionId()) // Variant to‘g‘ri bo‘lishi kerak
-                )
+                .filter(reqPassTest -> correctAnswersMap.getOrDefault(reqPassTest.getQuestionId(), -1L)
+                        .equals(reqPassTest.getOptionId()))
                 .count();
 
         result.setEndTime(LocalDateTime.now());
         result.setCorrectAnswers(correctCount);
-        Result result1 = resultRepository.save(result);
-        return new ApiResponse(resultService.convertToDTO(result1));
+        resultRepository.save(result);
+
+        return new ApiResponse(resultService.convertToDTO(result));
     }
+
 
     public List<QuestionDTO> getRandomQuestionsForQuiz(Long quizId) {
         QuizSettings settings = quizSettingsRepository.findByQuizId(quizId);
@@ -136,6 +140,7 @@ public class QuizService {
                                 .toList()))
                 .toList();
     }
+
 
     public ApiResponse getQuiz(Long quizId) {
         return quizRepository.findById(quizId)

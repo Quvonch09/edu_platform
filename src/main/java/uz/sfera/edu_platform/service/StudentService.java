@@ -1,9 +1,17 @@
 package uz.sfera.edu_platform.service;
 
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import uz.sfera.edu_platform.entity.File;
 import uz.sfera.edu_platform.entity.Group;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.entity.enums.Role;
 import uz.sfera.edu_platform.entity.enums.UserStatus;
+import uz.sfera.edu_platform.exception.NotFoundException;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.StudentDTO;
@@ -17,15 +25,10 @@ import uz.sfera.edu_platform.repository.GroupRepository;
 import uz.sfera.edu_platform.repository.HomeworkRepository;
 import uz.sfera.edu_platform.repository.UserRepository;
 import uz.sfera.edu_platform.security.JwtProvider;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,10 +49,13 @@ public class StudentService {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Student"));
         }
 
-        Group group = groupRepository.findById(reqStudent.getGroupId()).orElse(null);
-        if(group == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Group"));
-        }
+        Group group = groupRepository.findById(reqStudent.getGroupId())
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Group"))));
+
+        File file = (reqStudent.getFileId() != null)
+                ? fileRepository.findById(reqStudent.getFileId()).orElseThrow(() ->
+                new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("File"))))
+                : null;
 
         User student = User.builder()
                 .fullName(reqStudent.getFullName())
@@ -57,7 +63,7 @@ public class StudentService {
                 .role(Role.ROLE_STUDENT)
                 .age(reqStudent.getAge())
                 .parentPhoneNumber(reqStudent.getParentPhoneNumber())
-                .file(fileRepository.findById(reqStudent.getFileId()).orElse(null))
+                .file(file)
                 .password(passwordEncoder.encode(reqStudent.getPassword()))
                 .enabled(true)
                 .userStatus(UserStatus.UQIYAPDI)
@@ -65,16 +71,13 @@ public class StudentService {
                 .accountNonLocked(true)
                 .accountNonExpired(true)
                 .build();
-        User save = userRepository.save(student);
 
-        //todo gruppaga userni bunday qoshih xato, query yozib qo'shih kerak
-        group.getStudents().add(save);
+        group.getStudents().add(student);
         groupRepository.save(group);
+        userRepository.save(student);
 
         return new ApiResponse("Successfully saved student");
     }
-
-
 
 
     public ApiResponse searchStudent(String fullName, String phoneNumber,
@@ -84,11 +87,11 @@ public class StudentService {
 
         PageRequest pageRequest = PageRequest.of(page, size);
 
-        //todo bu code ham juda tushunarsiz
+        String userStatusStr = (userStatus != null) ? userStatus.name() : null;
+
         Page<ResStudent> users = userRepository.searchStudents(
-                fullName, phoneNumber,
-                Optional.ofNullable(userStatus).map(Enum::name).orElse(null),
-                groupName, teacherId, startAge, endAge, hasPaid, pageRequest
+                fullName, phoneNumber, userStatusStr, groupName,
+                teacherId, startAge, endAge, hasPaid, pageRequest
         );
 
         ResPageable resPageable = ResPageable.builder()
@@ -103,16 +106,11 @@ public class StudentService {
     }
 
 
+    public ApiResponse getOneStudent(Long studentId) {
+        User user = userRepository.findById(studentId)
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Student"))));
 
-
-    public ApiResponse getOneStudent(Long studentId){
-        User user = userRepository.findById(studentId).orElse(null);
-        if(user == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Student"));
-        }
-
-        Group byStudentId = groupRepository.findByStudentId(user.getId()).orElse(null);
-
+        Group group = groupRepository.findByStudentId(user.getId()).orElse(null);
 
         StudentDTO studentDTO = StudentDTO.builder()
                 .id(user.getId())
@@ -121,10 +119,11 @@ public class StudentService {
                 .parentPhoneNumber(user.getParentPhoneNumber())
                 .age(user.getAge())
                 .status(user.getUserStatus() != null ? user.getUserStatus().name() : null)
-                .score(homeworkRepository.countByBall(user.getId()))
-                .groupId(byStudentId != null ? byStudentId.getId() : null)
+                .score(homeworkRepository.countByBall(user.getId())) // Avoid null score
+                .groupId(group != null ? group.getId() : null)
                 .startStudyDate(user.getCreatedAt())
                 .build();
+
         return new ApiResponse(studentDTO);
     }
 
@@ -144,6 +143,7 @@ public class StudentService {
         Group oldGroup = groupRepository.findByStudentId(user.getId()).orElse(null);
         if (oldGroup != null) {
             oldGroup.getStudents().remove(user);
+            groupRepository.save(oldGroup);
         }
 
         user.setFullName(reqStudent.getFullName());
@@ -159,9 +159,12 @@ public class StudentService {
         //todo user gruppaga bunday qoshilmaydi
         newGroup.getStudents().add(user);
 
+        // 🔴 Missing: Studentni yangi grga qushildi lekin grni saqlanmagan
+        groupRepository.save(newGroup);
+
         userRepository.save(user);
 
-          String token = jwtProvider.generateToken(user.getPhoneNumber());
+        String token = jwtProvider.generateToken(user.getPhoneNumber());
         ResponseLogin responseLogin = new ResponseLogin(token, user.getRole().name(), user.getId());
 
         return new ApiResponse(responseLogin);
@@ -169,37 +172,37 @@ public class StudentService {
 
 
 
-    //todo @Transactional bu yerga shartmas
-    @Transactional
-    public ApiResponse deleteStudent(Long studentId, LocalDate departureDate, String departureDescription){
+    public ApiResponse deleteStudent(Long studentId, LocalDate departureDate, String departureDescription) {
         User user = userRepository.findById(studentId).orElse(null);
-        if(user == null){
+        if (user == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
-
+        // Updating user fields
         user.setUserStatus(UserStatus.CHIQIB_KETGAN);
         user.setEnabled(false);
         user.setPhoneNumber(user.getPhoneNumber() + LocalDateTime.now() + "_deleted");
         user.setDeparture_date(departureDate);
         user.setDeparture_description(departureDescription);
+
+        // 🔴 Missing: Malumot update qilingan lekin saqlanmagan xozir qushib quydim
+        userRepository.save(user);
+
         return new ApiResponse("Successfully deleted student");
     }
 
 
-    //todo bu yerga nma uchun kerak bu @Transtactional?
-    @Transactional
-    public ApiResponse getStudentGroupBy(Long groupId){
-
+    public ApiResponse getStudentGroupBy(Long groupId) {
         Group group = groupRepository.findById(groupId).orElse(null);
-        if(group == null){
+        if (group == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
 
         List<User> students = group.getStudents();
         List<StudentDTO> list = students.stream().map(this::getDto).toList();
-        return new ApiResponse(list);
 
+        return new ApiResponse(list);
     }
+
 
     public StudentDTO getDto(User user){
         return StudentDTO.builder()
@@ -214,17 +217,20 @@ public class StudentService {
                 .build();
     }
 
-    public ApiResponse getTeacherByStudnet(User user){
-        List<User> users = userRepository.searchForUsers(user.getId());
-        if ( users == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Student"));
 
-        }
-        List<UserDTO> list = users.stream().filter(Objects::nonNull).map(this::getStudentDTO).toList();
+    public ApiResponse getTeacherByStudent(User user){
+        List<User> users = Optional.ofNullable(userRepository.searchForUsers(user.getId()))
+                .orElse(Collections.emptyList());  // ✅ NullPointerException oldini oladi
+
+        List<UserDTO> list = users.stream()
+                .map(this::getTeacherDTO)  // ✅ To‘g‘ri metod nomi
+                .toList();
+
         return new ApiResponse(list);
     }
 
-    public UserDTO getStudentDTO(User user) {
+
+    public UserDTO getTeacherDTO(User user) {  // ✅ Metod nomi to‘g‘ri bo‘ldi
         return UserDTO.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
@@ -232,5 +238,6 @@ public class StudentService {
                 .fileId(user.getFile() != null ? user.getFile().getId() : null)
                 .build();
     }
+
 
 }

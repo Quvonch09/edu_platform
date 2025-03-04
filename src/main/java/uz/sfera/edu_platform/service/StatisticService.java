@@ -119,21 +119,6 @@ public class StatisticService {
         return new ApiResponse(ranks);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public ApiResponse getNewStudent(){
         return new ApiResponse(userRepository.getCEODiagrams());
     }
@@ -149,7 +134,4 @@ public class StatisticService {
     public ApiResponse getGroupEndDateStatistic(){
         return new ApiResponse(groupRepository.findByGroupEndDate());
     }
-
-
-
 }
