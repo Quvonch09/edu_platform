@@ -21,7 +21,6 @@ public class TeacherDTO {
     @Schema(hidden = true)
     private Integer groupCount;
     private List<ResGroupDto> groupList;
-    private String groupName;
     private Long fileId;
     private Boolean active;
 }

@@ -85,8 +85,11 @@ public class UserService {
         Page<User> allTeachers = userRepository.searchUsers(fullName, phoneNumber, groupId,
                 role != null ? role.name() : null, pageRequest);
 
-        List<TeacherDTO> teacherList = allTeachers.getContent().stream()
-                .map(this::convertUserToTeacherDTO)
+        List<TeacherDTO> teacherList = allTeachers.stream()
+                .map(user -> convertUserToTeacherDTO(user,
+                        user.getCategories().stream()
+                                .map(category -> new ResCategory(category.getId(), category.getName()))
+                                .collect(Collectors.toList())))
                 .collect(Collectors.toList());
 
         ResPageable resPageable = ResPageable.builder()
@@ -100,14 +103,29 @@ public class UserService {
     }
 
 
-    private TeacherDTO convertUserToTeacherDTO(User user) {
-        List<ResCategory> categories = user.getCategories().stream()
-                .map(category -> new ResCategory(category.getId(), category.getName()))
-                .collect(Collectors.toList());
+    private TeacherDTO convertUserToTeacherDTO(User user, List<ResCategory> categoryIds) {
+        List<Group> groups = groupRepository.findGroup(user.getId());
+        List<ResGroupDto> list = groups.isEmpty() ? new ArrayList<>() : groups.stream().map(this::getDto).toList();
 
-        return new TeacherDTO(user.getId(), user.getFullName(), user.getPhoneNumber(), categories,
-                null, null, null, null, null);
+        return TeacherDTO.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .phoneNumber(user.getPhoneNumber())
+                .categories(categoryIds)
+                .active(user.isEnabled())
+                .groupCount(groups.size())
+                .groupList(list)
+                .fileId(Optional.ofNullable(user.getFile()).map(File::getId).orElse(null)) // Optimallashtirilgan
+                .build();
     }
+//    private TeacherDTO convertUserToTeacherDTO(User user) {
+//        List<ResCategory> categories = user.getCategories().stream()
+//                .map(category -> new ResCategory(category.getId(), category.getName()))
+//                .collect(Collectors.toList());
+//
+//        return new TeacherDTO(user.getId(), user.getFullName(), user.getPhoneNumber(), categories,
+//                null, null, null, null, null);
+//    }
 
 
     public ApiResponse getUsersList(Role role) {
@@ -328,20 +346,6 @@ public class UserService {
 
 
     // TODO Ishlatilmay yotgan ekan cament olib quydim agar kerak bulmasa uchirib tashela
-//    private TeacherDTO convertUserToTeacherDTO(User user, List<ResCategory> categoryIds) {
-//        List<Group> groups = groupRepository.findGroup(user.getId());
-//        List<ResGroupDto> list = groups.isEmpty() ? new ArrayList<>() : groups.stream().map(this::getDto).toList();
-//
-//        return TeacherDTO.builder()
-//                .id(user.getId())
-//                .fullName(user.getFullName())
-//                .phoneNumber(user.getPhoneNumber())
-//                .categories(categoryIds)
-//                .active(user.isEnabled())
-//                .groupCount(groups.size())
-//                .groupList(list)
-//                .fileId(Optional.ofNullable(user.getFile()).map(File::getId).orElse(null)) // Optimallashtirilgan
-//                .build();
-//    }
+
 
 }

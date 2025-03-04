@@ -191,6 +191,7 @@ public class StudentService {
     }
 
 
+    @Transactional
     public ApiResponse getStudentGroupBy(Long groupId) {
         Group group = groupRepository.findById(groupId).orElse(null);
         if (group == null) {
