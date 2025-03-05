@@ -25,7 +25,7 @@ public class Group extends AbsEntity {
     @ManyToOne
     private Category category;
 
-    @ManyToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private List<User> students;
 
     private LocalDate startDate;

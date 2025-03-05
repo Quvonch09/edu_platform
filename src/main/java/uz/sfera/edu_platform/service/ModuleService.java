@@ -54,7 +54,6 @@ public class ModuleService {
         return new ApiResponse("Modul yaratildi");
     }
 
-    @Transactional
     public ApiResponse getByCategory(Long categoryId, User user, int page, int size) {
         Page<Module> modules = (categoryId != null)
                 ? moduleRepository.findByCategoryIdAndDeleted(categoryId, (byte) 0, PageRequest.of(page, size))
@@ -71,9 +70,6 @@ public class ModuleService {
 
 
 
-
-    //todo bu yerda nma qilib yuribdi @Transactional?
-    @Transactional
     public ApiResponse searchModule(String name, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 

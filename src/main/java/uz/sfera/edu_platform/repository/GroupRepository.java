@@ -180,8 +180,8 @@ ORDER BY r.rank_position;
 
 
     @Query(value = "select distinct g.* from groups g join " +
-            "groups_students gsl on gsl.students_id = ?1 and gsl.group_id = g.id", nativeQuery = true)
-    Optional<Group> findByStudentId(Long studentId);
+            "groups_students gsl on gsl.students_id = :studentId and gsl.group_id = g.id", nativeQuery = true)
+    Optional<Group> findByStudentId(@Param("studentId") Long studentId);
 
     boolean existsByName(String name);
 
