@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/quiz-settings")
+@RequestMapping("/api/quiz-settings")
 public class QuizSettingsController {
     private final QuizSettingsService quizSettingsService;
 

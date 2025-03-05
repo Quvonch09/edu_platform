@@ -230,8 +230,8 @@ ORDER BY r.rank_position;
            """ , nativeQuery = true)
     List<ResStudentCount> findAllStudentsByTeacherId(@Param("teacherId") Long teacherId);
 
-    @Query(value = "select coalesce(count(g.*) , 0) from groups g join lesson_tracking lt on g.id = lt.group_id", nativeQuery = true)
-    Integer countGroupLessons(Long groupId);
+    @Query(value = "select coalesce(count(g.*) , 0) from groups g join lesson_tracking lt on g.id = lt.group_id where g.id =:groupId", nativeQuery = true)
+    Integer countGroupLessons(@Param("groupId") Long groupId);
 
     @Query(value = "select g.* from groups g  where g.teacher_id = ?1 ", nativeQuery = true)
     List<Group> findGroup(Long userId);

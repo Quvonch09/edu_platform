@@ -9,7 +9,7 @@ import uz.sfera.edu_platform.payload.auth.AuthLogin;
 import uz.sfera.edu_platform.service.AuthService;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @CrossOrigin
 public class AuthController {
