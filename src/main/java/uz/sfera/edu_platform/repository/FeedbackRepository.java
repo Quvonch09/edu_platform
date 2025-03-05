@@ -28,5 +28,4 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
     Page<Feedback> getAllByQuizId(Long quizId, Pageable pageable);
 
     Page<Feedback> getAllByCreatedBy(Long studentId, Pageable pageable);
-
 }
