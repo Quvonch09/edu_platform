@@ -16,6 +16,7 @@ import java.util.List;
 @Table(name = "groups")
 public class Group extends AbsEntity {
 
+
     @Column(nullable = false)
     private String name;
 
@@ -25,7 +26,7 @@ public class Group extends AbsEntity {
     @ManyToOne
     private Category category;
 
-    @ManyToMany
+    @OneToMany
     private List<User> students;
 
     private LocalDate startDate;
