@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.Category;
 import uz.sfera.edu_platform.entity.File;
+import uz.sfera.edu_platform.exception.NotFoundException;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.CategoryDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
@@ -38,7 +39,7 @@ public class CategoryService {
     public ApiResponse getCategoryById(Long id) {
         return categoryRepository.findById(id)
                 .map(category -> new ApiResponse(convertCategoryToCategoryDTO(category)))
-                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Category")));
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Category"))));
     }
 
 
@@ -75,7 +76,7 @@ public class CategoryService {
                     categoryRepository.save(category);
                     return new ApiResponse("Category successfully updated");
                 })
-                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Category")));
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Category"))));
     }
 
 
@@ -86,7 +87,7 @@ public class CategoryService {
                     categoryRepository.save(category);
                     return new ApiResponse("Category successfully deleted");
                 })
-                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Category")));
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Category"))));
     }
 
 
@@ -97,7 +98,7 @@ public class CategoryService {
                     categoryRepository.save(category);
                     return new ApiResponse("Category successfully updated");
                 })
-                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Category")));
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Category"))));
     }
 
 

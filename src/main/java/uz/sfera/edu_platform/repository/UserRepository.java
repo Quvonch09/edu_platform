@@ -15,6 +15,10 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByPhoneNumber(String phoneNumber);
 
+    @Query(value = "select g.teacher_id from groups g join groups_students gs on g.id=gs.group_id where gs.students_id=?1",
+            nativeQuery = true)
+    Long getTeacherId(Long studentId);
+
     @Query(value = "select * from users u join groups_students gs on u.id=gs.students_id where gs.group_id = :groupId",nativeQuery=true)
     List<User> findAllByGroupId(Long groupId);
 

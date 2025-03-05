@@ -2,6 +2,7 @@ package uz.sfera.edu_platform.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StudentService {
@@ -130,15 +132,11 @@ public class StudentService {
 
     @Transactional
     public ApiResponse updateStudent(Long studentId, ReqStudent reqStudent) {
-        User user = userRepository.findById(studentId).orElse(null);
-        if (user == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Student"));
-        }
+        User user = userRepository.findById(studentId)
+                .orElseThrow(()-> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Student"))));
 
-        Group newGroup = groupRepository.findById(reqStudent.getGroupId()).orElse(null);
-        if (newGroup == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Group"));
-        }
+        Group newGroup = groupRepository.findById(reqStudent.getGroupId())
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Group"))));
 
         Group oldGroup = groupRepository.findByStudentId(user.getId()).orElse(null);
         if (oldGroup != null) {
@@ -173,10 +171,8 @@ public class StudentService {
 
 
     public ApiResponse deleteStudent(Long studentId, LocalDate departureDate, String departureDescription) {
-        User user = userRepository.findById(studentId).orElse(null);
-        if (user == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Student"));
-        }
+        User user = userRepository.findById(studentId)
+                .orElseThrow(()-> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("User"))));
         // Updating user fields
         user.setUserStatus(UserStatus.CHIQIB_KETGAN);
         user.setEnabled(false);
@@ -191,12 +187,9 @@ public class StudentService {
     }
 
 
-    @Transactional
     public ApiResponse getStudentGroupBy(Long groupId) {
-        Group group = groupRepository.findById(groupId).orElse(null);
-        if (group == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Group"));
-        }
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Group"))));
 
         List<User> students = group.getStudents();
         List<StudentDTO> list = students.stream().map(this::getDto).toList();

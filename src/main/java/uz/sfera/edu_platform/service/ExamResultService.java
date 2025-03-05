@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.ExamResult;
 import uz.sfera.edu_platform.entity.User;
+import uz.sfera.edu_platform.exception.NotFoundException;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.ExamResultDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
@@ -25,9 +26,8 @@ public class ExamResultService {
     private final UserRepository userRepository;
 
     public ApiResponse createExamResult(Month month,ExamResultRequest examResultRequest){
-        User student = userRepository.findById(examResultRequest.getStudentId()).orElse(null);
-
-        if (student == null) return new ApiResponse(ResponseError.NOTFOUND("Student"));
+        User student = userRepository.findById(examResultRequest.getStudentId())
+                .orElseThrow(()->new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Student"))));
 
         ExamResult examResult = ExamResult.builder()
                 .student(student)
