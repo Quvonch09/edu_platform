@@ -140,13 +140,13 @@ public class QuizService {
 
 
     public ApiResponse getQuiz(Long quizId) {
-        return quizRepository.findById(quizId)
+        return quizRepository.findByIdAndDeleted(quizId, (byte) 0)
                 .map(quiz -> {
                     QuizSettings settings = quizSettingsRepository.findByQuizId(quizId);
-                    List<QuestionDTO> questions = questionRepository.findByQuizId(quizId).stream()
-                            .map(q -> questionService.questionDTO(q, optionRepository.findByQuestionId(q.getId())
-                                    .stream().map(optionService::optionDTO).toList()))
-                            .toList();
+//                    List<QuestionDTO> questions = questionRepository.findByQuizId(quizId).stream()
+//                            .map(q -> questionService.questionDTO(q, optionRepository.findByQuestionId(q.getId())
+//                                    .stream().map(optionService::optionDTO).toList()))
+//                            .toList();
 
                     return new ApiResponse(new QuizDTO(
                             quiz.getId(),
@@ -163,7 +163,7 @@ public class QuizService {
         return lessonRepository.findById(lessonId)
                 .map(lesson -> {
                     List<QuizDTO> quizDTOS = quizRepository.findByLessonId(lessonId).stream()
-                            .filter(quiz -> quiz.getLesson().getModule().getCategory() != null)
+                            .filter(quiz -> quiz.getLesson().getModule().getCategory() != null && quiz.getDeleted() == 0)
                             .map(this::quizDTO)
                             .toList();
 
@@ -179,6 +179,11 @@ public class QuizService {
         if (quiz == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
         }
+
+        if (quiz.getDeleted() == 1){
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu quiz uchirilgan"));
+        }
+
         quiz.setDeleted((byte) 1);
         quizRepository.save(quiz);
         return new ApiResponse("Quiz o'chirildi");
