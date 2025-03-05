@@ -72,9 +72,9 @@ public class StudentService {
                 .accountNonExpired(true)
                 .build();
 
+        userRepository.save(student);
         group.getStudents().add(student);
         groupRepository.save(group);
-        userRepository.save(student);
 
         return new ApiResponse("Successfully saved student");
     }
