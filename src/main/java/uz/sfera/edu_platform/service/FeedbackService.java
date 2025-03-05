@@ -14,6 +14,7 @@ import uz.sfera.edu_platform.exception.NotFoundException;
 import uz.sfera.edu_platform.mapper.FeedbackMapper;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.FeedbackDto;
+import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.ResponseFeedback;
 import uz.sfera.edu_platform.payload.res.ResPageable;
 import uz.sfera.edu_platform.repository.FeedbackRepository;
@@ -89,8 +90,14 @@ public class FeedbackService {
     }
 
     public ApiResponse editFeedback(String comment, int rating, Long feedbackId, User user) {
-        Feedback feedback = feedbackRepository.findByIdAndCreatedBy(feedbackId, user.getId())
-                .orElseThrow(() -> new NotFoundException("Feedback not found"));
+//        frontchilar suragani uchun
+        Feedback feedback = feedbackRepository.findById(feedbackId).orElse(null);
+        if(feedback == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Feedback"));
+        }
+
+//        Feedback feedback = feedbackRepository.findByIdAndCreatedBy(feedbackId, user.getId())
+//                .orElseThrow(() -> new NotFoundException("Feedback not found"));
         feedback.setFeedback(comment);
         feedback.setRating(rating);
         feedbackRepository.save(feedback);
