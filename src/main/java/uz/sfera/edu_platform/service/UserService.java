@@ -78,7 +78,6 @@ public class UserService {
     }
 
 
-    @Transactional
     public ApiResponse searchUsers(String fullName, String phoneNumber, Long groupId, Role role, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
 
