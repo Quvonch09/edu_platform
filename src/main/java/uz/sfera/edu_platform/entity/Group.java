@@ -16,7 +16,6 @@ import java.util.List;
 @Table(name = "groups")
 public class Group extends AbsEntity {
 
-
     @Column(nullable = false)
     private String name;
 

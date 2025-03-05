@@ -4,6 +4,7 @@ import uz.sfera.edu_platform.entity.File;
 import uz.sfera.edu_platform.entity.Homework;
 import uz.sfera.edu_platform.entity.Task;
 import uz.sfera.edu_platform.entity.User;
+import uz.sfera.edu_platform.exception.NotFoundException;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.HomeworkDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
@@ -41,7 +42,7 @@ public class HomeworkService {
                     homeworkRepository.save(homework);
                     return new ApiResponse("Homework saqlandi");
                 })
-                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Task")));
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Task"))));
     }
 
     public ApiResponse checkHomework(Long homeworkId, byte ball) {
@@ -52,7 +53,7 @@ public class HomeworkService {
                     homeworkRepository.save(homework);
                     return new ApiResponse("Homework tekshirildi");
                 })
-                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Homework")));
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Homework"))));
     }
 
     public ApiResponse getMyHomeworks(boolean isChecked, User student, Long taskId, int page, int size) {

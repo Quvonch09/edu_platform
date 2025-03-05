@@ -51,8 +51,6 @@ public class LessonService {
         return new ApiResponse("Dars muvaffaqiyatli yaratildi");
     }
 
-    //todo  ??
-    @Transactional
     public ApiResponse getLessonInModule(Long moduleId) {
         moduleRepository.findByIdAndDeleted(moduleId, (byte) 0)
                 .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Modul"))));
@@ -87,7 +85,7 @@ public class LessonService {
                 .map(lesson -> {
                     lesson.setDeleted((byte) 1);
                     return new ApiResponse("Lesson o'chirildi");
-                }).orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Lesson")));
+                }).orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
     }
 
     @Transactional
@@ -111,13 +109,10 @@ public class LessonService {
     }
 
 
-    @Transactional
     public ApiResponse search(String name,Long id, int size, int page) {
         if (id != null){
-            Lesson lesson = lessonRepository.findById(id).orElse(null);
-            if (lesson == null){
-                return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
-            }
+            Lesson lesson = lessonRepository.findById(id)
+                    .orElseThrow(()->new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
             return new ApiResponse(lessonDTO(lesson));
         }
         Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1));
@@ -129,8 +124,6 @@ public class LessonService {
                 lessons.getTotalElements(), lessons.map(this::lessonDTO).toList()));
     }
 
-    //todo ??
-    @Transactional
     public ApiResponse getOpenLessonsInGroup(Long groupId) {
         List<LessonDTO> lessons = lessonTrackingRepository.findOpenLessonsByGroupId(groupId)
                 .stream().map(this::lessonDTO).toList();
@@ -170,8 +163,8 @@ public class LessonService {
 
     @Transactional
     public ApiResponse manageFiles(ReqLessonFiles req, boolean isAdding) {
-        Lesson lesson = lessonRepository.findById(req.getLessonId()).orElse(null);
-        if (lesson == null) return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        Lesson lesson = lessonRepository.findById(req.getLessonId())
+                .orElseThrow(()->new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
 
         List<File> files = fileRepository.findAllById(req.getFileIds());
         List<Long> notFoundFiles = req.getFileIds().stream()

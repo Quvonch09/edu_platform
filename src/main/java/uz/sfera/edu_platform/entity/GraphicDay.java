@@ -21,7 +21,7 @@ public class GraphicDay {
     private LocalTime startTime;
     private LocalTime endTime;
 
-    @ElementCollection
+    @ElementCollection(fetch =FetchType.EAGER )
     @Enumerated(EnumType.STRING)
     private List<WeekDay> weekDay;
 
