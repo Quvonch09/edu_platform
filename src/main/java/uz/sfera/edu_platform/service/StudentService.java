@@ -191,7 +191,7 @@ public class StudentService {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Group"))));
 
-        List<User> students = group.getStudents();
+        List<User> students = groupRepository.findByGroup(groupId);
         List<StudentDTO> list = students.stream().map(this::getDto).toList();
 
         return new ApiResponse(list);
