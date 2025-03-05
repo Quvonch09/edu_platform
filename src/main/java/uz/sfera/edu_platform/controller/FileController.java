@@ -11,7 +11,7 @@ import uz.sfera.edu_platform.service.FileService;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/file")
+@RequestMapping("/api/file")
 public class FileController {
 
     private final FileService videoFileService;
