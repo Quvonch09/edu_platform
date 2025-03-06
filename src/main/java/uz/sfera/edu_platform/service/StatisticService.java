@@ -100,7 +100,7 @@ public class StatisticService {
         }
 
         List<ResStudentRank> allByStudentRank = new ArrayList<>();
-        for (User student : group.getStudents()) {
+        for (User student : groupRepository.findByGroup(group.getId())) {
             allByStudentRank.addAll(groupRepository.findAllByStudentRank(student.getId()));
         }
 

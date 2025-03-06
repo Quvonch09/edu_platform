@@ -2,6 +2,7 @@ package uz.sfera.edu_platform.repository;
 
 import org.springframework.stereotype.Repository;
 import uz.sfera.edu_platform.entity.Group;
+import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.payload.res.ResCEODiagram;
 import uz.sfera.edu_platform.payload.res.ResStudentCount;
 import uz.sfera.edu_platform.payload.res.ResStudentRank;
@@ -18,6 +19,9 @@ import java.util.Optional;
 
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
+
+    @Query(value = "select u.* from users u join groups_students gs on gs.students_id = u.id where gs.group_id =:groupId", nativeQuery = true)
+    List<User> findByGroup(@Param("groupId") Long groupId);
 
     @Query("select  coalesce( count (g) , 0) from Group g where g.active = true ")
     Integer countAllByGroup();
