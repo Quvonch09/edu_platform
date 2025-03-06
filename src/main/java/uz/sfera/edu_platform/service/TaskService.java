@@ -66,13 +66,15 @@ public class TaskService {
     public ApiResponse updateTask(Long taskId, ReqTask reqTask) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task topilmadi"));
-        Lesson lesson = lessonRepository.findById(reqTask.getLessonId())
-                .orElseThrow(() -> new RuntimeException("Lesson topilmadi"));
-        File file = fileRepository.findById(reqTask.getFileId()).orElse(null);
 
-        task.setTitle(reqTask.getTitle());
-        task.setLesson(lesson);
-        task.setFile(file);
+        task.setLesson(lessonRepository.findById(reqTask.getLessonId())
+                .orElseThrow(() -> new RuntimeException("Lesson topilmadi")));
+
+        if (reqTask.getFileId() != null)
+            task.setFile(fileRepository.findById(reqTask.getFileId()).orElse(null));
+
+        if (reqTask.getTitle() != null && !reqTask.getTitle().isEmpty())
+            task.setTitle(reqTask.getTitle());
 
         taskRepository.save(task);
         return new ApiResponse("Task yangilandi");
