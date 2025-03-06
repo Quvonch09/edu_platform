@@ -80,7 +80,8 @@ public class FeedbackController {
 
 
     @GetMapping("/allFeedbacks")
-    public ResponseEntity<ApiResponse> getAllFeedbackForCeo(){
-        return ResponseEntity.ok(feedbackService.getAllForCeo());
+    public ResponseEntity<ApiResponse> getAllFeedbackForCeo(@RequestParam(defaultValue = "0") int page,
+                                                            @RequestParam(defaultValue = "10") int size){
+        return ResponseEntity.ok(feedbackService.getAllForCeo(page, size));
     }
 }
