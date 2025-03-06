@@ -86,8 +86,10 @@ public class GroupService {
 
 
     public ApiResponse getOneGroup(Long groupId) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Group"))));
+        Group group = groupRepository.findById(groupId).orElse(null);
+        if (group == null){
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
 
         Category category = group.getCategory();
         User teacher = group.getTeacher();
@@ -144,8 +146,10 @@ public class GroupService {
 
 
     public ApiResponse updateGroup(Long groupId, ReqGroup reqGroup) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Group"))));
+        Group group = groupRepository.findById(groupId).orElse(null);
+        if (group == null){
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
 
         GraphicDay graphicDay = graphicDayRepository.findGraphicDay(reqGroup.getRoomId()).orElse(null);
 
@@ -174,8 +178,10 @@ public class GroupService {
 
 
     public ApiResponse deleteGroup(Long groupId) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Group"))));
+        Group group = groupRepository.findById(groupId).orElse(null);
+        if (group == null){
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
 
         group.setActive(false);
         groupRepository.save(group);
@@ -245,8 +251,7 @@ public class GroupService {
 
 
     private <T> T findByIdOrThrow(JpaRepository<T, Long> repository, Long id, String entityName) {
-        return repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(entityName + " not found with id: " + id));
+        return repository.findById(id).orElse(null);
     }
 
 

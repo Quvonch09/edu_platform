@@ -28,8 +28,11 @@ public class CategoryService {
 
     public ApiResponse getAllCategories(String name, Long teacherId,String description, int page, int size) {
         if (teacherId != null){
-            User teacher = userRepository.findById(teacherId)
-                    .orElseThrow(()->new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Teacher"))));
+            User teacher = userRepository.findById(teacherId).orElse(null);
+            if (teacher == null){
+                return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
+            }
+
             List<Category> categories = teacher.getCategories();
             List<CategoryDTO> categoryDTOS = categories.stream()
                     .map(this::convertCategoryToCategoryDTO)
@@ -51,7 +54,7 @@ public class CategoryService {
     public ApiResponse getCategoryById(Long id) {
         return categoryRepository.findById(id)
                 .map(category -> new ApiResponse(convertCategoryToCategoryDTO(category)))
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Category"))));
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Category")));
     }
 
 
@@ -88,7 +91,7 @@ public class CategoryService {
                     categoryRepository.save(category);
                     return new ApiResponse("Category successfully updated");
                 })
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Category"))));
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Category")));
     }
 
 
@@ -99,7 +102,7 @@ public class CategoryService {
                     categoryRepository.save(category);
                     return new ApiResponse("Category successfully deleted");
                 })
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Category"))));
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Category")));
     }
 
 
@@ -110,7 +113,7 @@ public class CategoryService {
                     categoryRepository.save(category);
                     return new ApiResponse("Category successfully updated");
                 })
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Category"))));
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Category")));
     }
 
 
