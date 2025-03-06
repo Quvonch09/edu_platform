@@ -127,6 +127,15 @@ public class FeedbackService {
     }
 
 
+    public ApiResponse getAllForCeo(){
+
+        List<ResponseFeedback> responseFeedbacks = feedbackRepository.findAll().stream()
+                .map(feedbackMapper::toResponseFeedback).toList();
+
+        return new ApiResponse(responseFeedbacks);
+    }
+
+
     private ResPageable toResponseFeedback(int page, int size, Page<Feedback> feedbacks) {
         List<ResponseFeedback> responseFeedbacks = new ArrayList<>();
         for (Feedback feedback : feedbacks) {
