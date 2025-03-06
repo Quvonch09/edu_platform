@@ -81,11 +81,11 @@ public class LessonService {
 
 
     public ApiResponse delete(Long lessonId) {
-        return lessonRepository.findByIdAndDeleted(lessonId, (byte) 0)
-                .map(lesson -> {
-                    lesson.setDeleted((byte) 1);
-                    return new ApiResponse("Lesson o'chirildi");
-                }).orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
+        Lesson lesson =  lessonRepository.findByIdAndDeleted(lessonId, (byte) 0)
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
+        lesson.setDeleted((byte) 1);
+        lessonRepository.save(lesson);
+        return new ApiResponse("O'chirildi");
     }
 
     @Transactional
@@ -109,20 +109,32 @@ public class LessonService {
     }
 
 
-    public ApiResponse search(String name,Long id, int size, int page) {
-        if (id != null){
+    public ApiResponse search(String name, Long id, int size, int page) {
+        if (id != null) {
             Lesson lesson = lessonRepository.findById(id)
-                    .orElseThrow(()->new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
+                    .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
+
+            if (lesson.getModule() != null && lesson.getModule().getDeleted() == 1) {
+                return new ApiResponse(ResponseError.NOTFOUND("Lessonning bog‘liq modul o‘chirilgan"));
+            }
+
             return new ApiResponse(lessonDTO(lesson));
         }
+
         Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1));
         Page<Lesson> lessons = (name == null || name.trim().isEmpty())
                 ? lessonRepository.findAll(pageable)
                 : lessonRepository.findByNameAndDeleted(name, (byte) 0, pageable);
 
+        List<LessonDTO> filteredLessons = lessons.stream()
+                .filter(lesson -> lesson.getModule() == null || lesson.getModule().getDeleted() != 1)
+                .map(this::lessonDTO)
+                .toList();
+
         return new ApiResponse(new ResPageable(page, size, lessons.getTotalPages(),
-                lessons.getTotalElements(), lessons.map(this::lessonDTO).toList()));
+                lessons.getTotalElements(), filteredLessons));
     }
+
 
     public ApiResponse getOpenLessonsInGroup(Long groupId) {
         List<LessonDTO> lessons = lessonTrackingRepository.findOpenLessonsByGroupId(groupId)

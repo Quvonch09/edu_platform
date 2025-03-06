@@ -223,6 +223,7 @@ ORDER BY r.rank_position;
     @Query(value = """
 
             SELECT
+                    g.id AS groupId,
                     g.name AS groupName,
                     COUNT(gu.students_id) AS studentCount
                 FROM groups g
@@ -230,7 +231,7 @@ ORDER BY r.rank_position;
                 LEFT JOIN users s ON s.id = gu.students_id AND s.user_status = 'UQIYABDI'
                 WHERE g.teacher_id = :teacherId
                     AND g.active = TRUE
-                GROUP BY g.name;
+                GROUP BY g.id, g.name;
            """ , nativeQuery = true)
     List<ResStudentCount> findAllStudentsByTeacherId(@Param("teacherId") Long teacherId);
 

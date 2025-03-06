@@ -28,8 +28,7 @@ public class ModuleController {
     }
 
     @GetMapping("/get")
-    @Operation(summary = "(TEACHER/ADMIN) name bo'yicha module qidirish")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_TEACHER','ROLE_STUDENT')")
+    @Operation(summary = "name bo'yicha module qidirish")
     public ResponseEntity<ApiResponse> searchModule(
             @RequestParam(required = false, value = "name") String name,
             @RequestParam(defaultValue = "0") int page,
@@ -40,7 +39,7 @@ public class ModuleController {
 
     @GetMapping("/{moduleId}")
     @Operation(summary = "(TEACHER/ADMIN/CEO/STUDENT) id bo'yicha modulni olish")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN' , 'ROLE_CEO', 'ROLE_STUDENT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN' , 'ROLE_CEO', 'ROLE_STUDENT','ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> getById(
             @PathVariable Long moduleId
     ){
@@ -49,7 +48,7 @@ public class ModuleController {
 
     @GetMapping("/getByCategory")
     @Operation(summary = "Categorydagi modullarni ko'rish")
-    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_CEO')")
     public ResponseEntity<ApiResponse> getByCategory(
             @RequestParam(required = false) Long categoryId,
             @CurrentUser User user,
@@ -60,7 +59,7 @@ public class ModuleController {
 
     @PutMapping("/update/{moduleId}")
     @Operation(summary = "(TEACHER/ADMIN) Modulni yangilash")
-    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_CEO')")
     public ResponseEntity<ApiResponse> update(
             @PathVariable Long moduleId,
             @Valid @RequestBody ModuleRequest moduleRequest
@@ -70,7 +69,7 @@ public class ModuleController {
 
     @DeleteMapping("/delete/{moduleId}")
     @Operation(summary = "(TEACHER/ADMIN) Modulni o'chirish")
-    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_TEACHER','ROLE_ADMIN','ROLE_CEO')")
     public ResponseEntity<ApiResponse> delete(
             @PathVariable Long moduleId
     ){

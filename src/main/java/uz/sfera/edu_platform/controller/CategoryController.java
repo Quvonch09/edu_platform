@@ -32,11 +32,12 @@ public class CategoryController {
     @GetMapping
     public ResponseEntity<ApiResponse> search(
             @RequestParam(required = false, value = "name") String name,
+            @RequestParam(required = false) Long teacherId,
             @RequestParam(required = false, value = "description") String description,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-        ApiResponse allCategories = categoryService.getAllCategories(name, description, page, size);
+        ApiResponse allCategories = categoryService.getAllCategories(name,teacherId, description, page, size);
         return ResponseEntity.ok(allCategories);
     }
 
