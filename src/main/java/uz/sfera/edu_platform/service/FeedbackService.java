@@ -142,8 +142,8 @@ public class FeedbackService {
             ResFeedbackCount allByQuiz = feedbackRepository.findAllByQuiz();
 
             ResFeedback resFeedback = ResFeedback.builder()
-                    .teacherName(allByTeacher.getTeacherName())
-                    .countLesson(allByLesson != null ? allByLesson.getFeedbackCount() :null)
+                    .teacherName(allByTeacher != null ? allByTeacher.getTeacherName() : null)
+                    .countLesson(allByLesson != null ? allByLesson.getFeedbackCount() : null)
                     .lessonBall(allByLesson != null ? allByLesson.getFeedbackBall() : null)
                     .quizCount(allByQuiz != null ? allByQuiz.getFeedbackCount() : null)
                     .quizBall(allByQuiz != null ? allByQuiz.getFeedbackBall() : null)
