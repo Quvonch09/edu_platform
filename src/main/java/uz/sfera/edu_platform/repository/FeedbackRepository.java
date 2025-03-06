@@ -40,13 +40,22 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
             "           where teacher_id =:teacherId group by u.full_name", nativeQuery = true)
     ResFeedbackCount findAllByTeacher(@Param("teacherId") Long teacherId);
 
-    @Query(value = "select count(f.*) as feedbackCount, coalesce(avg(f.rating),0) as feedbackBall, u.full_name as teacherName " +
-            "from feedback f left join users u on u.id = f.teacher_id\n" +
-            "                    where f.lesson_id IS NOT NULL group by u.full_name", nativeQuery = true)
-    ResFeedbackCount findAllByLesson();
+    @Query(value = """
+        select count(f.*) as feedbackCount, coalesce(avg(f.rating),0) as feedbackBall, u.full_name as teacherName 
+            from feedback f  
+             left join  lesson l  on  f.lesson_id =l.id 
+            left join users u on u.id  = l.created_by 
+            where f.lesson_id IS NOT NULL and  u.id = :teacherId group by u.full_name
+            """
+            , nativeQuery = true)
+    ResFeedbackCount findAllByLesson(@Param("teacherId") Long teacherId) ;
 
-    @Query(value = "select count(f.*) as feedbackCount, coalesce(avg(f.rating),0) as feedbackBall, u.full_name as teacherName " +
-            "from feedback f left join users u on u.id = f.teacher_id\n" +
-            "                    where f.quiz_id IS NOT NULL group by u.full_name", nativeQuery = true)
-    ResFeedbackCount findAllByQuiz();
+    @Query(value = """
+            select count(f.*) as feedbackCount, coalesce(avg(f.rating),0) as feedbackBall, u.full_name as teacherName 
+            from feedback f 
+            left join quiz q on q.id = f.quiz_id 
+            left join  lesson l   on l.id = q.lesson_id
+            left join users u on u.id = l.created_by 
+                               where f.quiz_id IS NOT NULL and u.id = :teacherId group by u.full_name""", nativeQuery = true)
+    ResFeedbackCount findAllByQuiz(@Param("teacherId") Long teacherId);
 }
