@@ -14,6 +14,7 @@ import uz.sfera.edu_platform.exception.NotFoundException;
 import uz.sfera.edu_platform.mapper.FeedbackMapper;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.FeedbackDto;
+import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.ResponseFeedback;
 import uz.sfera.edu_platform.payload.res.ResPageable;
 import uz.sfera.edu_platform.repository.FeedbackRepository;
@@ -39,7 +40,7 @@ public class FeedbackService {
 
         Long teacherId = userRepository.getTeacherId(student.getId());
         User teacher = userRepository.findById(teacherId)
-                .orElseThrow(() -> new NotFoundException("teacher not found"));
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Teacher"))));
         boolean exist = feedbackRepository.existsByCreatedByAndTeacherId(student.getId(), teacher.getId());
         if(exist) {
             throw new BadRequestException("feedback already exist");
@@ -56,7 +57,7 @@ public class FeedbackService {
 
     public ApiResponse leaveFeedbackToLesson(FeedbackDto feedbackDto, User student) {
         Lesson lesson = lessonRepository.findById(feedbackDto.getLessonId())
-                .orElseThrow(() -> new NotFoundException("lesson not found"));
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
         boolean exist = feedbackRepository.existsByCreatedByAndLessonId(student.getId(), lesson.getId());
         if(exist) {
             throw new BadRequestException("feedback already exist");
@@ -73,7 +74,7 @@ public class FeedbackService {
 
     public ApiResponse leaveFeedbackToQuiz(FeedbackDto feedbackDto, User student) {
         Quiz quiz = quizRepository.findById(feedbackDto.getQuizId())
-                .orElseThrow(() -> new NotFoundException("quiz not found"));
+                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Quiz"))));
         boolean exist = feedbackRepository.existsByCreatedByAndQuizId(student.getId(), quiz.getId());
         if(exist) {
             throw new BadRequestException("feedback already exist");

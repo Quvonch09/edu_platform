@@ -3,6 +3,8 @@ package uz.sfera.edu_platform.payload;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -15,4 +17,5 @@ public class HomeworkDTO {
     private int ball;
     private String studentName;
     private Long taskId;
+    private Long fileId;
 }

@@ -102,6 +102,7 @@ public class HomeworkService {
                 .studentName(homework.getStudent().getFullName())
                 .ball(homework.getBall())
                 .taskId(homework.getTask().getId())
+                .fileId(homework.getFile().getId())
                 .build();
     }
 }
