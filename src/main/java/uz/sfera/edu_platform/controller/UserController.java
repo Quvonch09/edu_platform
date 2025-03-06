@@ -106,7 +106,7 @@ public class UserController {
 
 
     @PreAuthorize("hasAnyRole('ROLE_CEO')")
-    @Operation(summary = "CEO/ADMIN teacherni update qilish")
+    @Operation(summary = "CEO adminni update qilish")
     @PutMapping("/updateAdmin/{adminId}")
     public ResponseEntity<ApiResponse> updateAdmin(@PathVariable Long adminId, @Valid @RequestBody ReqAdmin reqAdmin) {
         ApiResponse apiResponse = userService.updateAdmin(adminId, reqAdmin);

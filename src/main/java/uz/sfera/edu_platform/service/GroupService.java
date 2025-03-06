@@ -55,9 +55,9 @@ public class GroupService {
 
     @Transactional
     public ApiResponse search(String groupName, String teacherName, LocalDate startDate,
-                              LocalDate endDate, Long categoryId, int page, int size) {
+                              LocalDate endDate, Long categoryId, Long teacherId, int page, int size) {
 
-        Page<Group> groups = groupRepository.searchGroup(groupName, teacherName, startDate, endDate, categoryId,
+        Page<Group> groups = groupRepository.searchGroup(groupName, teacherName, startDate, endDate, categoryId, teacherId,
                 PageRequest.of(page, size));
 
         Map<Long, GraphicDay> graphicDays = graphicDayRepository.findAllByGroupIds(
