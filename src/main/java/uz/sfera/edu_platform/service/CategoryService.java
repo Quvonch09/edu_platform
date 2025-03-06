@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.Category;
 import uz.sfera.edu_platform.entity.File;
+import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.exception.NotFoundException;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.CategoryDTO;
@@ -13,6 +14,7 @@ import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.res.ResPageable;
 import uz.sfera.edu_platform.repository.CategoryRepository;
 import uz.sfera.edu_platform.repository.FileRepository;
+import uz.sfera.edu_platform.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,8 +24,18 @@ import java.util.Optional;
 public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final FileRepository fileRepository;
+    private final UserRepository userRepository;
 
-    public ApiResponse getAllCategories(String name, String description, int page, int size) {
+    public ApiResponse getAllCategories(String name, Long teacherId,String description, int page, int size) {
+        if (teacherId != null){
+            User teacher = userRepository.findById(teacherId)
+                    .orElseThrow(()->new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Teacher"))));
+            List<Category> categories = teacher.getCategories();
+            List<CategoryDTO> categoryDTOS = categories.stream()
+                    .map(this::convertCategoryToCategoryDTO)
+                    .toList();
+            return new ApiResponse(categoryDTOS);
+        }
         Page<Category> pages = categoryRepository.getAllCategory(name, description, PageRequest.of(page, size));
 
         if (pages.isEmpty()) {
