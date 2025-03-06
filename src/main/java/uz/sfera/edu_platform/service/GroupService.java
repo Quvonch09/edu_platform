@@ -96,6 +96,8 @@ public class GroupService {
                 .map(d -> d.getWeekDay().stream().map(Enum::name).collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
 
+        List<User> list = groupRepository.findByGroup(groupId);
+
         ResGroup resGroup = ResGroup.builder()
                 .id(group.getId())
                 .name(group.getName())
@@ -104,7 +106,7 @@ public class GroupService {
                 .startDate(group.getStartDate())
                 .endDate(group.getEndDate())
                 .active(group.isActive())
-                .studentCount(group.getStudents().size())
+                .studentCount(list != null ? list.size() : 0)
                 .countEndMonth((int) ChronoUnit.MONTHS.between(LocalDate.now(), group.getEndDate()))
                 .countAllLessons(category != null ? lessonRepository.countLessonsByCategoryId(category.getId()) : 0)
                 .countGroupLessons(groupRepository.countGroupLessons(group.getId()))
