@@ -51,12 +51,12 @@ public class StudentService {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Student"));
         }
 
-        Group group = groupRepository.findById(reqStudent.getGroupId())
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Group"))));
-
+        Group group = groupRepository.findById(reqStudent.getGroupId()).orElse(null);
+        if (group == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
         File file = (reqStudent.getFileId() != null)
-                ? fileRepository.findById(reqStudent.getFileId()).orElseThrow(() ->
-                new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("File"))))
+                ? fileRepository.findById(reqStudent.getFileId()).orElse(null)
                 : null;
 
         User student = User.builder()
@@ -109,9 +109,10 @@ public class StudentService {
 
 
     public ApiResponse getOneStudent(Long studentId) {
-        User user = userRepository.findById(studentId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Student"))));
-
+        User user = userRepository.findById(studentId).orElse(null);
+        if (user == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Student"));
+        }
         Group group = groupRepository.findByStudentId(user.getId()).orElse(null);
 
         StudentDTO studentDTO = StudentDTO.builder()
@@ -132,12 +133,11 @@ public class StudentService {
 
     @Transactional
     public ApiResponse updateStudent(Long studentId, ReqStudent reqStudent) {
-        User user = userRepository.findById(studentId)
-                .orElseThrow(()-> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Student"))));
-
-        Group newGroup = groupRepository.findById(reqStudent.getGroupId())
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Group"))));
-
+        User user = userRepository.findById(studentId).orElse(null);
+        if (user == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Student"));
+        }
+        Group newGroup = groupRepository.findById(reqStudent.getGroupId()).orElse(null);
         Group oldGroup = groupRepository.findByStudentId(user.getId()).orElse(null);
         if (oldGroup != null) {
             oldGroup.getStudents().remove(user);
@@ -171,9 +171,11 @@ public class StudentService {
 
 
     public ApiResponse deleteStudent(Long studentId, LocalDate departureDate, String departureDescription) {
-        User user = userRepository.findById(studentId)
-                .orElseThrow(()-> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("User"))));
-        // Updating user fields
+        User user = userRepository.findById(studentId).orElse(null);
+        if (user == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Student"));
+        }
+         // Updating user fields
         user.setUserStatus(UserStatus.CHIQIB_KETGAN);
         user.setEnabled(false);
         user.setPhoneNumber(user.getPhoneNumber() + LocalDateTime.now() + "_deleted");
@@ -188,9 +190,10 @@ public class StudentService {
 
 
     public ApiResponse getStudentGroupBy(Long groupId) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Group"))));
-
+        Group group = groupRepository.findById(groupId).orElse(null);
+        if (group == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
         List<User> students = groupRepository.findByGroup(groupId);
         List<StudentDTO> list = students.stream().map(this::getDto).toList();
 

@@ -54,8 +54,11 @@ public class UserService {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu telefon raqam allaqachon mavjud"));
         }
 
-        Category category = categoryRepository.findById(reqTeacher.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Kategoriya topilmadi"));
+        Category category = categoryRepository.findById(reqTeacher.getCategoryId()).orElse(null);
+        if (category == null){
+            return new ApiResponse(ResponseError.NOTFOUND("Category"));
+        }
+
 
         File file = (reqTeacher.getFileId() != null)
                 ? fileRepository.findById(reqTeacher.getFileId()).orElse(null)
@@ -140,8 +143,10 @@ public class UserService {
     }
 
     public ApiResponse getOneTeacher(Long teacherId) {
-        userRepository.findById(teacherId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Teacher"))));
+        User user = userRepository.findById(teacherId).orElse(null);
+        if (user == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("User"));
+        }
 
         List<ResStudentCount> res = groupRepository.findAllStudentsByTeacherId(teacherId);
         return new ApiResponse(res);
@@ -160,8 +165,10 @@ public class UserService {
 
 
     public ApiResponse updateTeacher(Long teacherId, ReqTeacher reqTeacher) {
-        User user = userRepository.findById(teacherId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Teacher"))));
+        User user = userRepository.findById(teacherId).orElse(null);
+        if (user == null){
+            return new ApiResponse(ResponseError.NOTFOUND("User"));
+        }
 
         user.setFullName(reqTeacher.getFullName());
         user.setPhoneNumber(reqTeacher.getPhoneNumber());
@@ -178,8 +185,10 @@ public class UserService {
 
 
     public ApiResponse updateActiveTeacher(Long teacherId, Boolean active) {
-        User user = userRepository.findById(teacherId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Teacher"))));
+        User user = userRepository.findById(teacherId).orElse(null);
+        if (user == null){
+            return new ApiResponse(ResponseError.NOTFOUND("User"));
+        }
 
         user.setEnabled(active);
         userRepository.save(user);
@@ -244,9 +253,10 @@ public class UserService {
 
 
     public ApiResponse updateAdmin(Long adminId, ReqAdmin reqAdmin){
-        User user = userRepository.findById(adminId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Admin"))));
-
+        User user = userRepository.findById(adminId).orElse(null);
+        if (user == null){
+            return new ApiResponse(ResponseError.NOTFOUND("User"));
+        }
         user.setFullName(reqAdmin.getFullName());
         user.setPhoneNumber(reqAdmin.getPhoneNumber());
 
@@ -288,8 +298,8 @@ public class UserService {
     }
 
     public User getUser(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("User"))));
+        return userRepository.findById(id).orElse(null);
+
     }
 
     public void onlineOffline(User user, boolean isActive) {

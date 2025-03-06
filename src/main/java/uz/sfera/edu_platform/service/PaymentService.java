@@ -32,9 +32,10 @@ public class PaymentService {
     public ApiResponse createRipPayment(PaymentStatusEnum paymentStatus,
                                         PaymentEnum paymentType,
                                         ReqPayment reqPayment) {
-        User user = userRepository.findById(reqPayment.getUserId())
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Student"))));
-
+        User user = userRepository.findById(reqPayment.getUserId()).orElse(null);
+        if (user == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("User"));
+        }
         if (paymentType == PaymentEnum.TUSHUM && user == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
@@ -111,9 +112,10 @@ public class PaymentService {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Payment"))));
 
-        User user = userRepository.findById(reqPayment.getUserId())
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Student"))));
-
+        User user = userRepository.findById(reqPayment.getUserId()).orElse(null);
+        if (user == null){
+            return new ApiResponse(ResponseError.NOTFOUND("User"));
+        }
         if (paymentStatus == null) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Payment status cannot be null"));
         }
@@ -133,9 +135,10 @@ public class PaymentService {
 
 
     public ApiResponse deletePayment(Long paymentId) {
-        Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Payment"))));
-
+        Payment payment = paymentRepository.findById(paymentId).orElse(null);
+        if (payment == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Payment"));
+        }
         paymentRepository.delete(payment);
         return new ApiResponse("Successfully deleted");
     }

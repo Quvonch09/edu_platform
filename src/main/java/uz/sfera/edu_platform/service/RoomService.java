@@ -64,9 +64,10 @@ public class RoomService {
 
 
     public ApiResponse getRoomById(Long roomId) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Room"))));
-
+        Room room = roomRepository.findById(roomId).orElse(null);
+        if (room == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Room"));
+        }
         return new ApiResponse(roomDTO(room));
     }
 
@@ -83,9 +84,10 @@ public class RoomService {
 
 
     public ApiResponse updateRoom(Long roomId, ReqRoom reqRoom) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Room"))));
-
+        Room room = roomRepository.findById(roomId).orElse(null);
+        if (room == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Room"));
+        }
         boolean isUpdated = false;
 
         if (!room.getName().equals(reqRoom.getName())) {
@@ -113,9 +115,10 @@ public class RoomService {
     }
 
     public ApiResponse deleteRoom(Long roomId) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Room"))));
-
+        Room room = roomRepository.findById(roomId).orElse(null);
+        if (room == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Room"));
+        }
         roomRepository.delete(room);
         return new ApiResponse("Successfully deleted");
     }

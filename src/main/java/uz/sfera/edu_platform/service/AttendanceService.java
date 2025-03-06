@@ -35,8 +35,10 @@ public class AttendanceService {
                 .orElseThrow(() -> new NotFoundException("Group not found"));
 
         for (AttendanceDto attendanceDto : attendanceDtos) {
-            User student = userRepository.findById(attendanceDto.getStudentId())
-                    .orElseThrow(() -> new NotFoundException("user not found"));
+            User student = userRepository.findById(attendanceDto.getStudentId()).orElse(null);
+            if (student == null) {
+                return new ApiResponse(ResponseError.NOTFOUND("Student"));
+            }
 
             if (attendanceRepository.findByStudentAndDate(student, attendanceDto.getDate()) == null) {
                 Attendance attendance = Attendance.builder()
@@ -55,9 +57,10 @@ public class AttendanceService {
     @Transactional
     public ApiResponse getAttendanceByGroupId(Long groupId, int year, int month) {
 
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(
-                        ResponseError.NOTFOUND("group not found"))));
+        Group group = groupRepository.findById(groupId).orElse(null);
+        if (group == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
 
         LocalDate startOfMonth = LocalDate.of(year, Month.of(month), 1);
         LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
@@ -210,8 +213,10 @@ public class AttendanceService {
 //    }
 
     public List<LocalDate> getGroupDays(Long groupId, int year, int month) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NotFoundException("Group not found"));
+        Group group = groupRepository.findById(groupId).orElse(null);
+        if (group == null){
+            return new ArrayList<>();
+        }
 
         // WeekDay enum qiymatlarini olish
         Set<WeekDay> weekDays = new HashSet<>(Optional.ofNullable(group.getDays())
