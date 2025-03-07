@@ -54,9 +54,14 @@ public class UserService {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu telefon raqam allaqachon mavjud"));
         }
 
-        Category category = categoryRepository.findById(reqTeacher.getCategoryId()).orElse(null);
-        if (category == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Category"));
+        List<Category> categories = new ArrayList<>();
+        List<Long> notFounds = new ArrayList<>();
+        for (Long categoryId : reqTeacher.getCategoryIds()) {
+            Category category = categoryRepository.findById(categoryId).orElse(null);
+            if (category == null){
+                notFounds.add(categoryId);
+            }
+            categories.add(category);
         }
 
 
@@ -67,7 +72,7 @@ public class UserService {
         User teacher = User.builder()
                 .fullName(reqTeacher.getFullName())
                 .phoneNumber(reqTeacher.getPhoneNumber())
-                .categories(List.of(category))  // Ortacha ro‘yxat yaratamiz
+                .categories(categories)  // Ortacha ro‘yxat yaratamiz
                 .password(passwordEncoder.encode(reqTeacher.getPassword()))
                 .enabled(true)
                 .role(Role.ROLE_TEACHER)
@@ -79,7 +84,10 @@ public class UserService {
 
         userRepository.save(teacher);
 
-        return new ApiResponse("O‘qituvchi muvaffaqiyatli saqlandi");
+        if (!notFounds.isEmpty()){
+            return new ApiResponse("Kategoriyalar topilmadi: " + notFounds);
+        }
+        return new ApiResponse("O'qituvchi muvaffaqiyatli saqlandi");
     }
 
 
@@ -95,6 +103,10 @@ public class UserService {
                                 .map(category -> new ResCategory(category.getId(), category.getName()))
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());
+
+        if (teacherList.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Userlar"));
+        }
 
         ResPageable resPageable = ResPageable.builder()
                 .page(page)
@@ -138,6 +150,10 @@ public class UserService {
         List<UserDTO> userDTOList = users.stream()
                 .map(this::convertToUserDTO)
                 .collect(Collectors.toList());
+
+        if (userDTOList.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Userlar"));
+        }
 
         return new ApiResponse(userDTOList);
     }

@@ -260,6 +260,10 @@ public class GroupService {
         return graphicDayRepository.existsByGraphicDayInGroup(roomId, startTime, endTime);
     }
 
+    public void endGroup(){
+        //todo
+    }
+
     public void saveGroup(ReqGroup reqGroup, Category category, User teacher, Room room) {
         GraphicDay day = saveGraphicDay(reqGroup, room);
         Group build = Group.builder()
@@ -269,7 +273,7 @@ public class GroupService {
                 .days(day)
                 .active(true)
                 .startDate(reqGroup.getStartDate())
-                .endDate(reqGroup.getStartDate().plusDays(category.getDuration()))
+                .endDate(reqGroup.getStartDate().plusMonths(category.getDuration()))
                 .build();
         groupRepository.save(build);
     }
