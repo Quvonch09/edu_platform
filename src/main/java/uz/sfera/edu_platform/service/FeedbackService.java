@@ -9,6 +9,7 @@ import uz.sfera.edu_platform.entity.Feedback;
 import uz.sfera.edu_platform.entity.Lesson;
 import uz.sfera.edu_platform.entity.Quiz;
 import uz.sfera.edu_platform.entity.User;
+import uz.sfera.edu_platform.entity.enums.FeedbackEnum;
 import uz.sfera.edu_platform.entity.enums.Role;
 import uz.sfera.edu_platform.entity.template.AbsEntity;
 import uz.sfera.edu_platform.exception.BadRequestException;
@@ -20,6 +21,7 @@ import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.ResponseFeedback;
 import uz.sfera.edu_platform.payload.res.ResFeedback;
 import uz.sfera.edu_platform.payload.res.ResFeedbackCount;
+import uz.sfera.edu_platform.payload.res.ResFeedbackDTO;
 import uz.sfera.edu_platform.payload.res.ResPageable;
 import uz.sfera.edu_platform.repository.FeedbackRepository;
 import uz.sfera.edu_platform.repository.LessonRepository;
@@ -157,6 +159,7 @@ public class FeedbackService {
 
             ResFeedback resFeedback = ResFeedback.builder()
                     .teacherName(user.getFullName())
+                    .teacherId(user.getId())
                     .countLesson(allByLesson != null ? allByLesson.getFeedbackCount() :null)
                     .lessonBall(allByLesson != null ? allByLesson.getFeedbackBall() : null)
                     .quizCount(allByQuiz != null ? allByQuiz.getFeedbackCount() : null)
@@ -181,6 +184,35 @@ public class FeedbackService {
                 .totalPage(totalPages)
                 .totalElements(totalElements)
                 .body(pagedList)
+                .build();
+
+        return new ApiResponse(resPageable);
+    }
+
+
+    public ApiResponse getAllFeedbackByTeacher(Long teacherId, FeedbackEnum feedbackEnum, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        User user = userRepository.findById(teacherId).orElse(null);
+        if (user == null){
+            return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
+        }
+
+        Page<ResFeedbackDTO> feedbackPage = null;
+        if (feedbackEnum.equals(FeedbackEnum.FOR_TEACHER)){
+            feedbackPage = feedbackRepository.findFeedbackForTeacher(teacherId, pageable);
+        } else if (feedbackEnum.equals(FeedbackEnum.FOR_LESSON)){
+            feedbackPage = feedbackRepository.findFeedbackForLesson(teacherId, pageable);
+        } else if (feedbackEnum.equals(FeedbackEnum.FOR_QUIZ)){
+            feedbackPage = feedbackRepository.findFeedbackForQuiz(teacherId, pageable);
+        }
+
+        ResPageable resPageable = ResPageable.builder()
+                .page(page)
+                .size(size)
+                .totalElements(feedbackPage.getTotalElements())
+                .totalPage(feedbackPage.getTotalPages())
+                .body(feedbackPage.getContent())
                 .build();
 
         return new ApiResponse(resPageable);

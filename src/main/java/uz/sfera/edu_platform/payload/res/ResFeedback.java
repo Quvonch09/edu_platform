@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 public class ResFeedback {
     private String teacherName;
+    private Long teacherId;
     private Integer lessonBall;
     private Integer countLesson;
     private Integer quizBall;
