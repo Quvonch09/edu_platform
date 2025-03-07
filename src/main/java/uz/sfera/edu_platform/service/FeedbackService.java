@@ -131,7 +131,8 @@ public class FeedbackService {
     }
 
 
-    public ApiResponse getAllForCeo(){
+    public ApiResponse getAllForCeo( int page, int size){
+        Pageable pageable = PageRequest.of(page, size);
         List<Long> teacherIds = userRepository.findAllByRole(Role.ROLE_TEACHER).stream()
                         .map(AbsEntity::getId).toList();
 
@@ -154,7 +155,23 @@ public class FeedbackService {
             resFeedbacks.add(resFeedback);
         }
 
-        return new ApiResponse(resFeedbacks);
+        int totalElements = resFeedbacks.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        int start = page * size;
+        int end = Math.min(start + size, totalElements);
+
+        List<ResFeedback> pagedList = resFeedbacks.subList(start, end);
+
+
+        ResPageable resPageable = ResPageable.builder()
+                .page(page)
+                .size(size)
+                .totalPage(totalPages)
+                .totalElements(totalElements)
+                .body(pagedList)
+                .build();
+
+        return new ApiResponse(resPageable);
     }
 
 
