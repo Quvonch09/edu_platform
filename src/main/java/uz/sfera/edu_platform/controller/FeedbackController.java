@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uz.sfera.edu_platform.entity.User;
+import uz.sfera.edu_platform.entity.enums.FeedbackEnum;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.FeedbackDto;
 import uz.sfera.edu_platform.security.CurrentUser;
@@ -83,5 +84,14 @@ public class FeedbackController {
     public ResponseEntity<ApiResponse> getAllFeedbackForCeo(@RequestParam(defaultValue = "0") int page,
                                                             @RequestParam(defaultValue = "10") int size){
         return ResponseEntity.ok(feedbackService.getAllForCeo(page, size));
+    }
+
+
+    @GetMapping("/forTeacher/{teacherId}")
+    public ResponseEntity<ApiResponse> getFeedbacksForTeacher(@PathVariable Long teacherId,
+                                                              @RequestParam FeedbackEnum feedbackEnum,
+                                                              @RequestParam(defaultValue = "0") int page,
+                                                              @RequestParam(defaultValue = "10") int size){
+        return ResponseEntity.ok(feedbackService.getAllFeedbackByTeacher(teacherId, feedbackEnum, page, size));
     }
 }

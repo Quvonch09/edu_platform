@@ -73,6 +73,7 @@ public class CategoryService {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Category"));
         }
 
+
         Category category = new Category();
         save(category, categoryDTO);
         categoryRepository.save(category);
@@ -132,11 +133,14 @@ public class CategoryService {
 
     public void save(Category category, CategoryDTO categoryDTO)
     {
+        File file = (categoryDTO.getFileId() != null)
+                ? fileRepository.findById(categoryDTO.getFileId()).orElse(null)
+                : null;
         category.setName(categoryDTO.getName());
         category.setDescription(categoryDTO.getDescription());
         category.setDuration((byte) categoryDTO.getDuration());
         category.setCoursePrice(categoryDTO.getPrice());
         category.setActive((byte) 1);
-        category.setFile(categoryDTO.getFileId() != null ? fileRepository.findById(categoryDTO.getFileId()).orElse(null) : null);
+        category.setFile(file);
     }
 }
