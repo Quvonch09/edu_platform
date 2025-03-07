@@ -177,7 +177,11 @@ public class UserService {
             user.setPassword(passwordEncoder.encode(reqTeacher.getPassword()));
         }
 
-        user.setFile(fileRepository.findById(reqTeacher.getFileId()).orElse(null));
+        File file = (reqTeacher.getFileId() != null)
+                ? fileRepository.findById(reqTeacher.getFileId()).orElse(null)
+                : null;
+
+        user.setFile(file);
         userRepository.save(user);
 
         return new ApiResponse("Teacher successfully updated");
