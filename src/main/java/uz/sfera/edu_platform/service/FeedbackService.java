@@ -137,12 +137,13 @@ public class FeedbackService {
 
         List<ResFeedback> resFeedbacks = new ArrayList<>();
         for (Long teacherId : teacherIds) {
+            User user = userRepository.findById(teacherId).get();
             ResFeedbackCount allByTeacher = feedbackRepository.findAllByTeacher(teacherId);
-            ResFeedbackCount allByLesson = feedbackRepository.findAllByLesson();
-            ResFeedbackCount allByQuiz = feedbackRepository.findAllByQuiz();
+            ResFeedbackCount allByLesson = feedbackRepository.findAllByLesson(teacherId);
+            ResFeedbackCount allByQuiz = feedbackRepository.findAllByQuiz(teacherId);
 
             ResFeedback resFeedback = ResFeedback.builder()
-                    .teacherName(allByTeacher.getTeacherName())
+                    .teacherName(user.getFullName())
                     .countLesson(allByLesson != null ? allByLesson.getFeedbackCount() :null)
                     .lessonBall(allByLesson != null ? allByLesson.getFeedbackBall() : null)
                     .quizCount(allByQuiz != null ? allByQuiz.getFeedbackCount() : null)
