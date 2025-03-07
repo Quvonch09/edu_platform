@@ -31,9 +31,10 @@ public class QuizService {
 
     @Transactional
     public ApiResponse createQuiz(ReqQuiz reqQuiz) {
-        Lesson lesson = lessonRepository.findById(reqQuiz.getLessonId())
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
-
+        Lesson lesson = lessonRepository.findById(reqQuiz.getLessonId()).orElse(null);
+        if (lesson == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        }
         if (lesson.getModule() == null || lesson.getModule().getCategory() == null) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu lessonning categoriyasi o‘chirilgan"));
         }

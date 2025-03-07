@@ -32,9 +32,10 @@ public class LessonService {
     private final GroupRepository groupRepository;
 
     public ApiResponse createLesson(LessonRequest lessonRequest) {
-        Module module = moduleRepository.findByIdAndDeleted(lessonRequest.getModuleId(), (byte) 0)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Module "))));
-
+        Module module = moduleRepository.findByIdAndDeleted(lessonRequest.getModuleId(), (byte) 0).orElse(null);
+        if (module == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Module"));
+        }
         if (module.getCategory() == null) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu modulga dars qo'shish mumkin emas"));
         }
@@ -52,9 +53,10 @@ public class LessonService {
     }
 
     public ApiResponse getLessonInModule(Long moduleId) {
-        moduleRepository.findByIdAndDeleted(moduleId, (byte) 0)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Modul"))));
-
+        Module module = moduleRepository.findByIdAndDeleted(moduleId, (byte) 0).orElse(null);
+        if (module == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Module"));
+        }
         List<LessonDTO> lessons = lessonRepository.findByModuleIdAndDeleted(moduleId, (byte) 0).stream()
                 .filter(lesson -> lesson.getModule().getCategory() != null) // Consider optimizing this in the query
                 .map(this::lessonDTO)
@@ -65,11 +67,15 @@ public class LessonService {
 
     @Transactional
     public ApiResponse updateLesson(Long lessonId, LessonRequest lessonRequest) {
-        Lesson lesson = lessonRepository.findByIdAndDeleted(lessonId, (byte) 0)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
+        Lesson lesson = lessonRepository.findByIdAndDeleted(lessonId, (byte) 0).orElse(null);
+        if (lesson == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        }
 
-        Module module = moduleRepository.findByIdAndDeleted(lessonRequest.getModuleId(), (byte) 0)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Modul"))));
+        Module module = moduleRepository.findByIdAndDeleted(lessonRequest.getModuleId(), (byte) 0).orElse(null);
+        if (module == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Module"));
+        }
 
         lesson.setName(lessonRequest.getName());
         lesson.setDescription(lessonRequest.getDescription());
@@ -81,8 +87,11 @@ public class LessonService {
 
 
     public ApiResponse delete(Long lessonId) {
-        Lesson lesson =  lessonRepository.findByIdAndDeleted(lessonId, (byte) 0)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
+        Lesson lesson =  lessonRepository.findByIdAndDeleted(lessonId, (byte) 0).orElse(null);
+        if (lesson == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        }
+
         lesson.setDeleted((byte) 1);
         lessonRepository.save(lesson);
         return new ApiResponse("O'chirildi");
@@ -90,15 +99,19 @@ public class LessonService {
 
     @Transactional
     public ApiResponse allowLesson(ReqLessonTracking req) {
-        Lesson lesson = lessonRepository.findById(req.getLessonId())
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
+        Lesson lesson = lessonRepository.findById(req.getLessonId()).orElse(null);
+        if (lesson == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        }
 
         if (lesson.getDeleted() == 1) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Lesson already deleted"));
         }
 
-        Group group = groupRepository.findById(req.getGroupId())
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Group"))));
+        Group group = groupRepository.findById(req.getGroupId()).orElse(null);
+        if (group == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
 
         if (lessonTrackingRepository.existsByLessonIdAndGroupId(lesson.getId(), group.getId())) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("LessonTracking"));
@@ -111,8 +124,10 @@ public class LessonService {
 
     public ApiResponse search(String name, Long id, int size, int page) {
         if (id != null) {
-            Lesson lesson = lessonRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
+            Lesson lesson = lessonRepository.findById(id).orElse(null);
+            if (lesson == null) {
+                return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+            }
 
             if (lesson.getModule() != null && lesson.getModule().getDeleted() == 1) {
                 return new ApiResponse(ResponseError.NOTFOUND("Lessonning bog‘liq modul o‘chirilgan"));
@@ -175,8 +190,10 @@ public class LessonService {
 
     @Transactional
     public ApiResponse manageFiles(ReqLessonFiles req, boolean isAdding) {
-        Lesson lesson = lessonRepository.findById(req.getLessonId())
-                .orElseThrow(()->new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
+        Lesson lesson = lessonRepository.findById(req.getLessonId()).orElse(null);
+        if (lesson == null){
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        }
 
         List<File> files = fileRepository.findAllById(req.getFileIds());
         List<Long> notFoundFiles = req.getFileIds().stream()

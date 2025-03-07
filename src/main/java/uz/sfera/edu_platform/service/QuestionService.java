@@ -30,9 +30,10 @@ public class QuestionService {
 
     @Transactional
     public ApiResponse saveQuestion(QuestionEnum difficulty, ReqQuestion reqQuestion) {
-        Quiz quiz = quizRepository.findById(reqQuestion.getQuizId())
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Quiz"))));
-
+        Quiz quiz = quizRepository.findById(reqQuestion.getQuizId()).orElse(null);
+        if (quiz == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
+        }
         if (quiz.getDeleted() == 1) {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
         }
@@ -67,9 +68,10 @@ public class QuestionService {
 
 
     public ApiResponse getQuestionByQuiz(Long quizId) {
-        Quiz quiz = quizRepository.findById(quizId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Quiz"))));
-
+        Quiz quiz = quizRepository.findById(quizId).orElse(null);
+        if (quiz == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
+        }
         if (quiz.getDeleted() == 1) {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
         }
@@ -92,9 +94,10 @@ public class QuestionService {
 
     @Transactional
     public ApiResponse deleteQuiz(Long questionId) {
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Question"))));
-
+        Question question = questionRepository.findById(questionId).orElse(null);
+        if (question == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
+        }
         optionRepository.deleteByQuestionId(questionId); // Optionlarni o‘chirish
         questionRepository.delete(question); // Savolni o‘chirish
 
@@ -105,11 +108,15 @@ public class QuestionService {
 
     @Transactional
     public ApiResponse updateQuestion(Long questionId, QuestionEnum difficulty, ReqQuestion reqQuestion) {
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Question"))));
+        Question question = questionRepository.findById(questionId).orElse(null);
+        if (question == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Question"));
+        }
 
-        Quiz quiz = quizRepository.findById(reqQuestion.getQuizId())
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Quiz"))));
+        Quiz quiz = quizRepository.findById(reqQuestion.getQuizId()).orElse(null);
+        if (quiz == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
+        }
 
         if (reqQuestion.getReqOptionList().stream().filter(ReqOption::isCorrect).count() != 1) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Har bir savol uchun faqat 1 ta to‘g‘ri javob bo‘lishi kerak"));
