@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.Category;
 import uz.sfera.edu_platform.entity.File;
 import uz.sfera.edu_platform.entity.User;
+import uz.sfera.edu_platform.entity.enums.Role;
 import uz.sfera.edu_platform.exception.NotFoundException;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.CategoryDTO;
@@ -26,7 +27,7 @@ public class CategoryService {
     private final FileRepository fileRepository;
     private final UserRepository userRepository;
 
-    public ApiResponse getAllCategories(String name, Long teacherId,String description, int page, int size) {
+    public ApiResponse getAllCategories(User currentUser,String name, Long teacherId,String description, int page, int size) {
         if (teacherId != null){
             User teacher = userRepository.findById(teacherId).orElse(null);
             if (teacher == null){
@@ -34,6 +35,13 @@ public class CategoryService {
             }
 
             List<Category> categories = teacher.getCategories();
+            List<CategoryDTO> categoryDTOS = categories.stream()
+                    .map(this::convertCategoryToCategoryDTO)
+                    .toList();
+            return new ApiResponse(categoryDTOS);
+        }
+        if (currentUser.getRole().equals(Role.ROLE_TEACHER)){
+            List<Category> categories = currentUser.getCategories();
             List<CategoryDTO> categoryDTOS = categories.stream()
                     .map(this::convertCategoryToCategoryDTO)
                     .toList();
@@ -85,9 +93,6 @@ public class CategoryService {
     public ApiResponse updateCategory(Long categoryId, CategoryDTO categoryDTO) {
         return categoryRepository.findById(categoryId)
                 .map(category -> {
-                    if (categoryRepository.existsByNameAndActive(categoryDTO.getName(), (byte) 1)) {
-                        return new ApiResponse(ResponseError.ALREADY_EXIST("Category"));
-                    }
                     save(category, categoryDTO);
                     categoryRepository.save(category);
                     return new ApiResponse("Category successfully updated");

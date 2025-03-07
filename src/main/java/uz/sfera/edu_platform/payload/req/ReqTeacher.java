@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -18,7 +20,7 @@ public class ReqTeacher {
             message = "Invalid Uzbekistan phone number")
     private String phoneNumber;
 
-    private Long categoryId;
+    private List<Long> categoryIds;
 
     @NotBlank(message = "Bush bulmasin")
     private String password;
