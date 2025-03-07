@@ -77,4 +77,10 @@ public class FeedbackController {
         ApiResponse feedbacks = feedbackService.getAllByQuizId(quizId, page, size);
         return ResponseEntity.ok(feedbacks);
     }
+
+
+    @GetMapping("/allFeedbacks")
+    public ResponseEntity<ApiResponse> getAllFeedbackForCeo(){
+        return ResponseEntity.ok(feedbackService.getAllForCeo());
+    }
 }

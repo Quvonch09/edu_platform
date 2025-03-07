@@ -192,6 +192,7 @@ ORDER BY r.rank_position;
     @Query(value = "select g.* from groups g join users u on g.teacher_id = u.id  where\n" +
             "            (:name IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :name, '%')))\n" +
             "            and (:teacherName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :teacherName, '%')))\n" +
+            "            and (:teacherId IS NULL OR u.id = :teacherId) \n" +
             "            and ( coalesce(:startDate , null) IS NULL OR g.start_date <= CAST(:startDate AS DATE))\n" +
             "            and (coalesce(:endDate ,null) IS NULL OR g.end_date >= CAST(:endDate AS DATE))\n" +
             "            and (:categoryId IS NULL OR g.category_id = :categoryId ) order by g.id desc",
@@ -200,7 +201,8 @@ ORDER BY r.rank_position;
                             @Param("teacherName") String teacherName,
                             @Param("startDate")  LocalDate startDate,
                             @Param("endDate") LocalDate endDate,
-                            @Param("categoryId") Long categoryId, Pageable pageable);
+                            @Param("categoryId") Long categoryId,
+                            @Param("teacherId") Long teacherId, Pageable pageable);
 
     @Query(value = "select coalesce(count(*) ,0) from groups g join groups_students gs on g.id = gs.group_id " +
             "join users u on gs.students_id = u.id\n" +

@@ -57,7 +57,9 @@ public class UserService {
         Category category = categoryRepository.findById(reqTeacher.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Kategoriya topilmadi"));
 
-        File file = fileRepository.findById(reqTeacher.getFileId()).orElse(null);
+        File file = (reqTeacher.getFileId() != null)
+                ? fileRepository.findById(reqTeacher.getFileId()).orElse(null)
+                : null;
 
         User teacher = User.builder()
                 .fullName(reqTeacher.getFullName())

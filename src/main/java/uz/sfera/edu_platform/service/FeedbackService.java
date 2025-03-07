@@ -9,6 +9,8 @@ import uz.sfera.edu_platform.entity.Feedback;
 import uz.sfera.edu_platform.entity.Lesson;
 import uz.sfera.edu_platform.entity.Quiz;
 import uz.sfera.edu_platform.entity.User;
+import uz.sfera.edu_platform.entity.enums.Role;
+import uz.sfera.edu_platform.entity.template.AbsEntity;
 import uz.sfera.edu_platform.exception.BadRequestException;
 import uz.sfera.edu_platform.exception.NotFoundException;
 import uz.sfera.edu_platform.mapper.FeedbackMapper;
@@ -16,6 +18,8 @@ import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.FeedbackDto;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.ResponseFeedback;
+import uz.sfera.edu_platform.payload.res.ResFeedback;
+import uz.sfera.edu_platform.payload.res.ResFeedbackCount;
 import uz.sfera.edu_platform.payload.res.ResPageable;
 import uz.sfera.edu_platform.repository.FeedbackRepository;
 import uz.sfera.edu_platform.repository.LessonRepository;
@@ -124,6 +128,32 @@ public class FeedbackService {
         Page<Feedback> feedbacks = feedbackRepository.getAllByQuizId(quizId, pageable);
         ResPageable responseFeedback = toResponseFeedback(page, size, feedbacks);
         return new ApiResponse(responseFeedback);
+    }
+
+
+    public ApiResponse getAllForCeo(){
+        List<Long> teacherIds = userRepository.findAllByRole(Role.ROLE_TEACHER).stream()
+                        .map(AbsEntity::getId).toList();
+
+        List<ResFeedback> resFeedbacks = new ArrayList<>();
+        for (Long teacherId : teacherIds) {
+            ResFeedbackCount allByTeacher = feedbackRepository.findAllByTeacher(teacherId);
+            ResFeedbackCount allByLesson = feedbackRepository.findAllByLesson();
+            ResFeedbackCount allByQuiz = feedbackRepository.findAllByQuiz();
+
+            ResFeedback resFeedback = ResFeedback.builder()
+                    .teacherName(allByTeacher.getTeacherName())
+                    .countLesson(allByLesson != null ? allByLesson.getFeedbackCount() :null)
+                    .lessonBall(allByLesson != null ? allByLesson.getFeedbackBall() : null)
+                    .quizCount(allByQuiz != null ? allByQuiz.getFeedbackCount() : null)
+                    .quizBall(allByQuiz != null ? allByQuiz.getFeedbackBall() : null)
+                    .teacherCount(allByTeacher != null ? allByTeacher.getFeedbackCount() : null)
+                    .teacherBall(allByTeacher != null ? allByTeacher.getFeedbackBall() : null)
+                    .build();
+            resFeedbacks.add(resFeedback);
+        }
+
+        return new ApiResponse(resFeedbacks);
     }
 
 
