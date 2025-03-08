@@ -79,7 +79,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "select distinct u.* from users u  left join groups g on u.id = g.teacher_id where\n" +
             "                                                (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%')))\n" +
             "                                                and (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%')))\n" +
-            "                                                and (:groupId IS NULL OR g.id = :groupId) and u.role = :role order by u.id desc" , nativeQuery = true)
+            "                                                and (:groupId IS NULL OR g.id = :groupId) and u.role = :role order by u.created_at desc" , nativeQuery = true)
     Page<User> searchUsers(@Param("fullName") String fullName,
                               @Param("phoneNumber") String phoneNumber,
                               @Param("groupId") Long groupId,
@@ -154,7 +154,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 )
             GROUP BY
                 u.id, u.full_name, u.phone_number, g.name, g.id,
-                u.created_at, u.age, u.user_status, u.parent_phone_number, u2.full_name
+                u.created_at, u.age, u.user_status, u.parent_phone_number, u2.full_name  order by u.created_at desc
     """,
             countQuery = """
         SELECT COUNT(DISTINCT u.id) 

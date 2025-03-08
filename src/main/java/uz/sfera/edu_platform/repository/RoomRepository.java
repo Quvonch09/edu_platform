@@ -13,7 +13,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
     @Query(value = "select r.id, r.name, r.color, r.start_time as startTime, r.end_time as endTime from room r\n" +
             "            where (?1 IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', ?1, '%')))\n" +
-            "            and (?2 IS NULL OR LOWER(r.color) LIKE LOWER(CONCAT('%', ?2, '%')))",
+            "            and (?2 IS NULL OR LOWER(r.color) LIKE LOWER(CONCAT('%', ?2, '%'))) order by r.id desc",
             nativeQuery = true)
     Page<ResRoom> getAllRooms(String name, String color, Pageable pageable);
 }
