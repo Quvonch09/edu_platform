@@ -195,7 +195,7 @@ ORDER BY r.rank_position;
             "            and (:teacherId IS NULL OR u.id = :teacherId) \n" +
             "            and ( coalesce(:startDate , null) IS NULL OR g.start_date <= CAST(:startDate AS DATE))\n" +
             "            and (coalesce(:endDate ,null) IS NULL OR g.end_date >= CAST(:endDate AS DATE))\n" +
-            "            and (:categoryId IS NULL OR g.category_id = :categoryId ) order by g.id desc",
+            "            and (:categoryId IS NULL OR g.category_id = :categoryId ) order by g.created_at desc",
             nativeQuery = true)
     Page<Group> searchGroup(@Param("name") String name,
                             @Param("teacherName") String teacherName,
