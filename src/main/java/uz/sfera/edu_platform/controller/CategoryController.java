@@ -1,8 +1,10 @@
 package uz.sfera.edu_platform.controller;
 
 import jakarta.validation.Valid;
+import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.CategoryDTO;
+import uz.sfera.edu_platform.security.CurrentUser;
 import uz.sfera.edu_platform.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -34,10 +36,11 @@ public class CategoryController {
             @RequestParam(required = false, value = "name") String name,
             @RequestParam(required = false) Long teacherId,
             @RequestParam(required = false, value = "description") String description,
+            @CurrentUser User user,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-        ApiResponse allCategories = categoryService.getAllCategories(name,teacherId, description, page, size);
+        ApiResponse allCategories = categoryService.getAllCategories(user,name,teacherId, description, page, size);
         return ResponseEntity.ok(allCategories);
     }
 
