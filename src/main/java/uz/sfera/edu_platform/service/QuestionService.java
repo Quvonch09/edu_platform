@@ -151,6 +151,7 @@ public class QuestionService {
         return QuestionDTO.builder()
                 .id(question.getId())
                 .text(question.getQuestion())
+                .fileId(question.getFile().getId())
                 .difficulty(question.getQuestionEnum().toString())
                 .quizId(question.getQuiz().getId())
                 .options(optionList)
