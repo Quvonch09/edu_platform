@@ -10,12 +10,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class QuestionDTO {
     private Long id;
     private String text;
+    private Long fileId;
     private String difficulty;
     private Long quizId;
     private List<OptionDTO> options;
-    private Long resultId;
 }
