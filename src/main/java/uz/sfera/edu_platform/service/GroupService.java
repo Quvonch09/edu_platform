@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.*;
+import uz.sfera.edu_platform.entity.enums.Role;
 import uz.sfera.edu_platform.entity.enums.WeekDay;
 import uz.sfera.edu_platform.exception.NotFoundException;
 import uz.sfera.edu_platform.payload.ApiResponse;
@@ -125,20 +126,20 @@ public class GroupService {
     }
 
 
-    public ApiResponse getGroupsList() {
-        List<GroupListDTO> groupDTOList = groupRepository.findAll().stream()
-                .map(group -> {
-                    Category category = group.getCategory();
-                    User teacher = group.getTeacher();
-                    return GroupListDTO.builder()
-                            .id(group.getId())
-                            .name(group.getName())
-                            .categoryName(category != null ? category.getName() : null)
-                            .teacherName(teacher != null ? teacher.getFullName() : null)
-                            .startDate(group.getStartDate())
-                            .endDate(group.getEndDate())
-                            .build();
-                })
+    public ApiResponse getGroupsList(User user) {
+        List<Group> groups = user.getRole().equals(Role.ROLE_TEACHER)
+                ? groupRepository.findByTeacherId(user.getId())
+                : groupRepository.findAll();
+
+        List<GroupListDTO> groupDTOList = groups.stream()
+                .map(group -> GroupListDTO.builder()
+                        .id(group.getId())
+                        .name(group.getName())
+                        .categoryName(group.getCategory() != null ? group.getCategory().getName() : null)
+                        .teacherName(group.getTeacher() != null ? group.getTeacher().getFullName() : null)
+                        .startDate(group.getStartDate())
+                        .endDate(group.getEndDate())
+                        .build())
                 .collect(Collectors.toList());
 
         return new ApiResponse(groupDTOList);

@@ -74,8 +74,8 @@ public class GroupController {
     @PreAuthorize("hasAnyRole('ROLE_CEO', 'ROLE_ADMIN', 'ROLE_TEACHER')")
     @Operation(summary = "ADMIN/TEACHER/CEO guruhlar listini kurish")
     @GetMapping("/list")
-    public ResponseEntity<ApiResponse> getGroupList(){
-        ApiResponse oneGroup = groupService.getGroupsList();
+    public ResponseEntity<ApiResponse> getGroupList(@CurrentUser User user){
+        ApiResponse oneGroup = groupService.getGroupsList(user);
         return ResponseEntity.ok(oneGroup);
     }
 

@@ -1,5 +1,8 @@
 package uz.sfera.edu_platform.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import uz.sfera.edu_platform.entity.Group;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.entity.enums.PaymentEnum;
@@ -17,6 +20,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.fasterxml.jackson.databind.type.LogicalType.Collection;
 
 @Service
 @RequiredArgsConstructor
@@ -87,24 +92,20 @@ public class StatisticService {
     }
 
 
-    public ApiResponse getStudentStatisticByGroup(Long groupId, User user) {
-        Group group;
-        if (user.getRole().equals(Role.ROLE_STUDENT)){
-           group = groupRepository.findByStudentId(user.getId()).orElse(null);
-        }else {
-            group = groupRepository.findById(groupId).orElse(null);
-        }
+    public ApiResponse getStudentStatisticByGroup(Long groupId, User user, int page, int size) {
+        Group group = user.getRole().equals(Role.ROLE_STUDENT)
+                ? groupRepository.findByStudentId(user.getId()).orElse(null)
+                : groupRepository.findById(groupId).orElse(null);
 
         if (group == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
 
-        List<ResStudentRank> allByStudentRank = new ArrayList<>();
-        for (User student : groupRepository.findByGroup(group.getId())) {
-            allByStudentRank.addAll(groupRepository.findAllByStudentRank(student.getId()));
-        }
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ResStudentRank> studentRankPage = (Page<ResStudentRank>) groupRepository.findStudentsByGroupId(group.getId(), pageable)
+                .flatMap(student -> groupRepository.findAllByStudentRank(student.getId()).stream());
 
-        return new ApiResponse(allByStudentRank);
+        return new ApiResponse(studentRankPage);
     }
 
 

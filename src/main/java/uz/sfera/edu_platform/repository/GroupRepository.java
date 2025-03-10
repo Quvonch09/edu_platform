@@ -23,8 +23,17 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     @Query(value = "select u.* from users u join groups_students gs on gs.students_id = u.id where gs.group_id =:groupId", nativeQuery = true)
     List<User> findByGroup(@Param("groupId") Long groupId);
 
+    @Query("SELECT g FROM Group g WHERE g.teacher.id = :teacherId")
+    List<Group> findByTeacherId(@Param("teacherId") Long teacherId);
+
     @Query("select  coalesce( count (g) , 0) from Group g where g.active = true ")
     Integer countAllByGroup();
+
+    @Query(value = "SELECT u.* FROM users u " +
+            "JOIN groups_students gs ON gs.students_id = u.id " +
+            "WHERE gs.group_id = :groupId",
+            nativeQuery = true)
+    Page<User> findStudentsByGroupId(@Param("groupId") Long groupId,Pageable pageable);
 
     @Query(value = """
         WITH months AS (
