@@ -34,7 +34,7 @@ public class GroupController {
     public ResponseEntity<ApiResponse> getByTeacher(
             @CurrentUser User teacher
     ){
-        return ResponseEntity.ok(groupService.search(null,teacher.getFullName(),null,null,null, teacher.getId(), 0,0));
+        return ResponseEntity.ok(groupService.search(null,teacher.getFullName(),null,null,null, teacher.getId(), 0,10));
     }
 
 
