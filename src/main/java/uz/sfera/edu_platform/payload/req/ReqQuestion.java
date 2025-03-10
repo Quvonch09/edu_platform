@@ -16,6 +16,8 @@ public class ReqQuestion {
     @NotBlank(message = "Savol matni bo'sh bo'lmasin")
     private String questionText;
 
+    private Long fileId;
+
     @NotNull(message = "Quiz tanlanishi majburiy")
     private Long quizId;
 

@@ -3,6 +3,7 @@ package uz.sfera.edu_platform.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uz.sfera.edu_platform.entity.File;
 import uz.sfera.edu_platform.entity.Option;
 import uz.sfera.edu_platform.entity.Question;
 import uz.sfera.edu_platform.entity.Quiz;
@@ -14,6 +15,7 @@ import uz.sfera.edu_platform.payload.QuestionDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.req.ReqOption;
 import uz.sfera.edu_platform.payload.req.ReqQuestion;
+import uz.sfera.edu_platform.repository.FileRepository;
 import uz.sfera.edu_platform.repository.OptionRepository;
 import uz.sfera.edu_platform.repository.QuestionRepository;
 import uz.sfera.edu_platform.repository.QuizRepository;
@@ -25,6 +27,7 @@ import java.util.List;
 public class QuestionService {
     private final QuestionRepository questionRepository;
     private final QuizRepository quizRepository;
+    private final FileRepository fileRepository;
     private final OptionService optionService;
     private final OptionRepository optionRepository;
 
@@ -48,6 +51,7 @@ public class QuestionService {
         Question question = questionRepository.save(
                 Question.builder()
                         .question(reqQuestion.getQuestionText())
+                        .file(fileRepository.findById(reqQuestion.getFileId()).orElse(null))
                         .questionEnum(difficulty)
                         .quiz(quiz)
                         .build()
@@ -124,6 +128,7 @@ public class QuestionService {
 
         // Savolni yangilash
         question.setQuestion(reqQuestion.getQuestionText());
+        question.setFile(fileRepository.findById(reqQuestion.getFileId()).orElse(null));
         question.setQuestionEnum(difficulty);
         question.setQuiz(quiz);
 
