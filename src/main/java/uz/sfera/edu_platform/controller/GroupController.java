@@ -32,11 +32,9 @@ public class GroupController {
     @Operation(summary = "Teacher o'ziga tegishli guruhlarni ko'rish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> getByTeacher(
-            @CurrentUser User teacher,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @CurrentUser User teacher
     ){
-        return ResponseEntity.ok(groupService.search(null,teacher.getFullName(),null,null,null, teacher.getId(), page,size));
+        return ResponseEntity.ok(groupService.search(null,teacher.getFullName(),null,null,null, teacher.getId(), 0,0));
     }
 
 
@@ -74,8 +72,8 @@ public class GroupController {
     @PreAuthorize("hasAnyRole('ROLE_CEO', 'ROLE_ADMIN', 'ROLE_TEACHER')")
     @Operation(summary = "ADMIN/TEACHER/CEO guruhlar listini kurish")
     @GetMapping("/list")
-    public ResponseEntity<ApiResponse> getGroupList(){
-        ApiResponse oneGroup = groupService.getGroupsList();
+    public ResponseEntity<ApiResponse> getGroupList(@CurrentUser User user){
+        ApiResponse oneGroup = groupService.getGroupsList(user);
         return ResponseEntity.ok(oneGroup);
     }
 

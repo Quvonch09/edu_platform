@@ -23,8 +23,17 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     @Query(value = "select u.* from users u join groups_students gs on gs.students_id = u.id where gs.group_id =:groupId", nativeQuery = true)
     List<User> findByGroup(@Param("groupId") Long groupId);
 
+    @Query("SELECT g FROM Group g WHERE g.teacher.id = :teacherId")
+    List<Group> findByTeacherId(@Param("teacherId") Long teacherId);
+
     @Query("select  coalesce( count (g) , 0) from Group g where g.active = true ")
     Integer countAllByGroup();
+
+    @Query(value = "SELECT u.* FROM users u " +
+            "JOIN groups_students gs ON gs.students_id = u.id " +
+            "WHERE gs.group_id = :groupId",
+            nativeQuery = true)
+    Page<User> findStudentsByGroupId(@Param("groupId") Long groupId,Pageable pageable);
 
     @Query(value = """
         WITH months AS (
@@ -189,20 +198,38 @@ ORDER BY r.rank_position;
 
     boolean existsByName(String name);
 
-    @Query(value = "select g.* from groups g join users u on g.teacher_id = u.id  where\n" +
-            "            (:name IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :name, '%')))\n" +
-            "            and (:teacherName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :teacherName, '%')))\n" +
-            "            and (:teacherId IS NULL OR u.id = :teacherId) \n" +
-            "            and ( coalesce(:startDate , null) IS NULL OR g.start_date <= CAST(:startDate AS DATE))\n" +
-            "            and (coalesce(:endDate ,null) IS NULL OR g.end_date >= CAST(:endDate AS DATE))\n" +
-            "            and (:categoryId IS NULL OR g.category_id = :categoryId ) order by g.created_at desc",
+    @Query(value = """
+        SELECT g.* 
+        FROM groups g 
+        JOIN users u ON g.teacher_id = u.id  
+        WHERE (:name IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :name, '%')))
+          AND (:teacherId IS NOT NULL OR :teacherName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :teacherName, '%')))
+          AND (:teacherId IS NULL OR u.id = :teacherId)
+          AND (:startDate IS NULL OR g.start_date <= :startDate)
+          AND (:endDate IS NULL OR g.end_date >= :endDate)
+          AND (:categoryId IS NULL OR g.category_id = :categoryId)
+        ORDER BY g.created_at DESC
+        """,
+            countQuery = """
+        SELECT COUNT(*) 
+        FROM groups g 
+        JOIN users u ON g.teacher_id = u.id  
+        WHERE (:name IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :name, '%')))
+          AND (:teacherId IS NOT NULL OR :teacherName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :teacherName, '%')))
+          AND (:teacherId IS NULL OR u.id = :teacherId)
+          AND (:startDate IS NULL OR g.start_date <= :startDate)
+          AND (:endDate IS NULL OR g.end_date >= :endDate)
+          AND (:categoryId IS NULL OR g.category_id = :categoryId)
+        """,
             nativeQuery = true)
     Page<Group> searchGroup(@Param("name") String name,
                             @Param("teacherName") String teacherName,
-                            @Param("startDate")  LocalDate startDate,
+                            @Param("startDate") LocalDate startDate,
                             @Param("endDate") LocalDate endDate,
                             @Param("categoryId") Long categoryId,
-                            @Param("teacherId") Long teacherId, Pageable pageable);
+                            @Param("teacherId") Long teacherId,
+                            Pageable pageable);
+
 
     @Query(value = "select coalesce(count(*) ,0) from groups g join groups_students gs on g.id = gs.group_id " +
             "join users u on gs.students_id = u.id\n" +
