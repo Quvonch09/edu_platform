@@ -1,6 +1,7 @@
 package uz.sfera.edu_platform.service;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import uz.sfera.edu_platform.entity.Group;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.databind.type.LogicalType.Collection;
 
@@ -102,11 +104,25 @@ public class StatisticService {
         }
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<ResStudentRank> studentRankPage = (Page<ResStudentRank>) groupRepository.findStudentsByGroupId(group.getId(), pageable)
-                .flatMap(student -> groupRepository.findAllByStudentRank(student.getId()).stream());
+        Page<User> studentsPage = groupRepository.findStudentsByGroupId(group.getId(), pageable);
 
-        return new ApiResponse(studentRankPage);
+        List<ResStudentRank> studentRanks = studentsPage.stream()
+                .flatMap(student -> groupRepository.findAllByStudentRank(student.getId()).stream())
+                .collect(Collectors.toList());
+
+        Page<ResStudentRank> studentRankPage = new PageImpl<>(studentRanks, pageable, studentsPage.getTotalElements());
+
+        ResPageable resPageable = ResPageable.builder()
+                .page(studentRankPage.getNumber())
+                .size(studentRankPage.getSize())
+                .totalPage(studentRankPage.getTotalPages())
+                .totalElements(studentRankPage.getTotalElements())
+                .body(studentRankPage.getContent())
+                .build();
+
+        return new ApiResponse(resPageable);
     }
+
 
 
     public ApiResponse getStudentRank(User user) {
