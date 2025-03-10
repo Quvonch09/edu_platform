@@ -76,10 +76,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByPhoneNumberAndEnabledIsTrue(String phone);
 
-    @Query(value = "select distinct u.* from users u  left join groups g on u.id = g.teacher_id where\n" +
-            "                                                (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%')))\n" +
-            "                                                and (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%')))\n" +
-            "                                                and (:groupId IS NULL OR g.id = :groupId) and u.role = :role order by u.created_at desc" , nativeQuery = true)
+    @Query(value = "select distinct u.* from users u  " +
+            "left join groups g on u.id = g.teacher_id where " +
+            "(:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%'))) " +
+            "and (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%'))) " +
+            "and (:groupId IS NULL OR g.id = :groupId) " +
+            "and u.role = :role " +
+            "and u.enabled = true " +
+            "order by u.created_at desc", nativeQuery = true)
     Page<User> searchUsers(@Param("fullName") String fullName,
                               @Param("phoneNumber") String phoneNumber,
                               @Param("groupId") Long groupId,
@@ -204,7 +208,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "and EXTRACT(month from p.payment_date) = EXTRACT(month from current_date)", nativeQuery = true)
     Integer countStudentsHasPaid();
 
-    List<User> findAllByRole( Role role);
+    List<User> findAllByRoleAndEnabledTrue( Role role);
 
     @Query("select u from User u where (u.fullName like :fullName or u.phoneNumber = :phone) and u.role = :roleName")
     List<User> searchForChat(@Param("fullName") String fullName,
