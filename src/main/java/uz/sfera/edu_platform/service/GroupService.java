@@ -76,6 +76,10 @@ public class GroupService {
             return convertGroupToGroupDTO(group, days, graphicDay);
         }).collect(Collectors.toList());
 
+        if (teacherName != null || teacherId != null){
+            return new ApiResponse(list);
+        }
+
         return new ApiResponse(ResPageable.builder()
                 .page(page)
                 .size(size)
