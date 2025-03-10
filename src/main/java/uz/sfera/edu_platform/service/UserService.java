@@ -145,7 +145,7 @@ public class UserService {
 
 
     public ApiResponse getUsersList(Role role) {
-        List<User> users = (role != null) ? userRepository.findAllByRole(role) : userRepository.findAll();
+        List<User> users = (role != null) ? userRepository.findAllByRoleAndEnabledTrue(role) : userRepository.findAll();
 
         List<UserDTO> userDTOList = users.stream()
                 .map(this::convertToUserDTO)

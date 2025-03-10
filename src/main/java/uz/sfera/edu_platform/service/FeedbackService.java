@@ -147,7 +147,7 @@ public class FeedbackService {
 
     public ApiResponse getAllForCeo( int page, int size){
         Pageable pageable = PageRequest.of(page, size);
-        List<Long> teacherIds = userRepository.findAllByRole(Role.ROLE_TEACHER).stream()
+        List<Long> teacherIds = userRepository.findAllByRoleAndEnabledTrue(Role.ROLE_TEACHER).stream()
                         .map(AbsEntity::getId).toList();
 
         List<ResFeedback> resFeedbacks = new ArrayList<>();
