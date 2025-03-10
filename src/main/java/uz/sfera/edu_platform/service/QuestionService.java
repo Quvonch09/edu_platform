@@ -34,24 +34,20 @@ public class QuestionService {
     @Transactional
     public ApiResponse saveQuestion(QuestionEnum difficulty, ReqQuestion reqQuestion) {
         Quiz quiz = quizRepository.findById(reqQuestion.getQuizId()).orElse(null);
-        if (quiz == null) {
-            return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
-        }
-        if (quiz.getDeleted() == 1) {
+        if (quiz == null || quiz.getDeleted() == 1) {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
         }
 
-        long correctAnswerCount = reqQuestion.getReqOptionList()
-                .stream().filter(ReqOption::isCorrect).count();
-
-        if (correctAnswerCount != 1) {
+        if (reqQuestion.getReqOptionList().stream().filter(ReqOption::isCorrect).count() != 1) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Har bir savol uchun faqat 1 ta to'g'ri javob bo‘lishi kerak"));
         }
+
+        File file = reqQuestion.getFileId() != null ? fileRepository.findById(reqQuestion.getFileId()).orElse(null) : null;
 
         Question question = questionRepository.save(
                 Question.builder()
                         .question(reqQuestion.getQuestionText())
-                        .file(fileRepository.findById(reqQuestion.getFileId()).orElse(null))
+                        .file(file)
                         .questionEnum(difficulty)
                         .quiz(quiz)
                         .build()
@@ -69,6 +65,7 @@ public class QuestionService {
 
         return new ApiResponse("Savol yaratildi");
     }
+
 
 
     public ApiResponse getQuestionByQuiz(Long quizId) {
