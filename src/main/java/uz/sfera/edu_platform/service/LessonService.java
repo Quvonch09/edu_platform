@@ -62,6 +62,10 @@ public class LessonService {
                 .map(this::lessonDTO)
                 .toList();
 
+        if (lessons.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Lessons"));
+        }
+
         return new ApiResponse(Map.of("lessonCount", lessons.size(), "lessons", lessons));
     }
 
@@ -145,6 +149,10 @@ public class LessonService {
                 .filter(lesson -> lesson.getModule() == null || lesson.getModule().getDeleted() != 1)
                 .map(this::lessonDTO)
                 .toList();
+
+        if (filteredLessons.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Lessonlar"));
+        }
 
         return new ApiResponse(new ResPageable(page, size, lessons.getTotalPages(),
                 lessons.getTotalElements(), filteredLessons));

@@ -73,6 +73,10 @@ public class QuizService {
 
         List<QuestionDTO> questions = getRandomQuestionsForQuiz(quiz.getId());
 
+        if (questions.isEmpty() || questions.size() < quizSettings.getQuestionCount()){
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Savollar yetarli emas"));
+        }
+
         Result result = Result.builder()
                 .startTime(LocalDateTime.now())
                 .endTime(null)
@@ -130,13 +134,15 @@ public class QuizService {
 
     public List<QuestionDTO> getRandomQuestionsForQuiz(Long quizId) {
         QuizSettings settings = quizSettingsRepository.findByQuizId(quizId);
-        return questionRepository.findRandomQuestionsByQuizId(quizId).stream()
+        List<QuestionDTO> list =  questionRepository.findRandomQuestionsByQuizId(quizId).stream()
                 .limit(settings.getQuestionCount())
                 .map(question -> questionService.questionDTO(question,
                         optionRepository.findByQuestionId(question.getId()).stream()
                                 .map(optionService::optionDTO)
                                 .toList()))
                 .toList();
+
+        return list;
     }
 
 

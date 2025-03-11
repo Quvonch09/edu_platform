@@ -65,6 +65,10 @@ public class TaskService {
                 .map(this::taskDTO)
                 .toList();
 
+        if (taskDTOS.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Tasklar"));
+        }
+
         return new ApiResponse(taskDTOS);
     }
 
