@@ -2,6 +2,7 @@ package uz.sfera.edu_platform.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,6 +31,7 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GroupService {
     private final GroupRepository groupRepository;
     private final CategoryRepository categoryRepository;
@@ -183,20 +185,7 @@ public class GroupService {
     }
 
 
-    @Scheduled(cron = "0 0 7 * * *")
     public ApiResponse deleteGroup(Long groupId) {
-        if (groupId == null) {
-            List<Group> groups = groupRepository.findByEndDate(LocalDate.now());
-
-            for (Group group : groups) {
-                group.setActive(false);
-                groupRepository.save(group);
-            }
-
-            System.out.println("Bugun " + groups.size() + " ta guruh tugadi !");
-        }
-
-        assert groupId != null;
         Group group = groupRepository.findById(groupId).orElse(null);
 
         if (group == null){
@@ -209,6 +198,18 @@ public class GroupService {
         return new ApiResponse("Group o'chirildi");
     }
 
+
+    @Scheduled(cron = "0 0 7 * * *")
+     public void endGroup() {
+        List<Group> groups = groupRepository.findByEndDate(LocalDate.now());
+
+        for (Group group : groups) {
+            group.setActive(false);
+            groupRepository.save(group);
+        }
+
+        log.info("Bugun {} ta guruh tugatdi !", groups.size());
+    }
 
 
 
