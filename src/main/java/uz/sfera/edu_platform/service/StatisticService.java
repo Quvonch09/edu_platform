@@ -111,7 +111,7 @@ public class StatisticService {
 //                .collect(Collectors.toList());
         Page<ResStudentRank> allByStudentRank = null;
         for (User user1 : studentsPage.getContent()) {
-            allByStudentRank = groupRepository.findAllByStudentRank(user1.getId(), pageable);
+            allByStudentRank = groupRepository.findStudentRankingInGroups(user1.getId(), pageable);
         }
 
 //        Page<ResStudentRank> studentRankPage = new PageImpl<>(studentRanks, pageable, studentsPage.getTotalElements());

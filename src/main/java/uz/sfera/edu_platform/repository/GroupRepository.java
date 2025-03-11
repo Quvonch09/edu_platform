@@ -159,37 +159,78 @@ LIMIT 1;
     ResStudentStatistic findGroupByStudentId(@Param("studentId") Long studentId);
 
     @Query(value = """
-  WITH student_scores AS (
+WITH student_scores AS (
     SELECT
         gs.group_id,
         gs.students_id AS student_id,
         u.full_name AS student_name,
         COALESCE(SUM(h.ball), 0) AS total_score
     FROM groups_students gs
-             JOIN users u ON gs.students_id = u.id
-             LEFT JOIN homework h ON h.student_id = u.id AND h.checked = 1
-    WHERE gs.group_id IN (
-        SELECT group_id FROM groups_students WHERE students_id = :studentId
+    JOIN users u ON gs.students_id = u.id
+    LEFT JOIN homework h ON h.student_id = gs.students_id
+    WHERE gs.group_id = (
+        SELECT group_id FROM groups_students WHERE students_id = :studentId LIMIT 1
     )
+    AND (h.checked = 1 OR h.checked IS NULL)
     GROUP BY gs.group_id, gs.students_id, u.full_name
 ),
-     ranking AS (
-         SELECT
-             group_id,
-             student_id,
-             total_score,
-             RANK() OVER (PARTITION BY group_id ORDER BY total_score DESC) AS rank_position
-         FROM student_scores
-     )
+ranking AS (
+    SELECT
+        group_id,
+        student_id,
+        total_score,
+        RANK() OVER (PARTITION BY group_id ORDER BY total_score DESC) AS rank_position
+    FROM student_scores
+)
 SELECT
+    ss.group_id AS groupId,
     ss.student_name as fullName,
     ss.total_score as score,
     r.rank_position as rank
 FROM student_scores ss
-         JOIN ranking r ON ss.student_id = r.student_id AND ss.group_id = r.group_id
+JOIN ranking r ON ss.student_id = r.student_id AND ss.group_id = r.group_id
 ORDER BY r.rank_position;
-""" , nativeQuery = true)
+""", nativeQuery = true)
     Page<ResStudentRank> findAllByStudentRank(@Param("studentId") Long studentId, Pageable pageable);
+
+
+
+    @Query(value = """
+WITH student_scores AS (
+    SELECT
+        gs.group_id,
+        gs.students_id AS student_id,
+        u.full_name AS student_name,
+        COALESCE(SUM(h.ball), 0) AS total_score
+    FROM groups_students gs
+    JOIN users u ON gs.students_id = u.id
+    LEFT JOIN homework h ON h.student_id = gs.students_id
+    WHERE gs.group_id IN (
+        SELECT group_id FROM groups_students WHERE students_id = :studentId
+    )
+    AND (h.checked = 1 OR h.checked IS NULL)
+    GROUP BY gs.group_id, gs.students_id, u.full_name
+),
+ranking AS (
+    SELECT
+        group_id,
+        student_id,
+        total_score,
+        RANK() OVER (PARTITION BY group_id ORDER BY total_score DESC) AS rank_position
+    FROM student_scores
+)
+SELECT
+    ss.group_id AS groupId,
+    ss.student_name as fullName,
+    ss.total_score as score,
+    r.rank_position as rank
+FROM student_scores ss
+JOIN ranking r ON ss.student_id = r.student_id AND ss.group_id = r.group_id
+WHERE ss.student_id = :studentId
+ORDER BY r.rank_position;
+""", nativeQuery = true)
+    Page<ResStudentRank> findStudentRankingInGroups(@Param("studentId") Long studentId, Pageable pageable);
+
 
 
 
