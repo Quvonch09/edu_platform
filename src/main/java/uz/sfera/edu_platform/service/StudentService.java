@@ -97,6 +97,10 @@ public class StudentService {
                 teacherId, startAge, endAge, hasPaid, pageRequest
         );
 
+        if (users.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Hech qanday student"));
+        }
+
         ResPageable resPageable = ResPageable.builder()
                 .page(page)
                 .size(size)
@@ -223,6 +227,10 @@ public class StudentService {
         List<UserDTO> list = users.stream()
                 .map(this::getTeacherDTO)  // ✅ To‘g‘ri metod nomi
                 .toList();
+
+        if (list.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Userlar"));
+        }
 
         return new ApiResponse(list);
     }

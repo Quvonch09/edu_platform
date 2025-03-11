@@ -364,26 +364,4 @@ public class UserService {
                 .groupName(group.getName())
                 .build();
     }
-
-
-
-
-//    @Transactional
-//    public ApiResponse getOneTeacher(Long teacherId) {
-//        User user = userRepository.findById(teacherId).orElse(null);
-//        if (user == null) {
-//            return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
-//        }
-//        List<Long> categoryIds = new ArrayList<>();
-//        for (Category category : user.getCategories()) {
-//            categoryIds.add(category.getId());
-//        }
-//
-//        return new ApiResponse(convertUserToTeacherDTO(user,categoryIds));
-//    }
-
-
-    // TODO Ishlatilmay yotgan ekan cament olib quydim agar kerak bulmasa uchirib tashela
-
-
 }

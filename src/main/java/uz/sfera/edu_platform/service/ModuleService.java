@@ -81,6 +81,10 @@ public class ModuleService {
                 ? moduleRepository.findAll(pageable)
                 : moduleRepository.findByNameContainingIgnoreCaseAndDeleted(name, (byte) 0, pageable);
 
+        if (modules.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Modulelar"));
+        }
+
         return new ApiResponse(
                 ResPageable.builder()
                         .page(page)
@@ -154,6 +158,10 @@ public class ModuleService {
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+
+        if (resModules.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Moduullar"));
+        }
 
         return new ApiResponse(resModules);
     }

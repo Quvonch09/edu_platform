@@ -43,6 +43,10 @@ public class RoomService {
     public ApiResponse getRooms(String name, String color, int page, int size){
         Page<ResRoom> allRooms = roomRepository.getAllRooms(name, color, PageRequest.of(page, size));
 
+        if (allRooms.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Xonalar"));
+        }
+
         return new ApiResponse(ResPageable.builder()
                 .page(page)
                 .size(size)
@@ -57,6 +61,10 @@ public class RoomService {
         List<RoomDTO> resRooms = roomRepository.findAll().stream()
                 .map(this::roomDTO)
                 .toList();
+
+        if (resRooms.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Xonalar"));
+        }
 
 
         return new ApiResponse(resRooms);
