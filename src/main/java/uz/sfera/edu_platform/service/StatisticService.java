@@ -106,7 +106,7 @@ public class StatisticService {
         Pageable pageable = PageRequest.of(page, size);
         Page<User> studentsPage = groupRepository.findStudentsByGroupId(group.getId(), pageable);
 
-        List<ResStudentRank> studentRanks = studentsPage.stream()
+        List<ResStudentRank> studentRanks = studentsPage.getContent().stream()
                 .flatMap(student -> groupRepository.findAllByStudentRank(student.getId()).stream())
                 .collect(Collectors.toList());
 

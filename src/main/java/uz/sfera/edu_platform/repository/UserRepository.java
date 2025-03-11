@@ -82,7 +82,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "and (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%'))) " +
             "and (:groupId IS NULL OR g.id = :groupId) " +
             "and u.role = :role " +
-            "and u.enabled = true " +
             "order by u.created_at desc", nativeQuery = true)
     Page<User> searchUsers(@Param("fullName") String fullName,
                               @Param("phoneNumber") String phoneNumber,
@@ -212,7 +211,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "and EXTRACT(month from p.payment_date) = EXTRACT(month from current_date)", nativeQuery = true)
     Integer countStudentsHasPaid();
 
-    List<User> findAllByRoleAndEnabledTrue( Role role);
+    List<User> findAllByRole ( Role role);
 
     @Query("select u from User u where (u.fullName like :fullName or u.phoneNumber = :phone) and u.role = :roleName")
     List<User> searchForChat(@Param("fullName") String fullName,
