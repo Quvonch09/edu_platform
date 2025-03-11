@@ -178,6 +178,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
         AND (:startAge IS NULL OR u.age >= :startAge)
         AND (:endAge IS NULL OR u.age <= :endAge)
         AND u.role = 'ROLE_STUDENT'
+        AND u.deleted = false
+      
         AND (
             :hasPaid IS NULL
             OR (:hasPaid = TRUE AND EXISTS (
@@ -211,7 +213,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "and EXTRACT(month from p.payment_date) = EXTRACT(month from current_date)", nativeQuery = true)
     Integer countStudentsHasPaid();
 
-    List<User> findAllByRole ( Role role);
+    List<User> findAllByRoleAndDeletedFalse ( Role role);
 
     @Query("select u from User u where (u.fullName like :fullName or u.phoneNumber = :phone) and u.role = :roleName")
     List<User> searchForChat(@Param("fullName") String fullName,
@@ -223,7 +225,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             FROM users s
             JOIN groups_students gs ON s.id = gs.students_id
             JOIN groups g ON gs.group_id = g.id
-            WHERE g.teacher_id = :teacherId and g.active = true and s.user_status = 'UQIYAPDI'
+            WHERE g.teacher_id = :teacherId and g.active = true and s.user_status = 'UQIYAPDI' and s.deleted = false
          """ , nativeQuery = true
     )
     List<User> searchForUsers(@Param("teacherId") Long teacherId);

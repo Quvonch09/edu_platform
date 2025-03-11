@@ -55,6 +55,8 @@ public class User extends AbsEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     private ChatStatus chatStatus;
 
+    private boolean deleted;
+
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
     private boolean credentialsNonExpired = true;
