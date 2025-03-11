@@ -167,11 +167,10 @@ WITH student_scores AS (
         COALESCE(SUM(h.ball), 0) AS total_score
     FROM groups_students gs
     JOIN users u ON gs.students_id = u.id
-    LEFT JOIN homework h ON h.student_id = gs.students_id
+    LEFT JOIN homework h ON h.student_id = gs.students_id AND (h.checked = 1 OR h.checked IS NULL)
     WHERE gs.group_id = (
         SELECT group_id FROM groups_students WHERE students_id = :studentId LIMIT 1
     )
-    AND (h.checked = 1 OR h.checked IS NULL)
     GROUP BY gs.group_id, gs.students_id, u.full_name
 ),
 ranking AS (

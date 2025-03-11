@@ -106,15 +106,11 @@ public class StatisticService {
         Pageable pageable = PageRequest.of(page, size);
         Page<User> studentsPage = groupRepository.findStudentsByGroupId(group.getId(), pageable);
 
-//        List<ResStudentRank> studentRanks = studentsPage.stream()
-//                .flatMap(student -> groupRepository.findAllByStudentRank(student.getId()).stream())
-//                .collect(Collectors.toList());
         Page<ResStudentRank> allByStudentRank = null;
         for (User user1 : studentsPage.getContent()) {
             allByStudentRank = groupRepository.findStudentRankingInGroups(user1.getId(), pageable);
         }
 
-//        Page<ResStudentRank> studentRankPage = new PageImpl<>(studentRanks, pageable, studentsPage.getTotalElements());
 
         if (allByStudentRank == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Barcha student reytinglari"));
