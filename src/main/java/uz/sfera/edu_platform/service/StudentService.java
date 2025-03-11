@@ -68,6 +68,7 @@ public class StudentService {
                 .file(file)
                 .password(passwordEncoder.encode(reqStudent.getPassword()))
                 .enabled(true)
+                .deleted(false)
                 .userStatus(UserStatus.UQIYAPDI)
                 .credentialsNonExpired(true)
                 .accountNonLocked(true)
@@ -110,7 +111,7 @@ public class StudentService {
 
     public ApiResponse getOneStudent(Long studentId) {
         User user = userRepository.findById(studentId).orElse(null);
-        if (user == null) {
+        if (user == null || user.isDeleted()) {
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
         Group group = groupRepository.findByStudentId(user.getId()).orElse(null);
@@ -134,7 +135,7 @@ public class StudentService {
     @Transactional
     public ApiResponse updateStudent(Long studentId, ReqStudent reqStudent) {
         User user = userRepository.findById(studentId).orElse(null);
-        if (user == null) {
+        if (user == null || user.isEnabled()) {
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
         Group newGroup = groupRepository.findById(reqStudent.getGroupId()).orElse(null);
@@ -172,7 +173,7 @@ public class StudentService {
 
     public ApiResponse deleteStudent(Long studentId, LocalDate departureDate, String departureDescription) {
         User user = userRepository.findById(studentId).orElse(null);
-        if (user == null) {
+        if (user == null || user.isEnabled()) {
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
          // Updating user fields

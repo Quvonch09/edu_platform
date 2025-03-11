@@ -47,7 +47,7 @@ public class ExamResultService {
         Page<ExamResult> pages = examResultRepository.searchResult
                 (teacher.getId(),month != null ? month.name() : LocalDate.now().getMonth().name(), studentId, PageRequest.of(page, size));
 
-        if (pages.isEmpty()) return new ApiResponse(ResponseError.NOTFOUND("Imtihon natijalari topilmadi"));
+        if (pages.isEmpty()) return new ApiResponse(ResponseError.NOTFOUND("Imtihon natijalari"));
 
         List<ExamResultDTO> resultDTOPage = pages.map(this::examResultDTO).toList();
 
@@ -66,7 +66,7 @@ public class ExamResultService {
         Page<ExamResult> pages = examResultRepository.searchResultStudent(month != null ? month.name() : null,
                 student.getId(), PageRequest.of(page, size));
 
-        if (pages.isEmpty()) return new ApiResponse(ResponseError.NOTFOUND("Imtihon natijalari topilmadi"));
+        if (pages.isEmpty()) return new ApiResponse(ResponseError.NOTFOUND("Imtihon natijalari"));
 
         List<ExamResultDTO> resultDTOPage = pages.map(this::examResultDTO).toList();
 

@@ -77,6 +77,7 @@ public class UserService {
                 .enabled(true)
                 .role(Role.ROLE_TEACHER)
                 .file(file)
+                .deleted(false)
                 .accountNonExpired(true)
                 .accountNonLocked(true)
                 .credentialsNonExpired(true)
@@ -146,7 +147,7 @@ public class UserService {
 
 
     public ApiResponse getUsersList(Role role) {
-        List<User> users = (role != null) ? userRepository.findAllByRole(role) : userRepository.findAll();
+        List<User> users = (role != null) ? userRepository.findAllByRoleAndDeletedFalse(role) : userRepository.findAll();
 
         List<UserDTO> userDTOList = users.stream()
                 .map(this::convertToUserDTO)
@@ -161,7 +162,7 @@ public class UserService {
 
     public ApiResponse getOneTeacher(Long teacherId) {
         User user = userRepository.findById(teacherId).orElse(null);
-        if (user == null) {
+        if (user == null || user.isDeleted()) {
             return new ApiResponse(ResponseError.NOTFOUND("User"));
         }
 
@@ -219,14 +220,16 @@ public class UserService {
 
 
     public ApiResponse deleteTeacher(Long userId, User currentUser) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Teacher"))));
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null){
+            return new ApiResponse(ResponseError.NOTFOUND("User"));
+        }
 
         if (user.getRole().equals(Role.ROLE_ADMIN) && !currentUser.getRole().equals(Role.ROLE_CEO)) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Sizda adminni o‘chirishga huquq yo‘q"));
         }
 
-        user.setEnabled(false);
+        user.setDeleted(true);
         user.setPhoneNumber(user.getPhoneNumber() + "_" + UUID.randomUUID().toString().substring(0, 8) + "_deleted");
 
         userRepository.save(user);
@@ -246,6 +249,7 @@ public class UserService {
                 .password(passwordEncoder.encode(reqAdmin.getPassword()))
                 .file(reqAdmin.getFileId() != null ? fileRepository.findById(reqAdmin.getFileId()).orElse(null) : null)
                 .enabled(true)
+                .deleted(false)
                 .accountNonExpired(true)
                 .accountNonLocked(true)
                 .credentialsNonExpired(true)
@@ -256,8 +260,10 @@ public class UserService {
     }
 
     public ApiResponse getOneAdmin(Long adminId){
-        User user = userRepository.findById(adminId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Admin"))));
+        User user = userRepository.findById(adminId).orElse(null);
+        if (user == null || user.isDeleted()){
+            return new ApiResponse(ResponseError.NOTFOUND("Admin"));
+        }
 
         if (!user.getRole().equals(Role.ROLE_ADMIN)) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Admin topilmadi"));
