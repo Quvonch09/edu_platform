@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.repository;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 import uz.sfera.edu_platform.entity.Group;
 import uz.sfera.edu_platform.entity.User;
@@ -189,7 +190,7 @@ FROM student_scores ss
 ORDER BY r.rank_position;
        
 """ , nativeQuery = true)
-    List<ResStudentRank> findAllByStudentRank(@Param("studentId") Long studentId);
+    Page<ResStudentRank> findAllByStudentRank(@Param("studentId") Long studentId, Pageable pageable);
 
 
     @Query(value = "select distinct g.* from groups g join " +
