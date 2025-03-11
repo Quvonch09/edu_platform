@@ -159,35 +159,35 @@ LIMIT 1;
     ResStudentStatistic findGroupByStudentId(@Param("studentId") Long studentId);
 
     @Query(value = """
-WITH student_scores AS (
-    SELECT
-        gs.group_id,
-        gs.students_id AS student_id,
-        u.full_name AS student_name,
-        COALESCE(SUM(er.ball), 0) AS total_score
-    FROM groups_students gs
-             JOIN users u ON gs.students_id = u.id
-             LEFT JOIN exam_result er ON er.student_id = u.id
-    WHERE gs.group_id IN (
-        SELECT group_id FROM groups_students WHERE students_id = :studentId
-    )
-    GROUP BY gs.group_id, gs.students_id, u.full_name
-),
-     ranking AS (
-         SELECT
-             group_id,
-             student_id,
-             total_score,
-             RANK() OVER (PARTITION BY group_id ORDER BY total_score DESC) AS rank_position
-         FROM student_scores
-     )
-SELECT
-    ss.student_name as fullName,
-    ss.total_score as score,
-    r.rank_position as rank
-FROM student_scores ss
-         JOIN ranking r ON ss.student_id = r.student_id AND ss.group_id = r.group_id
-ORDER BY r.rank_position;
+            WITH student_scores AS (
+                             SELECT
+                                 gs.group_id,
+                                 gs.students_id AS student_id,
+                                 u.full_name AS student_name,
+                                 COALESCE(SUM(er.ball), 0) AS total_score
+                             FROM groups_students gs
+                                      JOIN users u ON gs.students_id = u.id
+                                      LEFT JOIN exam_result er ON er.student_id = gs.students_id\s
+                             WHERE gs.group_id IN (
+                                 SELECT group_id FROM groups_students WHERE students_id = :studentId
+                             )
+                             GROUP BY gs.group_id, gs.students_id, u.full_name
+                         ),
+                              ranking AS (
+                                  SELECT
+                                      group_id,
+                                      student_id,
+                                      total_score,
+                                      RANK() OVER (PARTITION BY group_id ORDER BY total_score DESC) AS rank_position
+                                  FROM student_scores
+                              )
+                         SELECT
+                             ss.student_name as fullName,
+                             ss.total_score as score,
+                             r.rank_position as rank
+                         FROM student_scores ss
+                                  JOIN ranking r ON ss.student_id = r.student_id AND ss.group_id = r.group_id
+                         ORDER BY r.rank_position;
 """ , nativeQuery = true)
     Page<ResStudentRank> findAllByStudentRank(@Param("studentId") Long studentId, Pageable pageable);
 
