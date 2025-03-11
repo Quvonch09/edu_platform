@@ -21,6 +21,8 @@ import java.util.Optional;
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
 
+    List<Group> findByEndDate(LocalDate date);
+
     @Query(value = "select u.* from users u join groups_students gs on gs.students_id = u.id where gs.group_id =:groupId", nativeQuery = true)
     List<User> findByGroup(@Param("groupId") Long groupId);
 

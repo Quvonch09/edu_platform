@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.*;
 import uz.sfera.edu_platform.entity.enums.Role;
@@ -182,8 +183,22 @@ public class GroupService {
     }
 
 
+    @Scheduled(cron = "0 0 7 * * *")
     public ApiResponse deleteGroup(Long groupId) {
+        if (groupId == null) {
+            List<Group> groups = groupRepository.findByEndDate(LocalDate.now());
+
+            for (Group group : groups) {
+                group.setActive(false);
+                groupRepository.save(group);
+            }
+
+            System.out.println("Bugun " + groups.size() + " ta guruh tugadi !");
+        }
+
+        assert groupId != null;
         Group group = groupRepository.findById(groupId).orElse(null);
+
         if (group == null){
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
@@ -191,7 +206,7 @@ public class GroupService {
         group.setActive(false);
         groupRepository.save(group);
 
-        return new ApiResponse("Successfully deleted group");
+        return new ApiResponse("Group o'chirildi");
     }
 
 
@@ -263,10 +278,6 @@ public class GroupService {
     // Xona bandligini tekshirish uchun metod
     private boolean isRoomOccupied(Long roomId, LocalTime startTime, LocalTime endTime) {
         return graphicDayRepository.existsByGraphicDayInGroup(roomId, startTime, endTime);
-    }
-
-    public void endGroup(){
-        //todo
     }
 
     public void saveGroup(ReqGroup reqGroup, Category category, User teacher, Room room) {
