@@ -82,6 +82,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "and (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%'))) " +
             "and (:groupId IS NULL OR g.id = :groupId) " +
             "and u.role = :role " +
+            "and u.deleted = false " +
             "order by u.created_at desc", nativeQuery = true)
     Page<User> searchUsers(@Param("fullName") String fullName,
                               @Param("phoneNumber") String phoneNumber,
