@@ -104,6 +104,7 @@ public class TaskService {
                 .title(task.getTitle())
                 .fileId(task.getFile() != null ? task.getFile().getId() : null)
                 .lessonId(task.getLesson().getId())
+                .lessonName(task.getLesson().getName())
                 .build();
     }
 

@@ -12,5 +12,6 @@ public class TaskDTO {
     private Long id;
     private String title;
     private Long lessonId;
+    private String lessonName;
     private Long fileId;
 }

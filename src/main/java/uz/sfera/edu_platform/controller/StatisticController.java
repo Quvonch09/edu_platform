@@ -82,8 +82,10 @@ public class StatisticController {
     @Operation(summary =" Student guruhidagi reyting jadvali  ")
     @PreAuthorize("hasAnyRole('ROLE_STUDENT')")
     @GetMapping("/student-rank")
-    public ResponseEntity<ApiResponse> getStudentGroupRank(@CurrentUser User user){
-        return ResponseEntity.ok(statisticService.getStudentRank(user));
+    public ResponseEntity<ApiResponse> getStudentGroupRank(@CurrentUser User user,
+                                                           @RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "10") int size){
+        return ResponseEntity.ok(statisticService.getStudentRank(user, page,size));
     }
 
 

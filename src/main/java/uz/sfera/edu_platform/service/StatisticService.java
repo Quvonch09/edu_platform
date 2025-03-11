@@ -106,18 +106,26 @@ public class StatisticService {
         Pageable pageable = PageRequest.of(page, size);
         Page<User> studentsPage = groupRepository.findStudentsByGroupId(group.getId(), pageable);
 
-        List<ResStudentRank> studentRanks = studentsPage.getContent().stream()
-                .flatMap(student -> groupRepository.findAllByStudentRank(student.getId()).stream())
-                .collect(Collectors.toList());
+//        List<ResStudentRank> studentRanks = studentsPage.stream()
+//                .flatMap(student -> groupRepository.findAllByStudentRank(student.getId()).stream())
+//                .collect(Collectors.toList());
+        Page<ResStudentRank> allByStudentRank = null;
+        for (User user1 : studentsPage.getContent()) {
+            allByStudentRank = groupRepository.findAllByStudentRank(user1.getId(), pageable);
+        }
 
-        Page<ResStudentRank> studentRankPage = new PageImpl<>(studentRanks, pageable, studentsPage.getTotalElements());
+//        Page<ResStudentRank> studentRankPage = new PageImpl<>(studentRanks, pageable, studentsPage.getTotalElements());
+
+        if (allByStudentRank == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Barcha student reytinglari"));
+        }
 
         ResPageable resPageable = ResPageable.builder()
-                .page(studentRankPage.getNumber())
-                .size(studentRankPage.getSize())
-                .totalPage(studentRankPage.getTotalPages())
-                .totalElements(studentRankPage.getTotalElements())
-                .body(studentRankPage.getContent())
+                .page(page)
+                .size(size)
+                .totalPage(allByStudentRank.getTotalPages())
+                .totalElements(allByStudentRank.getTotalElements())
+                .body(allByStudentRank.getContent())
                 .build();
 
         return new ApiResponse(resPageable);
@@ -125,13 +133,22 @@ public class StatisticService {
 
 
 
-    public ApiResponse getStudentRank(User user) {
-        List<ResStudentRank> ranks = groupRepository.findAllByStudentRank(user.getId());
+    public ApiResponse getStudentRank(User user, int page, int size) {
+        Page<ResStudentRank> ranks = groupRepository.findAllByStudentRank(user.getId(), PageRequest.of(page, size));
 
         if (ranks.isEmpty()){
             return new ApiResponse(ResponseError.NOTFOUND("Rank not found"));
         }
-        return new ApiResponse(ranks);
+
+        ResPageable resPageable = ResPageable.builder()
+                .page(page)
+                .size(size)
+                .totalPage(ranks.getTotalPages())
+                .totalElements(ranks.getTotalElements())
+                .body(ranks.getContent())
+                .build();
+
+        return new ApiResponse(resPageable);
     }
 
     public ApiResponse getNewStudent(){
