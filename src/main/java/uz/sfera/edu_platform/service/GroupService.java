@@ -25,6 +25,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -66,7 +67,7 @@ public class GroupService {
         ).stream().collect(Collectors.toMap(GraphicDay::getId, Function.identity()));
 
 
-        List<GroupDTO> list = groups.stream().map(group -> {
+        List<GroupDTO> list = groups.getContent().stream().map(group -> {
             GraphicDay graphicDay = graphicDays.get(group.getId()); // Xatolikni oldini olish
 
             List<String> days = Optional.ofNullable(group.getDays())
@@ -88,7 +89,6 @@ public class GroupService {
                 .body(list)
                 .build());
     }
-
 
     public ApiResponse getOneGroup(Long groupId) {
         Group group = groupRepository.findById(groupId).orElse(null);

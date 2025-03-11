@@ -131,6 +131,7 @@ public class UserService {
                 .active(user.isEnabled())
                 .groupCount(groups.size())
                 .groupList(list)
+                .active(user.isEnabled())
                 .fileId(Optional.ofNullable(user.getFile()).map(File::getId).orElse(null)) // Optimallashtirilgan
                 .build();
     }
@@ -145,7 +146,7 @@ public class UserService {
 
 
     public ApiResponse getUsersList(Role role) {
-        List<User> users = (role != null) ? userRepository.findAllByRoleAndEnabledTrue(role) : userRepository.findAll();
+        List<User> users = (role != null) ? userRepository.findAllByRole(role) : userRepository.findAll();
 
         List<UserDTO> userDTOList = users.stream()
                 .map(this::convertToUserDTO)

@@ -41,6 +41,9 @@ public class ExamResultService {
     }
 
     public ApiResponse getAll(User teacher, Month month, Long studentId, int page, int size) {
+        if (!teacher.isEnabled()){
+            return new ApiResponse(ResponseError.ACCESS_DENIED());
+        }
         Page<ExamResult> pages = examResultRepository.searchResult
                 (teacher.getId(),month != null ? month.name() : LocalDate.now().getMonth().name(), studentId, PageRequest.of(page, size));
 
