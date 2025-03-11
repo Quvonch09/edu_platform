@@ -163,10 +163,10 @@ WITH student_scores AS (
         gs.group_id,
         gs.students_id AS student_id,
         u.full_name AS student_name,
-        COALESCE(SUM(h.ball), 0) AS total_score
+        COALESCE(SUM(er.ball), 0) AS total_score
     FROM groups_students gs
              JOIN users u ON gs.students_id = u.id
-             LEFT JOIN homework h ON h.student_id = u.id AND h.checked = 1 
+             LEFT JOIN exam_result er ON er.student_id = u.id
     WHERE gs.group_id IN (
         SELECT group_id FROM groups_students WHERE students_id = :studentId
     )
@@ -187,9 +187,9 @@ SELECT
 FROM student_scores ss
          JOIN ranking r ON ss.student_id = r.student_id AND ss.group_id = r.group_id
 ORDER BY r.rank_position;
-       
 """ , nativeQuery = true)
     List<ResStudentRank> findAllByStudentRank(@Param("studentId") Long studentId);
+
 
 
     @Query(value = "select distinct g.* from groups g join " +
