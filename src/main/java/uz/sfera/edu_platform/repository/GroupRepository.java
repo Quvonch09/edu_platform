@@ -1,6 +1,8 @@
 package uz.sfera.edu_platform.repository;
 
+import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.stereotype.Repository;
 import uz.sfera.edu_platform.entity.Group;
 import uz.sfera.edu_platform.entity.User;
@@ -241,25 +243,61 @@ LIMIT 1;
     boolean existsByName(String name);
 
     @Query(value = """
-           SELECT g.*
-             FROM groups g
-             INNER JOIN users u ON g.teacher_id = u.id
-             WHERE (:name IS NULL OR UPPER(g.name) LIKE CONCAT('%', UPPER(:name), '%'))
-               AND (:teacherName IS NULL OR UPPER(u.full_name) LIKE CONCAT('%', UPPER(:teacherName), '%'))
-               AND (:teacherId IS NULL OR u.id = :teacherId)
-               AND (:startDate IS NULL OR g.start_date <= :startDate)
-               AND (:endDate IS NULL OR g.end_date >= :endDate)
-               AND (:categoryId IS NULL OR g.category_id = :categoryId)
-             ORDER BY g.created_at DESC
-        """,
-            nativeQuery = true)
+       SELECT g.* FROM groups g
+        join users u on g.teacher_id = u.id
+        WHERE (:name IS NULL OR UPPER(g.name) LIKE CONCAT('%', UPPER(:name), '%'))
+          AND (:teacherName IS NULL OR UPPER(u.full_name) LIKE CONCAT('%', UPPER(:teacherName), '%'))
+          AND (:teacherId IS NULL OR u.id = :teacherId)
+          AND (:categoryId IS NULL OR g.category_id = :categoryId)
+        ORDER BY g.created_at DESC
+    """, nativeQuery = true)
     Page<Group> searchGroup(@Param("name") String name,
+                            @Param("teacherName") String teacherName,
+                            @Param("categoryId") Long categoryId,
+                            @Param("teacherId") Long teacherId,
+                            Pageable pageable);
+
+
+    @Query(value = """
+       SELECT g.* FROM groups g
+        join users u on g.teacher_id = u.id
+        WHERE (:name IS NULL OR UPPER(g.name) LIKE CONCAT('%', UPPER(:name), '%'))
+          AND (:teacherName IS NULL OR UPPER(u.full_name) LIKE CONCAT('%', UPPER(:teacherName), '%'))
+          AND (:teacherId IS NULL OR u.id = :teacherId)
+          AND g.start_date <= :startDate
+          AND g.end_date >= :endDate
+          AND (:categoryId IS NULL OR g.category_id = :categoryId)
+        ORDER BY g.created_at DESC
+    """, nativeQuery = true)
+    Page<Group> searchGroupDate(@Param("name") String name,
                             @Param("teacherName") String teacherName,
                             @Param("startDate") LocalDate startDate,
                             @Param("endDate") LocalDate endDate,
                             @Param("categoryId") Long categoryId,
                             @Param("teacherId") Long teacherId,
                             Pageable pageable);
+
+
+    @Query(value = """
+       SELECT g.* FROM groups g
+       JOIN users u ON g.teacher_id = u.id
+       WHERE (:name IS NULL OR UPPER(g.name) LIKE CONCAT('%', UPPER(:name), '%'))
+         AND (:teacherName IS NULL OR UPPER(u.full_name) LIKE CONCAT('%', UPPER(:teacherName), '%'))
+         AND (:teacherId IS NULL OR u.id = :teacherId)
+         AND (:categoryId IS NULL OR g.category_id = :categoryId)
+         AND (
+               (:start = true AND g.start_date <= :date)
+               OR (:start = false AND g.end_date >= :date)
+             )
+       ORDER BY g.created_at DESC
+    """, nativeQuery = true)
+    Page<Group> searchGroupDate(@Param("name") String name,
+                                @Param("teacherName") String teacherName,
+                                @Param("categoryId") Long categoryId,
+                                @Param("teacherId") Long teacherId,
+                                @Param("date") LocalDate date,
+                                @Param("start") boolean start,
+                                Pageable pageable);
 
 
     @Query(value = "select coalesce(count(*) ,0) from groups g join groups_students gs on g.id = gs.group_id " +
