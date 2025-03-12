@@ -13,16 +13,24 @@ import java.time.Month;
 @Repository
 public interface ExamResultRepository extends JpaRepository<ExamResult,Long> {
 
-    @Query(value = "select ex.* from exam_result ex left join groups g on g.teacher_id = :teacherId \n" +
-            "    left join groups_students gs on g.id = gs.group_id\n" +
-            "and gs.students_id  = ex.student_id where \n" +
-            "(:month IS NULL OR ex.month = :month) and " +
-            "(:groupId IS NULL OR ex.group_id = :groupId) and " +
-            "(:studentId IS NULL OR ex.student_id = :studentId) order by ex.id desc", nativeQuery = true)
+    @Query(value = """
+    SELECT ex.* 
+    FROM exam_result ex
+    LEFT JOIN groups g ON g.id = ex.group_id 
+    LEFT JOIN groups_students gs ON gs.group_id = g.id AND gs.students_id = ex.student_id
+    WHERE (:teacherId IS NULL OR g.teacher_id = :teacherId)
+      AND (:month IS NULL OR ex.month = :month)
+      AND (:groupId IS NULL OR ex.group_id = :groupId)
+      AND (:studentId IS NULL OR ex.student_id = :studentId)
+    ORDER BY ex.id DESC
+    """, nativeQuery = true)
     Page<ExamResult> searchResult(@Param("teacherId") Long teacherId,
                                   @Param("month") String month,
                                   @Param("groupId") Long groupId,
-                                  @Param("studentId") Long studentId, Pageable pageable);
+                                  @Param("studentId") Long studentId,
+                                  Pageable pageable);
+
+
 
     @Query(value = "select ex.* from exam_result ex where \n" +
             "(:month IS NULL OR ex.month = :month) and ex.student_id = :studentId order by ex.id desc", nativeQuery = true)

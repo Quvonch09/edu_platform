@@ -77,18 +77,24 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByPhoneNumberAndEnabledIsTrue(String phone);
     boolean existsByPhoneNumberAndEnabledIsTrueAndIdNot(String phone, Long id);
 
-    @Query(value = "select distinct u.* from users u  " +
-            "left join groups g on u.id = g.teacher_id where " +
-            "(:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%'))) " +
-            "and (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%'))) " +
-            "and (:groupId IS NULL OR g.id = :groupId) " +
-            "and u.role = :role " +
-            "and u.deleted = false " +
-            "order by u.created_at desc", nativeQuery = true)
+    @Query(value = """
+    SELECT DISTINCT u.* 
+    FROM users u  
+    LEFT JOIN groups g ON u.id = g.teacher_id 
+    LEFT JOIN users_categories uc ON uc.user_id = u.id
+    WHERE (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :fullName, '%')))
+      AND (:phoneNumber IS NULL OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', :phoneNumber, '%')))
+      AND (:categoryId IS NULL OR uc.categories_id = :categoryId)
+      AND u.role = :role
+      AND u.deleted = false
+    ORDER BY u.created_at DESC
+    """, nativeQuery = true)
     Page<User> searchUsers(@Param("fullName") String fullName,
-                              @Param("phoneNumber") String phoneNumber,
-                              @Param("groupId") Long groupId,
-                              @Param("role") String role, Pageable pageable);
+                           @Param("phoneNumber") String phoneNumber,
+                           @Param("categoryId") Long categoryId,
+                           @Param("role") String role,
+                           Pageable pageable);
+
 
 
     @Query(value = """

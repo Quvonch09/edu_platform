@@ -52,7 +52,7 @@ public class UserService {
         }
 
         if (userRepository.existsByPhoneNumberAndEnabledIsTrue(reqTeacher.getPhoneNumber())) {
-            return new ApiResponse(ResponseError.ALREADY_EXIST("Bu telefon raqam allaqachon mavjud"));
+            return new ApiResponse(ResponseError.ALREADY_EXIST("Bu telefon raqam"));
         }
 
         List<Category> categories = new ArrayList<>();
@@ -93,10 +93,10 @@ public class UserService {
     }
 
 
-    public ApiResponse searchUsers(String fullName, String phoneNumber, Long groupId, Role role, int page, int size) {
+    public ApiResponse searchUsers(String fullName, String phoneNumber, Long categoryId, Role role, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
 
-        Page<User> allTeachers = userRepository.searchUsers(fullName, phoneNumber, groupId,
+        Page<User> allTeachers = userRepository.searchUsers(fullName, phoneNumber, categoryId,
                 role != null ? role.name() : null, pageRequest);
 
         List<TeacherDTO> teacherList = allTeachers.stream()
