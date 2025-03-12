@@ -170,8 +170,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     LEFT JOIN users u2 ON u2.id = g.teacher_id
     LEFT JOIN payment p ON p.student_id = u.id
     WHERE
-        u.enabled = true
-        AND (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', COALESCE(:fullName, ''), '%')))
+        (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', COALESCE(:fullName, ''), '%')))
         AND (COALESCE(:phoneNumber , '') = '' OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', COALESCE(:phoneNumber, ''), '%')) )
         AND (COALESCE(:userStatus ,'') = ''  OR u.user_status = :userStatus)
         AND (COALESCE(:groupName ,'') = '' OR LOWER(g.name) LIKE LOWER(CONCAT('%', COALESCE(:groupName, ''), '%')) )
@@ -179,7 +178,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
         AND (:startAge IS NULL OR u.age >= :startAge)
         AND (:endAge IS NULL OR u.age <= :endAge)
         AND u.role = 'ROLE_STUDENT'
-        AND u.deleted = false
       
         AND (
             :hasPaid IS NULL
