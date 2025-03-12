@@ -32,11 +32,9 @@ public class GroupController {
     @Operation(summary = "Teacher o'ziga tegishli guruhlarni ko'rish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> getByTeacher(
-            @CurrentUser User teacher,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @CurrentUser User teacher
     ){
-        return ResponseEntity.ok(groupService.search(null,teacher.getFullName(),null,null,null, teacher.getId(), page,size));
+        return ResponseEntity.ok(groupService.getGroupByTeacher(teacher));
     }
 
 

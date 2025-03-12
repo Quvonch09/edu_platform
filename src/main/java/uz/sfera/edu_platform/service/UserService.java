@@ -189,6 +189,10 @@ public class UserService {
             return new ApiResponse(ResponseError.NOTFOUND("User"));
         }
 
+        if (userRepository.existsByPhoneNumberAndEnabledIsTrueAndIdNot(reqTeacher.getPhoneNumber(),teacherId)){
+            return new ApiResponse(ResponseError.ALREADY_EXIST("Bu telefon nomer"));
+        }
+
         user.setFullName(reqTeacher.getFullName());
         user.setPhoneNumber(reqTeacher.getPhoneNumber());
 
