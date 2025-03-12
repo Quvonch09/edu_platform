@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -199,7 +200,13 @@ public class UserService {
                 ? fileRepository.findById(reqTeacher.getFileId()).orElse(null)
                 : null;
 
+        List<Category> categories = new ArrayList<>();
+        for (Long categoryId : reqTeacher.getCategoryIds()) {
+            categories.add(categoryRepository.findById(categoryId).orElse(null));
+        }
+
         user.setFile(file);
+        user.setCategories(categories);
         userRepository.save(user);
 
         return new ApiResponse("Teacher successfully updated");
