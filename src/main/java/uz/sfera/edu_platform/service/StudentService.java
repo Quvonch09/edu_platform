@@ -183,6 +183,7 @@ public class StudentService {
         }
          // Updating user fields
         user.setUserStatus(UserStatus.CHIQIB_KETGAN);
+        user.setDeleted(true);
         user.setEnabled(false);
         user.setPhoneNumber(user.getPhoneNumber() + LocalDateTime.now() + "_deleted");
         user.setDeparture_date(departureDate);
