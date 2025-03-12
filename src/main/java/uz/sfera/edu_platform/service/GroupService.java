@@ -22,6 +22,7 @@ import uz.sfera.edu_platform.payload.res.ResPageable;
 import uz.sfera.edu_platform.repository.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -80,9 +81,6 @@ public class GroupService {
             return convertGroupToGroupDTO(group, days, graphicDay);
         }).collect(Collectors.toList());
 
-        if (teacherName != null || teacherId != null){
-            return new ApiResponse(list);
-        }
 
         return new ApiResponse(ResPageable.builder()
                 .page(page)
@@ -232,10 +230,10 @@ public class GroupService {
                 .countGroupLessons(groupRepository.countGroupLessons(group.getId()))
                 .departureStudentCount(groupRepository.countGroup(group.getId()))
                 .weekDays(weekDays)
-                .roomName(graphicDay.getRoom().getName())
-                .roomId(graphicDay.getRoom().getId())
-                .startTime(graphicDay.getStartTime())
-                .endTime(graphicDay.getEndTime())
+                .roomName(graphicDay != null ? graphicDay.getRoom().getName() : null)
+                .roomId(graphicDay != null ? graphicDay.getRoom().getId() : null)
+                .startTime(graphicDay != null ? graphicDay.getStartTime() : null)
+                .endTime(graphicDay != null ? graphicDay.getEndTime() : null)
                 .build();
     }
 

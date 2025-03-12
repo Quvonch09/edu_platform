@@ -241,27 +241,16 @@ LIMIT 1;
     boolean existsByName(String name);
 
     @Query(value = """
-        SELECT g.* 
-        FROM groups g 
-        JOIN users u ON g.teacher_id = u.id  
-        WHERE (:name IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :name, '%')))
-          AND (:teacherId IS NOT NULL OR :teacherName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :teacherName, '%')))
-          AND (:teacherId IS NULL OR u.id = :teacherId)
-          AND (:startDate IS NULL OR g.start_date <= :startDate)
-          AND (:endDate IS NULL OR g.end_date >= :endDate)
-          AND (:categoryId IS NULL OR g.category_id = :categoryId)
-        ORDER BY g.created_at DESC
-        """,
-            countQuery = """
-        SELECT COUNT(*) 
-        FROM groups g 
-        JOIN users u ON g.teacher_id = u.id  
-        WHERE (:name IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :name, '%')))
-          AND (:teacherId IS NOT NULL OR :teacherName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :teacherName, '%')))
-          AND (:teacherId IS NULL OR u.id = :teacherId)
-          AND (:startDate IS NULL OR g.start_date <= :startDate)
-          AND (:endDate IS NULL OR g.end_date >= :endDate)
-          AND (:categoryId IS NULL OR g.category_id = :categoryId)
+           SELECT g.*
+             FROM groups g
+             INNER JOIN users u ON g.teacher_id = u.id
+             WHERE (:name IS NULL OR UPPER(g.name) LIKE CONCAT('%', UPPER(:name), '%'))
+               AND (:teacherName IS NULL OR UPPER(u.full_name) LIKE CONCAT('%', UPPER(:teacherName), '%'))
+               AND (:teacherId IS NULL OR u.id = :teacherId)
+               AND (:startDate IS NULL OR g.start_date <= :startDate)
+               AND (:endDate IS NULL OR g.end_date >= :endDate)
+               AND (:categoryId IS NULL OR g.category_id = :categoryId)
+             ORDER BY g.created_at DESC
         """,
             nativeQuery = true)
     Page<Group> searchGroup(@Param("name") String name,
