@@ -99,6 +99,29 @@ public class GroupService {
                 .build());
     }
 
+
+    @Transactional
+    public ApiResponse getGroupByTeacher(User teacher){
+        List<Group> byTeacherId = groupRepository.findByTeacherId(teacher.getId());
+
+        Map<Long, GraphicDay> graphicDays = graphicDayRepository.findAllByGroupIds(
+                byTeacherId.stream().map(Group::getId).collect(Collectors.toList())
+        ).stream().collect(Collectors.toMap(GraphicDay::getId, Function.identity()));
+
+        List<GroupDTO> list = byTeacherId.stream().map(group -> {
+            GraphicDay graphicDay = graphicDays.get(group.getId()); // Xatolikni oldini olish
+
+            List<String> days = Optional.ofNullable(group.getDays())
+                    .map(gd -> gd.getWeekDay().stream().map(Enum::name).collect(Collectors.toList()))
+                    .orElse(Collections.emptyList());
+
+            return convertGroupToGroupDTO(group, days, graphicDay);
+        }).toList();
+
+        return new ApiResponse(list);
+    }
+
+
     public ApiResponse getOneGroup(Long groupId) {
         Group group = groupRepository.findById(groupId).orElse(null);
         if (group == null){

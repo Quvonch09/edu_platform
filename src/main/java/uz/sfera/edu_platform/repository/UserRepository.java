@@ -75,6 +75,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<ResCEODiagram> getLeaveStudent();
 
     boolean existsByPhoneNumberAndEnabledIsTrue(String phone);
+    boolean existsByPhoneNumberAndEnabledIsTrueAndIdNot(String phone, Long id);
 
     @Query(value = "select distinct u.* from users u  " +
             "left join groups g on u.id = g.teacher_id where " +
@@ -114,6 +115,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
         u.created_at,
         u.age,
         u.user_status AS status,
+        u.departure_date as departureDate,
+        u.departure_description as departureDescription,
         u.parent_phone_number,
         u2.full_name AS teacherName,
         CASE
@@ -158,7 +161,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
         )
     GROUP BY
         u.id, u.full_name, u.phone_number, g.name, g.id,
-        u.created_at, u.age, u.user_status, u.parent_phone_number, u2.full_name
+        u.created_at, u.age, u.user_status,u.departure_date, u.departure_description, u.parent_phone_number, u2.full_name
     ORDER BY u.created_at DESC
 """,
             countQuery = """
