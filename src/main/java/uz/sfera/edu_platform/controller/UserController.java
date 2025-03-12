@@ -37,11 +37,11 @@ public class UserController {
     @GetMapping("/searchUsers")
     public ResponseEntity<ApiResponse> searchUsers(@RequestParam(required = false, value = "fullName") String fullName,
                                                      @RequestParam(required = false, value = "phoneNumber") String phoneNumber,
-                                                     @RequestParam(required = false, value = "groupId") Long groupId,
+                                                     @RequestParam(required = false, value = "categoryId") Long categoryId,
                                                      @RequestParam(value = "role") Role role,
                                                      @RequestParam(defaultValue = "0") int page,
                                                      @RequestParam(defaultValue = "10") int size) {
-        ApiResponse apiResponse = userService.searchUsers(fullName, phoneNumber, groupId,role, page, size);
+        ApiResponse apiResponse = userService.searchUsers(fullName, phoneNumber, categoryId,role, page, size);
         return ResponseEntity.ok(apiResponse);
     }
 
