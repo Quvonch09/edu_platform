@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.*;
 import uz.sfera.edu_platform.entity.enums.Role;
 import uz.sfera.edu_platform.entity.enums.WeekDay;
-import uz.sfera.edu_platform.exception.NotFoundException;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.GroupDTO;
 import uz.sfera.edu_platform.payload.GroupListDTO;
@@ -22,13 +21,11 @@ import uz.sfera.edu_platform.payload.res.ResPageable;
 import uz.sfera.edu_platform.repository.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -63,8 +60,19 @@ public class GroupService {
     public ApiResponse search(String groupName, String teacherName, LocalDate startDate,
                               LocalDate endDate, Long categoryId, Long teacherId, int page, int size) {
 
-        Page<Group> groups = groupRepository.searchGroup(groupName, teacherName, startDate, endDate, categoryId, teacherId,
-                PageRequest.of(page, size));
+        Page<Group> groups;
+        if (startDate != null && endDate != null) {
+            groups = groupRepository.searchGroupDate(groupName, teacherName, startDate, endDate, categoryId, teacherId,
+                    PageRequest.of(page, size));
+        }else if (startDate != null || endDate != null) {
+            LocalDate date = startDate != null ? startDate : endDate;
+            groups = groupRepository.searchGroupDate(groupName, teacherName, categoryId, teacherId, date, startDate != null,
+                    PageRequest.of(page, size));
+        }else {
+            groups = groupRepository.searchGroup(groupName, teacherName, categoryId, teacherId,
+                    PageRequest.of(page, size));
+        }
+
 
         Map<Long, GraphicDay> graphicDays = graphicDayRepository.findAllByGroupIds(
                 groups.getContent().stream().map(Group::getId).collect(Collectors.toList())

@@ -99,7 +99,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                  LEFT JOIN groups_students gu ON gu.group_id = g.id  -- group_user jadvali, bu yerda studentlar va guruhlar bog‘langan
                  LEFT JOIN users s ON s.id = gu.students_id AND s.user_status = 'UQIYAPDI'  -- Studentlarning statusi
         WHERE g.teacher_id = :teacherId
-          AND g.active = TRUE """ , nativeQuery = true
+          AND g.active = TRUE""" , nativeQuery = true
     )
     Integer countAllByStudent(Long teacherId);
 
@@ -158,7 +158,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
         )
     GROUP BY
         u.id, u.full_name, u.phone_number, g.name, g.id,
-        u.created_at, u.age, u.user_status, u.parent_phone_number, u2.full_name  
+        u.created_at, u.age, u.user_status, u.parent_phone_number, u2.full_name
     ORDER BY u.created_at DESC
 """,
             countQuery = """
@@ -236,7 +236,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                  JOIN users u ON g.teacher_id = u.id
                  LEFT JOIN groups_students gu ON gu.group_id = g.id  -- group_user jadvali, bu yerda studentlar va guruhlar bog‘langan
         WHERE gu.students_id = :studentId
-          AND g.active = TRUE """ , nativeQuery = true
+          AND g.active = TRUE""" , nativeQuery = true
     )
     List<User> searchForTeacher(@Param("studentId") Long studentId);
 }

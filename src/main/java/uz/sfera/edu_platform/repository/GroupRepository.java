@@ -1,6 +1,8 @@
 package uz.sfera.edu_platform.repository;
 
+import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.stereotype.Repository;
 import uz.sfera.edu_platform.entity.Group;
 import uz.sfera.edu_platform.entity.User;
@@ -198,38 +200,36 @@ LIMIT 1;
 
 
     @Query(value = """
-WITH student_scores AS (
-    SELECT
-        gs.group_id,
-        gs.students_id AS student_id,
-        u.full_name AS student_name,
-        COALESCE(SUM(h.ball), 0) AS total_score
-    FROM groups_students gs
-    JOIN users u ON gs.students_id = u.id
-    LEFT JOIN homework h ON h.student_id = gs.students_id
-    WHERE gs.group_id IN (
-        SELECT group_id FROM groups_students WHERE students_id = :studentId
-    )
-    AND (h.checked = 1 OR h.checked IS NULL)
-    GROUP BY gs.group_id, gs.students_id, u.full_name
-),
-ranking AS (
-    SELECT
-        group_id,
-        student_id,
-        total_score,
-        RANK() OVER (PARTITION BY group_id ORDER BY total_score DESC) AS rank_position
-    FROM student_scores
-)
-SELECT
-    ss.group_id AS groupId,
-    ss.student_name as fullName,
-    ss.total_score as score,
-    r.rank_position as rank
-FROM student_scores ss
-JOIN ranking r ON ss.student_id = r.student_id AND ss.group_id = r.group_id
-WHERE ss.student_id = :studentId
-ORDER BY r.rank_position;
+
+            WITH student_scores AS (
+                             SELECT
+                                 gs.group_id,
+                                 gs.students_id AS student_id,
+                                 u.full_name AS student_name,
+                                 COALESCE(SUM(h.ball), 0) AS total_score
+                             FROM groups_students gs
+                                      JOIN users u ON gs.students_id = u.id
+                                      LEFT JOIN homework h ON h.student_id = u.id AND h.checked = 1
+                             WHERE gs.group_id IN (
+                                 SELECT group_id FROM groups_students WHERE students_id = :studentId
+                             )
+                             GROUP BY gs.group_id, gs.students_id, u.full_name
+                         ),
+                              ranking AS (
+                                  SELECT
+                                      group_id,
+                                      student_id,
+                                      total_score,
+                                      RANK() OVER (PARTITION BY group_id ORDER BY total_score DESC) AS rank_position
+                                  FROM student_scores
+                              )
+                         SELECT
+                             ss.student_name as fullName,
+                             ss.total_score as score,
+                             r.rank_position as rank
+                         FROM student_scores ss
+                                  JOIN ranking r ON ss.student_id = r.student_id AND ss.group_id = r.group_id
+                         ORDER BY r.rank_position;
 """, nativeQuery = true)
     Page<ResStudentRank> findStudentRankingInGroups(@Param("studentId") Long studentId, Pageable pageable);
 
@@ -243,25 +243,61 @@ ORDER BY r.rank_position;
     boolean existsByName(String name);
 
     @Query(value = """
-           SELECT g.*
-             FROM groups g
-             INNER JOIN users u ON g.teacher_id = u.id
-             WHERE (:name IS NULL OR UPPER(g.name) LIKE CONCAT('%', UPPER(:name), '%'))
-               AND (:teacherName IS NULL OR UPPER(u.full_name) LIKE CONCAT('%', UPPER(:teacherName), '%'))
-               AND (:teacherId IS NULL OR u.id = :teacherId)
-               AND (:startDate IS NULL OR g.start_date <= :startDate)
-               AND (:endDate IS NULL OR g.end_date >= :endDate)
-               AND (:categoryId IS NULL OR g.category_id = :categoryId)
-             ORDER BY g.created_at DESC
-        """,
-            nativeQuery = true)
+       SELECT g.* FROM groups g
+        join users u on g.teacher_id = u.id
+        WHERE (:name IS NULL OR UPPER(g.name) LIKE CONCAT('%', UPPER(:name), '%'))
+          AND (:teacherName IS NULL OR UPPER(u.full_name) LIKE CONCAT('%', UPPER(:teacherName), '%'))
+          AND (:teacherId IS NULL OR u.id = :teacherId)
+          AND (:categoryId IS NULL OR g.category_id = :categoryId)
+        ORDER BY g.created_at DESC
+    """, nativeQuery = true)
     Page<Group> searchGroup(@Param("name") String name,
+                            @Param("teacherName") String teacherName,
+                            @Param("categoryId") Long categoryId,
+                            @Param("teacherId") Long teacherId,
+                            Pageable pageable);
+
+
+    @Query(value = """
+       SELECT g.* FROM groups g
+        join users u on g.teacher_id = u.id
+        WHERE (:name IS NULL OR UPPER(g.name) LIKE CONCAT('%', UPPER(:name), '%'))
+          AND (:teacherName IS NULL OR UPPER(u.full_name) LIKE CONCAT('%', UPPER(:teacherName), '%'))
+          AND (:teacherId IS NULL OR u.id = :teacherId)
+          AND g.start_date <= :startDate
+          AND g.end_date >= :endDate
+          AND (:categoryId IS NULL OR g.category_id = :categoryId)
+        ORDER BY g.created_at DESC
+    """, nativeQuery = true)
+    Page<Group> searchGroupDate(@Param("name") String name,
                             @Param("teacherName") String teacherName,
                             @Param("startDate") LocalDate startDate,
                             @Param("endDate") LocalDate endDate,
                             @Param("categoryId") Long categoryId,
                             @Param("teacherId") Long teacherId,
                             Pageable pageable);
+
+
+    @Query(value = """
+       SELECT g.* FROM groups g
+       JOIN users u ON g.teacher_id = u.id
+       WHERE (:name IS NULL OR UPPER(g.name) LIKE CONCAT('%', UPPER(:name), '%'))
+         AND (:teacherName IS NULL OR UPPER(u.full_name) LIKE CONCAT('%', UPPER(:teacherName), '%'))
+         AND (:teacherId IS NULL OR u.id = :teacherId)
+         AND (:categoryId IS NULL OR g.category_id = :categoryId)
+         AND (
+               (:start = true AND g.start_date <= :date)
+               OR (:start = false AND g.end_date >= :date)
+             )
+       ORDER BY g.created_at DESC
+    """, nativeQuery = true)
+    Page<Group> searchGroupDate(@Param("name") String name,
+                                @Param("teacherName") String teacherName,
+                                @Param("categoryId") Long categoryId,
+                                @Param("teacherId") Long teacherId,
+                                @Param("date") LocalDate date,
+                                @Param("start") boolean start,
+                                Pageable pageable);
 
 
     @Query(value = "select coalesce(count(*) ,0) from groups g join groups_students gs on g.id = gs.group_id " +

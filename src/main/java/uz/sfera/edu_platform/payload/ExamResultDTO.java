@@ -13,4 +13,5 @@ public class ExamResultDTO {
     private String studentName;
     private int ball;
     private String month;
+    private String groupName;
 }
