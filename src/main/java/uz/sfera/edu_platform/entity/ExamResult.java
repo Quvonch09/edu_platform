@@ -24,6 +24,9 @@ public class ExamResult {
     @Column(nullable = false)
     private Month month;
 
+    @ManyToOne
+    private Group group;
+
     @Column(nullable = false)
     private int ball;
 }

@@ -35,12 +35,13 @@ public class ExamResultController {
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> getExams(
             @CurrentUser User teacher,
+            @RequestParam(required = false) Long groupId,
             @RequestParam(required = false) Long studentId,
             @RequestParam(required = false) Month month,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-        return ResponseEntity.ok(examResultService.getAll(teacher,month, studentId, page, size));
+        return ResponseEntity.ok(examResultService.getAll(teacher,groupId,month, studentId, page, size));
     }
 
     @GetMapping("/myExamResults")
