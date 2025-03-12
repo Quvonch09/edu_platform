@@ -133,8 +133,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     LEFT JOIN homework h ON u.id = h.student_id
     LEFT JOIN payment p ON p.student_id = u.id
     WHERE
-        u.enabled = true
-        AND (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', COALESCE(:fullName, ''), '%')))
+        (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', COALESCE(:fullName, ''), '%')))
         AND (COALESCE(:phoneNumber , '') = '' OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', COALESCE(:phoneNumber, ''), '%')) )
         AND (COALESCE(:userStatus ,'') = ''  OR u.user_status = :userStatus)
         AND (COALESCE(:groupName ,'') = '' OR LOWER(g.name) LIKE LOWER(CONCAT('%', COALESCE(:groupName, ''), '%')) )
@@ -163,7 +162,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     ORDER BY u.created_at DESC
 """,
             countQuery = """
-    SELECT COUNT(DISTINCT u.id) 
+    SELECT COUNT(DISTINCT u.id)
     FROM users u
     JOIN groups_students gsl ON u.id = gsl.students_id
     JOIN groups g ON gsl.group_id = g.id
