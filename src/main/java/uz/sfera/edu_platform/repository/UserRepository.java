@@ -99,7 +99,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                  LEFT JOIN groups_students gu ON gu.group_id = g.id  -- group_user jadvali, bu yerda studentlar va guruhlar bog‘langan
                  LEFT JOIN users s ON s.id = gu.students_id AND s.user_status = 'UQIYAPDI'  -- Studentlarning statusi
         WHERE g.teacher_id = :teacherId
-          AND g.active = TRUE """ , nativeQuery = true
+          AND g.active = TRUE""" , nativeQuery = true
     )
     Integer countAllByStudent(Long teacherId);
 
@@ -133,8 +133,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     LEFT JOIN homework h ON u.id = h.student_id
     LEFT JOIN payment p ON p.student_id = u.id
     WHERE
-        u.enabled = true
-        AND (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', COALESCE(:fullName, ''), '%')))
+        (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', COALESCE(:fullName, ''), '%')))
         AND (COALESCE(:phoneNumber , '') = '' OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', COALESCE(:phoneNumber, ''), '%')) )
         AND (COALESCE(:userStatus ,'') = ''  OR u.user_status = :userStatus)
         AND (COALESCE(:groupName ,'') = '' OR LOWER(g.name) LIKE LOWER(CONCAT('%', COALESCE(:groupName, ''), '%')) )
@@ -159,11 +158,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
         )
     GROUP BY
         u.id, u.full_name, u.phone_number, g.name, g.id,
-        u.created_at, u.age, u.user_status, u.parent_phone_number, u2.full_name  
+        u.created_at, u.age, u.user_status, u.parent_phone_number, u2.full_name
     ORDER BY u.created_at DESC
 """,
             countQuery = """
-    SELECT COUNT(DISTINCT u.id) 
+    SELECT COUNT(DISTINCT u.id)
     FROM users u
     JOIN groups_students gsl ON u.id = gsl.students_id
     JOIN groups g ON gsl.group_id = g.id
@@ -237,7 +236,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                  JOIN users u ON g.teacher_id = u.id
                  LEFT JOIN groups_students gu ON gu.group_id = g.id  -- group_user jadvali, bu yerda studentlar va guruhlar bog‘langan
         WHERE gu.students_id = :studentId
-          AND g.active = TRUE """ , nativeQuery = true
+          AND g.active = TRUE""" , nativeQuery = true
     )
     List<User> searchForTeacher(@Param("studentId") Long studentId);
 }
