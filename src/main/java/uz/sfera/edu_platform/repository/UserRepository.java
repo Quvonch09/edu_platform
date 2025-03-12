@@ -178,7 +178,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
         AND (:startAge IS NULL OR u.age >= :startAge)
         AND (:endAge IS NULL OR u.age <= :endAge)
         AND u.role = 'ROLE_STUDENT'
-        AND u.deleted = false
       
         AND (
             :hasPaid IS NULL
