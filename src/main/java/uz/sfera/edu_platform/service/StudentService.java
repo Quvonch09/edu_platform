@@ -130,6 +130,7 @@ public class StudentService {
                 .score(homeworkRepository.countByBall(user.getId())) // Avoid null score
                 .groupId(group != null ? group.getId() : null)
                 .startStudyDate(user.getCreatedAt())
+                .departureDescription(user.getDeparture_description())
                 .build();
 
         return new ApiResponse(studentDTO);
@@ -177,7 +178,7 @@ public class StudentService {
 
     public ApiResponse deleteStudent(Long studentId, LocalDate departureDate, String departureDescription) {
         User user = userRepository.findById(studentId).orElse(null);
-        if (user == null || user.isEnabled()) {
+        if (user == null || !user.isEnabled()) {
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
          // Updating user fields
@@ -216,6 +217,7 @@ public class StudentService {
                 .status(user.getUserStatus() != null ? user.getUserStatus().name() : null)
                 .score(homeworkRepository.countByBall(user.getId()))
                 .startStudyDate(user.getCreatedAt())
+                .departureDescription(user.getDeparture_description())
                 .build();
     }
 
