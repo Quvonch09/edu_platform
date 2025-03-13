@@ -1,20 +1,25 @@
 package uz.sfera.edu_platform.service;
 
 
+import org.springframework.transaction.annotation.Transactional;
 import uz.sfera.edu_platform.entity.Chat;
+import uz.sfera.edu_platform.entity.ChatGroup;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.entity.enums.Role;
 import uz.sfera.edu_platform.exception.BadRequestException;
 import uz.sfera.edu_platform.exception.NotFoundException;
 import uz.sfera.edu_platform.payload.*;
+import uz.sfera.edu_platform.repository.ChatGroupRepository;
 import uz.sfera.edu_platform.repository.ChatRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uz.sfera.edu_platform.repository.UserRepository;
 
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.DataFormatException;
 
 
 @Slf4j
@@ -27,6 +32,66 @@ public class ChatService {
     private final FileService fileService;
 
 
+
+
+    private final ChatGroupRepository chatGroupRepository;
+
+    private final UserRepository userRepository;
+
+    @Transactional
+    public String createChatGroup(String groupName, Set<Long> memberIds) {
+
+        Set<User> members = new HashSet<>();
+
+        for (Long memberId : memberIds) {
+            members.add(userRepository.findById(memberId).orElse(null));
+
+        }
+        if (members.isEmpty()) {
+            throw new BadRequestException("Группа не может быть создана без участников");
+        }
+
+        ChatGroup chatGroup = ChatGroup.builder()
+                .groupName(groupName)
+                .members(members)
+                .build();
+        chatGroupRepository.save(chatGroup);
+        return "ChatGroup created";
+    }
+
+    @Transactional
+    public ChatGroup addMembersToGroup(Long groupId, Set<Long> newMemberIds) {
+        Optional<ChatGroup> chatGroupOptional = chatGroupRepository.findById(groupId);
+
+        if (chatGroupOptional.isEmpty()) {
+            throw new NotFoundException("Чат-группа не найдена");
+        }
+
+        ChatGroup chatGroup = chatGroupOptional.get();
+
+        for (Long userId : newMemberIds) {
+            if(!chatGroupRepository.existsMemberInChat(chatGroup.getId(), userId)) {
+                userRepository.findById(userId).ifPresent(user ->
+                        chatGroupRepository.addMemberToChatGroup(chatGroup.getId(), userId));
+
+            }
+        }
+
+        return chatGroupRepository.save(chatGroup);
+    }
+
+    @Transactional
+    public ApiResponse removeMemberFromGroup(Long groupId, Long userId) {
+        Optional<ChatGroup> chatGroupOptional = chatGroupRepository.findById(groupId);
+
+        if (chatGroupOptional.isEmpty()) {
+            throw new NotFoundException("Чат-группа не найдена");
+        }
+
+        ChatGroup chatGroup = chatGroupOptional.get();
+        chatGroupRepository.removeMemberFromChatGroup(chatGroup.getId(), userId);
+        return new ApiResponse("Пользователь был удален");
+    }
 
     public ApiResponse onlineOffline(boolean isActive, User user) {
         userService.onlineOffline(user, isActive);
