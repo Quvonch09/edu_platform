@@ -207,10 +207,14 @@ public class GroupService {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
         }
 
+        // Eski GraphicDay bog‘liqligini olib tashlash
         if (group.getDays() != null) {
-            graphicDayRepository.delete(group.getDays());
+            group.setDays(null);
+            groupRepository.save(group); // Oldin bog‘liqlikni olib tashlab saqlaymiz
+            graphicDayRepository.delete(group.getDays()); // Keyin eski GraphicDay’ni o‘chiramiz
         }
 
+        // Yangi GraphicDay yaratish
         GraphicDay graphicDay = new GraphicDay();
         graphicDay.setRoom(room);
         graphicDay.setWeekDay(weekDayList(reqGroup.getDayIds()));
@@ -218,6 +222,7 @@ public class GroupService {
         graphicDay.setEndTime(reqGroup.getEndTime());
         graphicDayRepository.save(graphicDay);
 
+        // Guruhni yangilash
         group.setName(reqGroup.getGroupName());
         group.setCategory(category);
         group.setTeacher(teacher);
@@ -227,6 +232,7 @@ public class GroupService {
         groupRepository.save(group);
         return new ApiResponse("Successfully updated group");
     }
+
 
 
 
