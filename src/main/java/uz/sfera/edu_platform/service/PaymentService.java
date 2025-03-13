@@ -19,6 +19,7 @@ import uz.sfera.edu_platform.payload.res.ResPayment;
 import uz.sfera.edu_platform.repository.PaymentRepository;
 import uz.sfera.edu_platform.repository.UserRepository;
 
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,45 +34,20 @@ public class PaymentService {
                                         PaymentEnum paymentType,
                                         ReqPayment reqPayment) {
 
-        User user = null;
-
-        if (reqPayment.getUserId() != null){
-            user = userRepository.findById(reqPayment.getUserId()).orElse(null);
+        if (reqPayment.getUserName() == null || reqPayment.getUserName().isEmpty()){
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("UserName kiritilsin!!!"));
         }
 
-        if (paymentType.equals(PaymentEnum.CHIQIM)){
-            if (reqPayment.getUserName() == null || reqPayment.getUserName().isEmpty()){
-                return new ApiResponse(ResponseError.DEFAULT_ERROR("UserName kiritilsin!!!"));
-            }
-
-            Payment payment = Payment.builder()
-                    .paid((byte) 1)
-                    .userName(reqPayment.getUserName() != null ? reqPayment.getUserName() : null)
-                    .paymentDate(reqPayment.getPaymentDate())
-                    .paymentStatus(paymentStatus)
-                    .paymentType(paymentType)
-                    .price(reqPayment.getPrice())
-                    .paymentType(paymentType)
-                    .student(null)
-                    .build();
-            paymentRepository.save(payment);
-
-        } else {
-            if (user == null){
-                return new ApiResponse(ResponseError.NOTFOUND("Student"));
-            }
-
-            Payment payment = Payment.builder()
-                    .student(user)
-                    .userName(user.getFullName())
-                    .price(reqPayment.getPrice())
-                    .paymentDate(reqPayment.getPaymentDate())
-                    .paymentStatus(paymentStatus)
-                    .paymentType(paymentType)
-                    .paid(reqPayment.isPaid() ? (byte) 1:0)
-                    .build();
-            paymentRepository.save(payment);
-        }
+        Payment payment = Payment.builder()
+                .paid(reqPayment.isPaid() ? (byte) 1:0)
+                .userName(reqPayment.getUserName() != null ? reqPayment.getUserName() : null)
+                .paymentDate(reqPayment.getPaymentDate())
+                .paymentStatus(paymentStatus)
+                .paymentType(paymentType)
+                .price(reqPayment.getPrice())
+                .month(reqPayment.getPaymentDate().getMonth())
+                .build();
+        paymentRepository.save(payment);
 
         return new ApiResponse("Successfully saved");
     }
@@ -95,15 +71,15 @@ public class PaymentService {
     }
 
 
-    public ApiResponse search(String userName, PaymentStatusEnum paymentStatus, PaymentEnum paymentEnum,
+    public ApiResponse search(String userName, PaymentStatusEnum paymentStatus, PaymentEnum paymentEnum, Month month,
                               Boolean paid, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size);
 
         Byte hasPaid = (paid == null) ? null : (byte) (paid ? 1 : 0);
 
         Page<Payment> payments = paymentRepository.searchPayments(
                 userName, hasPaid, Optional.ofNullable(paymentStatus).map(Enum::name).orElse(null),
-                Optional.ofNullable(paymentEnum).map(Enum::name).orElse(null), pageRequest
+                Optional.ofNullable(paymentEnum).map(Enum::name).orElse(null),
+                Optional.ofNullable(month).map(Enum::name).orElse(null), PageRequest.of(page, size)
         );
 
         if (payments.isEmpty()){
@@ -140,26 +116,12 @@ public class PaymentService {
             return new ApiResponse(ResponseError.NOTFOUND("Payment"));
         }
 
-        User user = null;
-
-        if (reqPayment.getUserId() != null){
-            user = userRepository.findById(reqPayment.getUserId()).orElse(null);
-        }
-
 
         if (paymentType == null) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Payment type cannot be null"));
         }
 
         payment.setPaymentStatus(paymentStatus);
-
-        if (user.getRole().equals(Role.ROLE_STUDENT)){
-            if (user == null){
-                return new ApiResponse(ResponseError.NOTFOUND("Student"));
-            }
-            payment.setUserName(user.getFullName());
-            payment.setStudent(user);
-        }
         payment.setUserName(reqPayment.getUserName() != null ? reqPayment.getUserName() : null);
         payment.setPaymentType(paymentType);
         payment.setPaymentDate(reqPayment.getPaymentDate());

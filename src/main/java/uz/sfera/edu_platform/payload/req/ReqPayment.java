@@ -12,8 +12,6 @@ import java.time.LocalDate;
 @Builder
 public class ReqPayment {
 
-    private Long userId;
-
     private String userName;
 
     @NotNull(message = "Narx bo‘sh bo‘lishi mumkin emas")
