@@ -184,34 +184,51 @@ public class GroupService {
 
     public ApiResponse updateGroup(Long groupId, ReqGroup reqGroup) {
         Group group = groupRepository.findById(groupId).orElse(null);
-        if (group == null){
+        if (group == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
 
-        GraphicDay graphicDay = graphicDayRepository.findGraphicDay(reqGroup.getRoomId()).orElse(null);
-
-        if (graphicDay == null || !reqGroup.getRoomId().equals(graphicDay.getRoom().getId())) {
-            if (graphicDayRepository.existsByGraphicDayInGroup(reqGroup.getRoomId(), reqGroup.getStartTime(), reqGroup.getEndTime())) {
-                return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
-            }
-
-            if (graphicDay != null) {
-                graphicDay.setWeekDay(weekDayList(reqGroup.getDayIds()));
-                graphicDay.setStartTime(reqGroup.getStartTime());
-                graphicDay.setEndTime(reqGroup.getEndTime());
-                graphicDayRepository.save(graphicDay);
-            }
+        Room room = roomRepository.findById(reqGroup.getRoomId()).orElse(null);
+        if (room == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Room"));
         }
 
+        Category category = categoryRepository.findById(reqGroup.getCategoryId()).orElse(null);
+        if (category == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Category"));
+        }
+
+        User teacher = userRepository.findById(reqGroup.getTeacherId()).orElse(null);
+        if (teacher == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
+        }
+
+        if (graphicDayRepository.existsByGraphicDayInGroup(reqGroup.getRoomId(), reqGroup.getStartTime(), reqGroup.getEndTime())) {
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
+        }
+
+        if (group.getDays() != null) {
+            graphicDayRepository.delete(group.getDays());
+        }
+
+        GraphicDay graphicDay = new GraphicDay();
+        graphicDay.setRoom(room);
+        graphicDay.setWeekDay(weekDayList(reqGroup.getDayIds()));
+        graphicDay.setStartTime(reqGroup.getStartTime());
+        graphicDay.setEndTime(reqGroup.getEndTime());
+        graphicDayRepository.save(graphicDay);
+
         group.setName(reqGroup.getGroupName());
-        group.setCategory(categoryRepository.findById(reqGroup.getCategoryId()).orElse(null));
-        group.setTeacher(userRepository.findById(reqGroup.getTeacherId()).orElse(null));
+        group.setCategory(category);
+        group.setTeacher(teacher);
         group.setStartDate(reqGroup.getStartDate());
         group.setDays(graphicDay);
 
         groupRepository.save(group);
         return new ApiResponse("Successfully updated group");
     }
+
+
 
 
     public ApiResponse deleteGroup(Long groupId) {
