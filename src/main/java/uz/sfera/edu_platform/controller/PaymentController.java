@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Month;
+
 @RestController
 @RequestMapping("/api/payment")
 @RequiredArgsConstructor
@@ -49,10 +51,11 @@ public class PaymentController {
             @RequestParam(value = "status" , required = false) PaymentStatusEnum statusEnum,
             @RequestParam(value = "type" , required = false) PaymentEnum paymentEnum,
             @RequestParam(value = "paid", required = false) Boolean paid,
+            @RequestParam(value = "month", required = false) Month month,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-        ApiResponse search = paymentService.search(fullName, statusEnum,paymentEnum, paid, page, size);
+        ApiResponse search = paymentService.search(fullName, statusEnum,paymentEnum, month, paid, page, size);
         return ResponseEntity.ok(search);
     }
 

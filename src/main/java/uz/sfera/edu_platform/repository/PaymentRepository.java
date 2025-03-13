@@ -25,11 +25,13 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             "            (:name IS NULL OR LOWER(p.user_name) LIKE LOWER(CONCAT('%', :name, '%')))\n" +
             "            and (:paymentStatus IS NULL OR p.payment_status = :paymentStatus)\n" +
             "            and (:paymentEnum IS NULL OR p.payment_type = :paymentEnum)\n" +
-            "            and (:paid IS NULL OR p.paid = :paid)", nativeQuery = true)
+            "            and (:paid IS NULL OR p.paid = :paid)" +
+            "            and (:month IS NULL OR p.month = :month)   ", nativeQuery = true)
     Page<Payment> searchPayments(@Param("name") String name,
                                  @Param("paid") Byte paid,
                                  @Param("paymentStatus") String paymentStatus,
                                  @Param("paymentEnum") String paymentEnum,
+                                 @Param("month") String month,
                                  Pageable pageable);
 
     @Query("select  coalesce( avg(p.price) , 0.0 )  from Payment p where p.paymentType = 'TUSHUM' and extract(month from p.paymentDate) = "

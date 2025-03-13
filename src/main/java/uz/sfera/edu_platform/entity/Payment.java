@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.Month;
 
 @Getter
 @Setter
@@ -18,14 +19,15 @@ import java.time.LocalDate;
 @Builder
 @Entity
 public class Payment extends AbsEntity {
-    private Double price;
 
-    @ManyToOne
-    private User student;
+    private Double price;
 
     private String userName;
 
     private LocalDate paymentDate;
+
+    @Enumerated(EnumType.STRING)
+    private Month month;
 
     @Enumerated(EnumType.STRING)
     private PaymentStatusEnum paymentStatus;
