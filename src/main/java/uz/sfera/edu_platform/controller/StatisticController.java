@@ -95,7 +95,7 @@ public class StatisticController {
     @PreAuthorize("hasAnyRole('ROLE_TEACHER', 'ROLE_STUDENT')")
     @GetMapping("/studentRank/byGroup")
     public ResponseEntity<ApiResponse> getStudentRankByGroup(
-            @RequestParam(required = false) Long groupId,
+            @RequestParam Long groupId,
             @CurrentUser User student,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
