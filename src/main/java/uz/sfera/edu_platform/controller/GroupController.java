@@ -42,16 +42,16 @@ public class GroupController {
     @Operation(summary = "ADMIN/CEO/TEACHER groupni search qilish")
     @GetMapping
     public ResponseEntity<ApiResponse> searchGroup(
+            @CurrentUser User teacher,
             @RequestParam(required = false, value = "name") String name,
             @RequestParam(required = false, value = "teacherName") String teacherName,
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate,
             @RequestParam(required = false, value = "categoryId") Long categoryId,
-            @RequestParam(required = false, value = "teacherId") Long teacherId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-        ApiResponse search = groupService.search(name, teacherName, startDate, endDate, categoryId, teacherId, page, size);
+        ApiResponse search = groupService.search(teacher,name, teacherName, startDate, endDate, categoryId, page, size);
         return ResponseEntity.ok(search);
     }
 
