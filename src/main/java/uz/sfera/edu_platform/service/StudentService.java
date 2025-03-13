@@ -51,12 +51,12 @@ public class StudentService {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Student"));
         }
 
-        Group group = groupRepository.findById(reqStudent.getGroupId())
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Group"))));
-
+        Group group = groupRepository.findById(reqStudent.getGroupId()).orElse(null);
+        if (group == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
         File file = (reqStudent.getFileId() != null)
-                ? fileRepository.findById(reqStudent.getFileId()).orElseThrow(() ->
-                new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("File"))))
+                ? fileRepository.findById(reqStudent.getFileId()).orElse(null)
                 : null;
 
         User student = User.builder()
@@ -68,6 +68,7 @@ public class StudentService {
                 .file(file)
                 .password(passwordEncoder.encode(reqStudent.getPassword()))
                 .enabled(true)
+                .deleted(false)
                 .userStatus(UserStatus.UQIYAPDI)
                 .credentialsNonExpired(true)
                 .accountNonLocked(true)
@@ -96,6 +97,10 @@ public class StudentService {
                 teacherId, startAge, endAge, hasPaid, pageRequest
         );
 
+        if (users.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Hech qanday student"));
+        }
+
         ResPageable resPageable = ResPageable.builder()
                 .page(page)
                 .size(size)
@@ -109,9 +114,10 @@ public class StudentService {
 
 
     public ApiResponse getOneStudent(Long studentId) {
-        User user = userRepository.findById(studentId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Student"))));
-
+        User user = userRepository.findById(studentId).orElse(null);
+        if (user == null || user.isDeleted()) {
+            return new ApiResponse(ResponseError.NOTFOUND("Student"));
+        }
         Group group = groupRepository.findByStudentId(user.getId()).orElse(null);
 
         StudentDTO studentDTO = StudentDTO.builder()
@@ -124,6 +130,7 @@ public class StudentService {
                 .score(homeworkRepository.countByBall(user.getId())) // Avoid null score
                 .groupId(group != null ? group.getId() : null)
                 .startStudyDate(user.getCreatedAt())
+                .departureDescription(user.getDeparture_description())
                 .build();
 
         return new ApiResponse(studentDTO);
@@ -132,12 +139,11 @@ public class StudentService {
 
     @Transactional
     public ApiResponse updateStudent(Long studentId, ReqStudent reqStudent) {
-        User user = userRepository.findById(studentId)
-                .orElseThrow(()-> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Student"))));
-
-        Group newGroup = groupRepository.findById(reqStudent.getGroupId())
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Group"))));
-
+        User user = userRepository.findById(studentId).orElse(null);
+        if (user == null || user.isEnabled()) {
+            return new ApiResponse(ResponseError.NOTFOUND("Student"));
+        }
+        Group newGroup = groupRepository.findById(reqStudent.getGroupId()).orElse(null);
         Group oldGroup = groupRepository.findByStudentId(user.getId()).orElse(null);
         if (oldGroup != null) {
             oldGroup.getStudents().remove(user);
@@ -171,10 +177,13 @@ public class StudentService {
 
 
     public ApiResponse deleteStudent(Long studentId, LocalDate departureDate, String departureDescription) {
-        User user = userRepository.findById(studentId)
-                .orElseThrow(()-> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("User"))));
-        // Updating user fields
+        User user = userRepository.findById(studentId).orElse(null);
+        if (user == null || !user.isEnabled()) {
+            return new ApiResponse(ResponseError.NOTFOUND("Student"));
+        }
+         // Updating user fields
         user.setUserStatus(UserStatus.CHIQIB_KETGAN);
+        user.setDeleted(true);
         user.setEnabled(false);
         user.setPhoneNumber(user.getPhoneNumber() + LocalDateTime.now() + "_deleted");
         user.setDeparture_date(departureDate);
@@ -188,10 +197,11 @@ public class StudentService {
 
 
     public ApiResponse getStudentGroupBy(Long groupId) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Group"))));
-
-        List<User> students = group.getStudents();
+        Group group = groupRepository.findById(groupId).orElse(null);
+        if (group == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
+        List<User> students = groupRepository.findByGroup(groupId);
         List<StudentDTO> list = students.stream().map(this::getDto).toList();
 
         return new ApiResponse(list);
@@ -208,6 +218,7 @@ public class StudentService {
                 .status(user.getUserStatus() != null ? user.getUserStatus().name() : null)
                 .score(homeworkRepository.countByBall(user.getId()))
                 .startStudyDate(user.getCreatedAt())
+                .departureDescription(user.getDeparture_description())
                 .build();
     }
 
@@ -219,6 +230,10 @@ public class StudentService {
         List<UserDTO> list = users.stream()
                 .map(this::getTeacherDTO)  // ✅ To‘g‘ri metod nomi
                 .toList();
+
+        if (list.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Userlar"));
+        }
 
         return new ApiResponse(list);
     }

@@ -6,6 +6,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.Category;
 import uz.sfera.edu_platform.entity.File;
+import uz.sfera.edu_platform.entity.User;
+import uz.sfera.edu_platform.entity.enums.Role;
 import uz.sfera.edu_platform.exception.NotFoundException;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.CategoryDTO;
@@ -13,6 +15,7 @@ import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.res.ResPageable;
 import uz.sfera.edu_platform.repository.CategoryRepository;
 import uz.sfera.edu_platform.repository.FileRepository;
+import uz.sfera.edu_platform.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,8 +25,28 @@ import java.util.Optional;
 public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final FileRepository fileRepository;
+    private final UserRepository userRepository;
 
-    public ApiResponse getAllCategories(String name, String description, int page, int size) {
+    public ApiResponse getAllCategories(User currentUser,String name, Long teacherId,String description, int page, int size) {
+        if (teacherId != null){
+            User teacher = userRepository.findById(teacherId).orElse(null);
+            if (teacher == null){
+                return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
+            }
+
+            List<Category> categories = teacher.getCategories();
+            List<CategoryDTO> categoryDTOS = categories.stream()
+                    .map(this::convertCategoryToCategoryDTO)
+                    .toList();
+            return new ApiResponse(categoryDTOS);
+        }
+        if (currentUser.getRole().equals(Role.ROLE_TEACHER)){
+            List<Category> categories = currentUser.getCategories();
+            List<CategoryDTO> categoryDTOS = categories.stream()
+                    .map(this::convertCategoryToCategoryDTO)
+                    .toList();
+            return new ApiResponse(categoryDTOS);
+        }
         Page<Category> pages = categoryRepository.getAllCategory(name, description, PageRequest.of(page, size));
 
         if (pages.isEmpty()) {
@@ -39,7 +62,7 @@ public class CategoryService {
     public ApiResponse getCategoryById(Long id) {
         return categoryRepository.findById(id)
                 .map(category -> new ApiResponse(convertCategoryToCategoryDTO(category)))
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Category"))));
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Category")));
     }
 
 
@@ -58,6 +81,7 @@ public class CategoryService {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Category"));
         }
 
+
         Category category = new Category();
         save(category, categoryDTO);
         categoryRepository.save(category);
@@ -69,14 +93,11 @@ public class CategoryService {
     public ApiResponse updateCategory(Long categoryId, CategoryDTO categoryDTO) {
         return categoryRepository.findById(categoryId)
                 .map(category -> {
-                    if (categoryRepository.existsByNameAndActive(categoryDTO.getName(), (byte) 1)) {
-                        return new ApiResponse(ResponseError.ALREADY_EXIST("Category"));
-                    }
                     save(category, categoryDTO);
                     categoryRepository.save(category);
                     return new ApiResponse("Category successfully updated");
                 })
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Category"))));
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Category")));
     }
 
 
@@ -87,7 +108,7 @@ public class CategoryService {
                     categoryRepository.save(category);
                     return new ApiResponse("Category successfully deleted");
                 })
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Category"))));
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Category")));
     }
 
 
@@ -98,7 +119,7 @@ public class CategoryService {
                     categoryRepository.save(category);
                     return new ApiResponse("Category successfully updated");
                 })
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Category"))));
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Category")));
     }
 
 
@@ -117,11 +138,14 @@ public class CategoryService {
 
     public void save(Category category, CategoryDTO categoryDTO)
     {
+        File file = (categoryDTO.getFileId() != null)
+                ? fileRepository.findById(categoryDTO.getFileId()).orElse(null)
+                : null;
         category.setName(categoryDTO.getName());
         category.setDescription(categoryDTO.getDescription());
         category.setDuration((byte) categoryDTO.getDuration());
         category.setCoursePrice(categoryDTO.getPrice());
         category.setActive((byte) 1);
-        category.setFile(categoryDTO.getFileId() != null ? fileRepository.findById(categoryDTO.getFileId()).orElse(null) : null);
+        category.setFile(file);
     }
 }

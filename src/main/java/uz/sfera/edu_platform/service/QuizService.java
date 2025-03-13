@@ -31,9 +31,10 @@ public class QuizService {
 
     @Transactional
     public ApiResponse createQuiz(ReqQuiz reqQuiz) {
-        Lesson lesson = lessonRepository.findById(reqQuiz.getLessonId())
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
-
+        Lesson lesson = lessonRepository.findById(reqQuiz.getLessonId()).orElse(null);
+        if (lesson == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        }
         if (lesson.getModule() == null || lesson.getModule().getCategory() == null) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu lessonning categoriyasi o‘chirilgan"));
         }
@@ -71,6 +72,10 @@ public class QuizService {
         }
 
         List<QuestionDTO> questions = getRandomQuestionsForQuiz(quiz.getId());
+
+        if (questions.isEmpty() || questions.size() < quizSettings.getQuestionCount()){
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Savollar yetarli emas"));
+        }
 
         Result result = Result.builder()
                 .startTime(LocalDateTime.now())
@@ -129,13 +134,15 @@ public class QuizService {
 
     public List<QuestionDTO> getRandomQuestionsForQuiz(Long quizId) {
         QuizSettings settings = quizSettingsRepository.findByQuizId(quizId);
-        return questionRepository.findRandomQuestionsByQuizId(quizId).stream()
+        List<QuestionDTO> list =  questionRepository.findRandomQuestionsByQuizId(quizId).stream()
                 .limit(settings.getQuestionCount())
                 .map(question -> questionService.questionDTO(question,
                         optionRepository.findByQuestionId(question.getId()).stream()
                                 .map(optionService::optionDTO)
                                 .toList()))
                 .toList();
+
+        return list;
     }
 
 

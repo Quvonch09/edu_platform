@@ -3,6 +3,7 @@ package uz.sfera.edu_platform.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uz.sfera.edu_platform.entity.File;
 import uz.sfera.edu_platform.entity.Option;
 import uz.sfera.edu_platform.entity.Question;
 import uz.sfera.edu_platform.entity.Quiz;
@@ -14,6 +15,7 @@ import uz.sfera.edu_platform.payload.QuestionDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.req.ReqOption;
 import uz.sfera.edu_platform.payload.req.ReqQuestion;
+import uz.sfera.edu_platform.repository.FileRepository;
 import uz.sfera.edu_platform.repository.OptionRepository;
 import uz.sfera.edu_platform.repository.QuestionRepository;
 import uz.sfera.edu_platform.repository.QuizRepository;
@@ -25,28 +27,27 @@ import java.util.List;
 public class QuestionService {
     private final QuestionRepository questionRepository;
     private final QuizRepository quizRepository;
+    private final FileRepository fileRepository;
     private final OptionService optionService;
     private final OptionRepository optionRepository;
 
     @Transactional
     public ApiResponse saveQuestion(QuestionEnum difficulty, ReqQuestion reqQuestion) {
-        Quiz quiz = quizRepository.findById(reqQuestion.getQuizId())
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Quiz"))));
-
-        if (quiz.getDeleted() == 1) {
+        Quiz quiz = quizRepository.findById(reqQuestion.getQuizId()).orElse(null);
+        if (quiz == null || quiz.getDeleted() == 1) {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
         }
 
-        long correctAnswerCount = reqQuestion.getReqOptionList()
-                .stream().filter(ReqOption::isCorrect).count();
-
-        if (correctAnswerCount != 1) {
+        if (reqQuestion.getReqOptionList().stream().filter(ReqOption::isCorrect).count() != 1) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Har bir savol uchun faqat 1 ta to'g'ri javob bo‘lishi kerak"));
         }
+
+        File file = reqQuestion.getFileId() != null ? fileRepository.findById(reqQuestion.getFileId()).orElse(null) : null;
 
         Question question = questionRepository.save(
                 Question.builder()
                         .question(reqQuestion.getQuestionText())
+                        .file(file)
                         .questionEnum(difficulty)
                         .quiz(quiz)
                         .build()
@@ -66,10 +67,12 @@ public class QuestionService {
     }
 
 
-    public ApiResponse getQuestionByQuiz(Long quizId) {
-        Quiz quiz = quizRepository.findById(quizId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Quiz"))));
 
+    public ApiResponse getQuestionByQuiz(Long quizId) {
+        Quiz quiz = quizRepository.findById(quizId).orElse(null);
+        if (quiz == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
+        }
         if (quiz.getDeleted() == 1) {
             return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
         }
@@ -92,9 +95,10 @@ public class QuestionService {
 
     @Transactional
     public ApiResponse deleteQuiz(Long questionId) {
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Question"))));
-
+        Question question = questionRepository.findById(questionId).orElse(null);
+        if (question == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
+        }
         optionRepository.deleteByQuestionId(questionId); // Optionlarni o‘chirish
         questionRepository.delete(question); // Savolni o‘chirish
 
@@ -105,11 +109,15 @@ public class QuestionService {
 
     @Transactional
     public ApiResponse updateQuestion(Long questionId, QuestionEnum difficulty, ReqQuestion reqQuestion) {
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Question"))));
+        Question question = questionRepository.findById(questionId).orElse(null);
+        if (question == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Question"));
+        }
 
-        Quiz quiz = quizRepository.findById(reqQuestion.getQuizId())
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Quiz"))));
+        Quiz quiz = quizRepository.findById(reqQuestion.getQuizId()).orElse(null);
+        if (quiz == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Quiz"));
+        }
 
         if (reqQuestion.getReqOptionList().stream().filter(ReqOption::isCorrect).count() != 1) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Har bir savol uchun faqat 1 ta to‘g‘ri javob bo‘lishi kerak"));
@@ -117,6 +125,7 @@ public class QuestionService {
 
         // Savolni yangilash
         question.setQuestion(reqQuestion.getQuestionText());
+        question.setFile(fileRepository.findById(reqQuestion.getFileId()).orElse(null));
         question.setQuestionEnum(difficulty);
         question.setQuiz(quiz);
 
@@ -142,6 +151,7 @@ public class QuestionService {
         return QuestionDTO.builder()
                 .id(question.getId())
                 .text(question.getQuestion())
+                .fileId(question.getFile() != null ? question.getFile().getId() : null)
                 .difficulty(question.getQuestionEnum().toString())
                 .quizId(question.getQuiz().getId())
                 .options(optionList)

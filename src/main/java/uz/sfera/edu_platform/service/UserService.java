@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -51,22 +52,33 @@ public class UserService {
         }
 
         if (userRepository.existsByPhoneNumberAndEnabledIsTrue(reqTeacher.getPhoneNumber())) {
-            return new ApiResponse(ResponseError.ALREADY_EXIST("Bu telefon raqam allaqachon mavjud"));
+            return new ApiResponse(ResponseError.ALREADY_EXIST("Bu telefon raqam"));
         }
 
-        Category category = categoryRepository.findById(reqTeacher.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Kategoriya topilmadi"));
+        List<Category> categories = new ArrayList<>();
+        List<Long> notFounds = new ArrayList<>();
+        for (Long categoryId : reqTeacher.getCategoryIds()) {
+            Category category = categoryRepository.findById(categoryId).orElse(null);
+            if (category == null){
+                notFounds.add(categoryId);
+            }
+            categories.add(category);
+        }
 
-        File file = fileRepository.findById(reqTeacher.getFileId()).orElse(null);
+
+        File file = (reqTeacher.getFileId() != null)
+                ? fileRepository.findById(reqTeacher.getFileId()).orElse(null)
+                : null;
 
         User teacher = User.builder()
                 .fullName(reqTeacher.getFullName())
                 .phoneNumber(reqTeacher.getPhoneNumber())
-                .categories(List.of(category))  // Ortacha ro‘yxat yaratamiz
+                .categories(categories)  // Ortacha ro‘yxat yaratamiz
                 .password(passwordEncoder.encode(reqTeacher.getPassword()))
                 .enabled(true)
                 .role(Role.ROLE_TEACHER)
                 .file(file)
+                .deleted(false)
                 .accountNonExpired(true)
                 .accountNonLocked(true)
                 .credentialsNonExpired(true)
@@ -74,14 +86,17 @@ public class UserService {
 
         userRepository.save(teacher);
 
-        return new ApiResponse("O‘qituvchi muvaffaqiyatli saqlandi");
+        if (!notFounds.isEmpty()){
+            return new ApiResponse("Kategoriyalar topilmadi: " + notFounds);
+        }
+        return new ApiResponse("O'qituvchi muvaffaqiyatli saqlandi");
     }
 
 
-    public ApiResponse searchUsers(String fullName, String phoneNumber, Long groupId, Role role, int page, int size) {
+    public ApiResponse searchUsers(String fullName, String phoneNumber, Long categoryId, Role role, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
 
-        Page<User> allTeachers = userRepository.searchUsers(fullName, phoneNumber, groupId,
+        Page<User> allTeachers = userRepository.searchUsers(fullName, phoneNumber, categoryId,
                 role != null ? role.name() : null, pageRequest);
 
         List<TeacherDTO> teacherList = allTeachers.stream()
@@ -90,6 +105,10 @@ public class UserService {
                                 .map(category -> new ResCategory(category.getId(), category.getName()))
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());
+
+        if (teacherList.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Userlar"));
+        }
 
         ResPageable resPageable = ResPageable.builder()
                 .page(page)
@@ -114,6 +133,7 @@ public class UserService {
                 .active(user.isEnabled())
                 .groupCount(groups.size())
                 .groupList(list)
+                .active(user.isEnabled())
                 .fileId(Optional.ofNullable(user.getFile()).map(File::getId).orElse(null)) // Optimallashtirilgan
                 .build();
     }
@@ -128,18 +148,24 @@ public class UserService {
 
 
     public ApiResponse getUsersList(Role role) {
-        List<User> users = (role != null) ? userRepository.findAllByRole(role) : userRepository.findAll();
+        List<User> users = (role != null) ? userRepository.findAllByRoleAndDeletedFalse(role) : userRepository.findAll();
 
         List<UserDTO> userDTOList = users.stream()
                 .map(this::convertToUserDTO)
                 .collect(Collectors.toList());
 
+        if (userDTOList.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Userlar"));
+        }
+
         return new ApiResponse(userDTOList);
     }
 
     public ApiResponse getOneTeacher(Long teacherId) {
-        userRepository.findById(teacherId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Teacher"))));
+        User user = userRepository.findById(teacherId).orElse(null);
+        if (user == null || user.isDeleted()) {
+            return new ApiResponse(ResponseError.NOTFOUND("User"));
+        }
 
         List<ResStudentCount> res = groupRepository.findAllStudentsByTeacherId(teacherId);
         return new ApiResponse(res);
@@ -158,8 +184,14 @@ public class UserService {
 
 
     public ApiResponse updateTeacher(Long teacherId, ReqTeacher reqTeacher) {
-        User user = userRepository.findById(teacherId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Teacher"))));
+        User user = userRepository.findById(teacherId).orElse(null);
+        if (user == null){
+            return new ApiResponse(ResponseError.NOTFOUND("User"));
+        }
+
+        if (userRepository.existsByPhoneNumberAndEnabledIsTrueAndIdNot(reqTeacher.getPhoneNumber(),teacherId)){
+            return new ApiResponse(ResponseError.ALREADY_EXIST("Bu telefon nomer"));
+        }
 
         user.setFullName(reqTeacher.getFullName());
         user.setPhoneNumber(reqTeacher.getPhoneNumber());
@@ -168,7 +200,17 @@ public class UserService {
             user.setPassword(passwordEncoder.encode(reqTeacher.getPassword()));
         }
 
-        user.setFile(fileRepository.findById(reqTeacher.getFileId()).orElse(null));
+        File file = (reqTeacher.getFileId() != null)
+                ? fileRepository.findById(reqTeacher.getFileId()).orElse(null)
+                : null;
+
+        List<Category> categories = new ArrayList<>();
+        for (Long categoryId : reqTeacher.getCategoryIds()) {
+            categories.add(categoryRepository.findById(categoryId).orElse(null));
+        }
+
+        user.setFile(file);
+        user.setCategories(categories);
         userRepository.save(user);
 
         return new ApiResponse("Teacher successfully updated");
@@ -176,8 +218,10 @@ public class UserService {
 
 
     public ApiResponse updateActiveTeacher(Long teacherId, Boolean active) {
-        User user = userRepository.findById(teacherId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Teacher"))));
+        User user = userRepository.findById(teacherId).orElse(null);
+        if (user == null){
+            return new ApiResponse(ResponseError.NOTFOUND("User"));
+        }
 
         user.setEnabled(active);
         userRepository.save(user);
@@ -187,14 +231,16 @@ public class UserService {
 
 
     public ApiResponse deleteTeacher(Long userId, User currentUser) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Teacher"))));
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null){
+            return new ApiResponse(ResponseError.NOTFOUND("User"));
+        }
 
         if (user.getRole().equals(Role.ROLE_ADMIN) && !currentUser.getRole().equals(Role.ROLE_CEO)) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Sizda adminni o‘chirishga huquq yo‘q"));
         }
 
-        user.setEnabled(false);
+        user.setDeleted(true);
         user.setPhoneNumber(user.getPhoneNumber() + "_" + UUID.randomUUID().toString().substring(0, 8) + "_deleted");
 
         userRepository.save(user);
@@ -214,6 +260,7 @@ public class UserService {
                 .password(passwordEncoder.encode(reqAdmin.getPassword()))
                 .file(reqAdmin.getFileId() != null ? fileRepository.findById(reqAdmin.getFileId()).orElse(null) : null)
                 .enabled(true)
+                .deleted(false)
                 .accountNonExpired(true)
                 .accountNonLocked(true)
                 .credentialsNonExpired(true)
@@ -224,8 +271,10 @@ public class UserService {
     }
 
     public ApiResponse getOneAdmin(Long adminId){
-        User user = userRepository.findById(adminId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Admin"))));
+        User user = userRepository.findById(adminId).orElse(null);
+        if (user == null || user.isDeleted()){
+            return new ApiResponse(ResponseError.NOTFOUND("Admin"));
+        }
 
         if (!user.getRole().equals(Role.ROLE_ADMIN)) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Admin topilmadi"));
@@ -242,9 +291,10 @@ public class UserService {
 
 
     public ApiResponse updateAdmin(Long adminId, ReqAdmin reqAdmin){
-        User user = userRepository.findById(adminId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Admin"))));
-
+        User user = userRepository.findById(adminId).orElse(null);
+        if (user == null){
+            return new ApiResponse(ResponseError.NOTFOUND("User"));
+        }
         user.setFullName(reqAdmin.getFullName());
         user.setPhoneNumber(reqAdmin.getPhoneNumber());
 
@@ -286,8 +336,8 @@ public class UserService {
     }
 
     public User getUser(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("User"))));
+        return userRepository.findById(id).orElse(null);
+
     }
 
     public void onlineOffline(User user, boolean isActive) {
@@ -325,26 +375,4 @@ public class UserService {
                 .groupName(group.getName())
                 .build();
     }
-
-
-
-
-//    @Transactional
-//    public ApiResponse getOneTeacher(Long teacherId) {
-//        User user = userRepository.findById(teacherId).orElse(null);
-//        if (user == null) {
-//            return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
-//        }
-//        List<Long> categoryIds = new ArrayList<>();
-//        for (Category category : user.getCategories()) {
-//            categoryIds.add(category.getId());
-//        }
-//
-//        return new ApiResponse(convertUserToTeacherDTO(user,categoryIds));
-//    }
-
-
-    // TODO Ishlatilmay yotgan ekan cament olib quydim agar kerak bulmasa uchirib tashela
-
-
 }

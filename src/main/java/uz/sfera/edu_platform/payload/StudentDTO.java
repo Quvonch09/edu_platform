@@ -20,4 +20,5 @@ public class StudentDTO {
     private Boolean isPay;
     private String parentPhoneNumber;
     private Double score;
+    private String departureDescription;
 }

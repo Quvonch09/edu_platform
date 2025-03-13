@@ -6,6 +6,7 @@ import uz.sfera.edu_platform.entity.File;
 import uz.sfera.edu_platform.entity.Lesson;
 import uz.sfera.edu_platform.entity.Task;
 import uz.sfera.edu_platform.payload.ApiResponse;
+import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.TaskDTO;
 import uz.sfera.edu_platform.payload.req.ReqTask;
 import uz.sfera.edu_platform.repository.FileRepository;
@@ -22,10 +23,12 @@ public class TaskService {
     private final FileRepository fileRepository;
 
     public ApiResponse saveTask(ReqTask reqTask) {
-        Lesson lesson = lessonRepository.findById(reqTask.getLessonId())
-                .orElseThrow(() -> new RuntimeException("Lesson topilmadi"));
-
-        File file = (reqTask.getFileId() != null) ?
+        Lesson lesson = lessonRepository.findById(reqTask.getLessonId()).orElse(null);
+        if (lesson == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        }
+        File
+                file = (reqTask.getFileId() != null) ?
                 fileRepository.findById(reqTask.getFileId()).orElse(null) : null;
 
         Task task = Task.builder()
@@ -42,37 +45,45 @@ public class TaskService {
 
 
     public ApiResponse getTask(Long taskId) {
-        Task foundTask = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Task topilmadi"));
+        Task foundTask = taskRepository.findById(taskId).orElse(null);
+        if (foundTask == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Task"));
+        }
 
         return new ApiResponse(taskDTO(foundTask));
     }
 
 
     public ApiResponse getTaskInLesson(Long lessonId) {
-        lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new RuntimeException("Lesson topilmadi"));
-
+        Lesson lesson = lessonRepository.findById(lessonId).orElse(null);
+        if (lesson == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        }
         List<Task> tasks = taskRepository.findByLessonIdAndDeleted(lessonId, (byte) 0);
 
         List<TaskDTO> taskDTOS = tasks.stream()
                 .map(this::taskDTO)
                 .toList();
 
+        if (taskDTOS.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Tasklar"));
+        }
+
         return new ApiResponse(taskDTOS);
     }
 
 
     public ApiResponse updateTask(Long taskId, ReqTask reqTask) {
-        Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Task topilmadi"));
-        Lesson lesson = lessonRepository.findById(reqTask.getLessonId())
-                .orElseThrow(() -> new RuntimeException("Lesson topilmadi"));
-        File file = fileRepository.findById(reqTask.getFileId()).orElse(null);
+        Task task = taskRepository.findById(taskId).orElse(null);
+        if (task == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Task"));
+        }
+        task.setLesson(lessonRepository.findById(reqTask.getLessonId()).orElse(null));
+        if (reqTask.getFileId() != null)
+            task.setFile(fileRepository.findById(reqTask.getFileId()).orElse(null));
 
-        task.setTitle(reqTask.getTitle());
-        task.setLesson(lesson);
-        task.setFile(file);
+        if (reqTask.getTitle() != null && !reqTask.getTitle().isEmpty())
+            task.setTitle(reqTask.getTitle());
 
         taskRepository.save(task);
         return new ApiResponse("Task yangilandi");
@@ -80,8 +91,10 @@ public class TaskService {
 
 
     public ApiResponse delete(Long taskId) {
-        Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Task topilmadi"));
+        Task task = taskRepository.findById(taskId).orElse(null);
+        if (task == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Task"));
+        }
 
         task.setDeleted((byte) 1);
         taskRepository.save(task);
@@ -95,6 +108,7 @@ public class TaskService {
                 .title(task.getTitle())
                 .fileId(task.getFile() != null ? task.getFile().getId() : null)
                 .lessonId(task.getLesson().getId())
+                .lessonName(task.getLesson().getName())
                 .build();
     }
 

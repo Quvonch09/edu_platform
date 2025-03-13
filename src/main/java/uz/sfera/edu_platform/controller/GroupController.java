@@ -32,11 +32,9 @@ public class GroupController {
     @Operation(summary = "Teacher o'ziga tegishli guruhlarni ko'rish")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> getByTeacher(
-            @CurrentUser User teacher,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @CurrentUser User teacher
     ){
-        return ResponseEntity.ok(groupService.search(null,teacher.getFullName(),null,null,null,page,size));
+        return ResponseEntity.ok(groupService.getGroupByTeacher(teacher));
     }
 
 
@@ -49,10 +47,11 @@ public class GroupController {
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate,
             @RequestParam(required = false, value = "categoryId") Long categoryId,
+            @RequestParam(required = false, value = "teacherId") Long teacherId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-        ApiResponse search = groupService.search(name, teacherName, startDate, endDate, categoryId, page, size);
+        ApiResponse search = groupService.search(name, teacherName, startDate, endDate, categoryId, teacherId, page, size);
         return ResponseEntity.ok(search);
     }
 
@@ -73,8 +72,8 @@ public class GroupController {
     @PreAuthorize("hasAnyRole('ROLE_CEO', 'ROLE_ADMIN', 'ROLE_TEACHER')")
     @Operation(summary = "ADMIN/TEACHER/CEO guruhlar listini kurish")
     @GetMapping("/list")
-    public ResponseEntity<ApiResponse> getGroupList(){
-        ApiResponse oneGroup = groupService.getGroupsList();
+    public ResponseEntity<ApiResponse> getGroupList(@CurrentUser User user){
+        ApiResponse oneGroup = groupService.getGroupsList(user);
         return ResponseEntity.ok(oneGroup);
     }
 

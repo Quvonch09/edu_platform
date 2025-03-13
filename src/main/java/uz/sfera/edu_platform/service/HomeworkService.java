@@ -42,7 +42,7 @@ public class HomeworkService {
                     homeworkRepository.save(homework);
                     return new ApiResponse("Homework saqlandi");
                 })
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Task"))));
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Task")));
     }
 
     public ApiResponse checkHomework(Long homeworkId, byte ball) {
@@ -53,7 +53,7 @@ public class HomeworkService {
                     homeworkRepository.save(homework);
                     return new ApiResponse("Homework tekshirildi");
                 })
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Homework"))));
+                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Homework")));
     }
 
     public ApiResponse getMyHomeworks(boolean isChecked, User student, Long taskId, int page, int size) {
@@ -102,6 +102,7 @@ public class HomeworkService {
                 .studentName(homework.getStudent().getFullName())
                 .ball(homework.getBall())
                 .taskId(homework.getTask().getId())
+                .fileId(homework.getFile() != null ? homework.getFile().getId() : null)
                 .build();
     }
 }

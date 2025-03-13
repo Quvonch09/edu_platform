@@ -28,7 +28,7 @@ public class AuthService {
             return new ApiResponse(ResponseError.NOTFOUND("User"));
         }
 
-        if (!user.isEnabled()){
+        if (!user.isEnabled() || user.isDeleted()){
             return new ApiResponse(ResponseError.ACCESS_DENIED());
         }
 

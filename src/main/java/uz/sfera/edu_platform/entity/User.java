@@ -36,7 +36,7 @@ public class User extends AbsEntity implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Category> categories;
 
     @Enumerated(EnumType.STRING)
@@ -54,6 +54,8 @@ public class User extends AbsEntity implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private ChatStatus chatStatus;
+
+    private boolean deleted;
 
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;

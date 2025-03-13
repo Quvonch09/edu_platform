@@ -18,6 +18,9 @@ public class Question {
     @Column(nullable = false)
     private String question;
 
+    @OneToOne
+    private File file;
+
     @Enumerated(EnumType.STRING)
     private QuestionEnum questionEnum;
 

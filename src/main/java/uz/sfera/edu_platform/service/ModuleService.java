@@ -57,7 +57,11 @@ public class ModuleService {
     public ApiResponse getByCategory(Long categoryId, User user, int page, int size) {
         Page<Module> modules = (categoryId != null)
                 ? moduleRepository.findByCategoryIdAndDeleted(categoryId, (byte) 0, PageRequest.of(page, size))
-                : moduleRepository.findByDeleted((byte) 0, PageRequest.of(page, size)); // Agar categoryId null bo‘lsa, barcha modullar
+                : moduleRepository.findByDeleted((byte) 0, PageRequest.of(page, size));
+
+        if (modules.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Modullar"));// Agar categoryId null bo‘lsa, barcha modullar
+        }
 
         return new ApiResponse(ResPageable.builder()
                 .page(page)
@@ -76,6 +80,10 @@ public class ModuleService {
         Page<Module> modules = (name == null || name.isBlank())
                 ? moduleRepository.findAll(pageable)
                 : moduleRepository.findByNameContainingIgnoreCaseAndDeleted(name, (byte) 0, pageable);
+
+        if (modules.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Modulelar"));
+        }
 
         return new ApiResponse(
                 ResPageable.builder()
@@ -150,6 +158,10 @@ public class ModuleService {
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+
+        if (resModules.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Moduullar"));
+        }
 
         return new ApiResponse(resModules);
     }

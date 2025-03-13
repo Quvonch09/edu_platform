@@ -32,9 +32,10 @@ public class LessonService {
     private final GroupRepository groupRepository;
 
     public ApiResponse createLesson(LessonRequest lessonRequest) {
-        Module module = moduleRepository.findByIdAndDeleted(lessonRequest.getModuleId(), (byte) 0)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Module "))));
-
+        Module module = moduleRepository.findByIdAndDeleted(lessonRequest.getModuleId(), (byte) 0).orElse(null);
+        if (module == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Module"));
+        }
         if (module.getCategory() == null) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu modulga dars qo'shish mumkin emas"));
         }
@@ -52,24 +53,33 @@ public class LessonService {
     }
 
     public ApiResponse getLessonInModule(Long moduleId) {
-        moduleRepository.findByIdAndDeleted(moduleId, (byte) 0)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Modul"))));
-
+        Module module = moduleRepository.findByIdAndDeleted(moduleId, (byte) 0).orElse(null);
+        if (module == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Module"));
+        }
         List<LessonDTO> lessons = lessonRepository.findByModuleIdAndDeleted(moduleId, (byte) 0).stream()
                 .filter(lesson -> lesson.getModule().getCategory() != null) // Consider optimizing this in the query
                 .map(this::lessonDTO)
                 .toList();
+
+        if (lessons.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Lessons"));
+        }
 
         return new ApiResponse(Map.of("lessonCount", lessons.size(), "lessons", lessons));
     }
 
     @Transactional
     public ApiResponse updateLesson(Long lessonId, LessonRequest lessonRequest) {
-        Lesson lesson = lessonRepository.findByIdAndDeleted(lessonId, (byte) 0)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
+        Lesson lesson = lessonRepository.findByIdAndDeleted(lessonId, (byte) 0).orElse(null);
+        if (lesson == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        }
 
-        Module module = moduleRepository.findByIdAndDeleted(lessonRequest.getModuleId(), (byte) 0)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Modul"))));
+        Module module = moduleRepository.findByIdAndDeleted(lessonRequest.getModuleId(), (byte) 0).orElse(null);
+        if (module == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Module"));
+        }
 
         lesson.setName(lessonRequest.getName());
         lesson.setDescription(lessonRequest.getDescription());
@@ -81,24 +91,31 @@ public class LessonService {
 
 
     public ApiResponse delete(Long lessonId) {
-        return lessonRepository.findByIdAndDeleted(lessonId, (byte) 0)
-                .map(lesson -> {
-                    lesson.setDeleted((byte) 1);
-                    return new ApiResponse("Lesson o'chirildi");
-                }).orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
+        Lesson lesson =  lessonRepository.findByIdAndDeleted(lessonId, (byte) 0).orElse(null);
+        if (lesson == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        }
+
+        lesson.setDeleted((byte) 1);
+        lessonRepository.save(lesson);
+        return new ApiResponse("O'chirildi");
     }
 
     @Transactional
     public ApiResponse allowLesson(ReqLessonTracking req) {
-        Lesson lesson = lessonRepository.findById(req.getLessonId())
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
+        Lesson lesson = lessonRepository.findById(req.getLessonId()).orElse(null);
+        if (lesson == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        }
 
         if (lesson.getDeleted() == 1) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Lesson already deleted"));
         }
 
-        Group group = groupRepository.findById(req.getGroupId())
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Group"))));
+        Group group = groupRepository.findById(req.getGroupId()).orElse(null);
+        if (group == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
 
         if (lessonTrackingRepository.existsByLessonIdAndGroupId(lesson.getId(), group.getId())) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("LessonTracking"));
@@ -109,20 +126,38 @@ public class LessonService {
     }
 
 
-    public ApiResponse search(String name,Long id, int size, int page) {
-        if (id != null){
-            Lesson lesson = lessonRepository.findById(id)
-                    .orElseThrow(()->new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
+    public ApiResponse search(String name, Long id, int size, int page) {
+        if (id != null) {
+            Lesson lesson = lessonRepository.findById(id).orElse(null);
+            if (lesson == null) {
+                return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+            }
+
+            if (lesson.getModule() != null && lesson.getModule().getDeleted() == 1) {
+                return new ApiResponse(ResponseError.NOTFOUND("Lessonning bog‘liq modul o‘chirilgan"));
+            }
+
             return new ApiResponse(lessonDTO(lesson));
         }
+
         Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1));
         Page<Lesson> lessons = (name == null || name.trim().isEmpty())
                 ? lessonRepository.findAll(pageable)
                 : lessonRepository.findByNameAndDeleted(name, (byte) 0, pageable);
 
+        List<LessonDTO> filteredLessons = lessons.stream()
+                .filter(lesson -> lesson.getModule() == null || lesson.getModule().getDeleted() != 1)
+                .map(this::lessonDTO)
+                .toList();
+
+        if (filteredLessons.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Lessonlar"));
+        }
+
         return new ApiResponse(new ResPageable(page, size, lessons.getTotalPages(),
-                lessons.getTotalElements(), lessons.map(this::lessonDTO).toList()));
+                lessons.getTotalElements(), filteredLessons));
     }
+
 
     public ApiResponse getOpenLessonsInGroup(Long groupId) {
         List<LessonDTO> lessons = lessonTrackingRepository.findOpenLessonsByGroupId(groupId)
@@ -163,8 +198,10 @@ public class LessonService {
 
     @Transactional
     public ApiResponse manageFiles(ReqLessonFiles req, boolean isAdding) {
-        Lesson lesson = lessonRepository.findById(req.getLessonId())
-                .orElseThrow(()->new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Lesson"))));
+        Lesson lesson = lessonRepository.findById(req.getLessonId()).orElse(null);
+        if (lesson == null){
+            return new ApiResponse(ResponseError.NOTFOUND("Lesson"));
+        }
 
         List<File> files = fileRepository.findAllById(req.getFileIds());
         List<Long> notFoundFiles = req.getFileIds().stream()

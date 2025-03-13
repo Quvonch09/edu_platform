@@ -43,6 +43,10 @@ public class RoomService {
     public ApiResponse getRooms(String name, String color, int page, int size){
         Page<ResRoom> allRooms = roomRepository.getAllRooms(name, color, PageRequest.of(page, size));
 
+        if (allRooms.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Xonalar"));
+        }
+
         return new ApiResponse(ResPageable.builder()
                 .page(page)
                 .size(size)
@@ -58,15 +62,20 @@ public class RoomService {
                 .map(this::roomDTO)
                 .toList();
 
+        if (resRooms.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Xonalar"));
+        }
+
 
         return new ApiResponse(resRooms);
     }
 
 
     public ApiResponse getRoomById(Long roomId) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Room"))));
-
+        Room room = roomRepository.findById(roomId).orElse(null);
+        if (room == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Room"));
+        }
         return new ApiResponse(roomDTO(room));
     }
 
@@ -83,9 +92,10 @@ public class RoomService {
 
 
     public ApiResponse updateRoom(Long roomId, ReqRoom reqRoom) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Room"))));
-
+        Room room = roomRepository.findById(roomId).orElse(null);
+        if (room == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Room"));
+        }
         boolean isUpdated = false;
 
         if (!room.getName().equals(reqRoom.getName())) {
@@ -113,9 +123,10 @@ public class RoomService {
     }
 
     public ApiResponse deleteRoom(Long roomId) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new NotFoundException(new ApiResponse(ResponseError.NOTFOUND("Room"))));
-
+        Room room = roomRepository.findById(roomId).orElse(null);
+        if (room == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Room"));
+        }
         roomRepository.delete(room);
         return new ApiResponse("Successfully deleted");
     }

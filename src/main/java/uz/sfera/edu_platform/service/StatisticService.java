@@ -1,5 +1,9 @@
 package uz.sfera.edu_platform.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import uz.sfera.edu_platform.entity.Group;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.entity.enums.PaymentEnum;
@@ -17,6 +21,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.fasterxml.jackson.databind.type.LogicalType.Collection;
 
 @Service
 @RequiredArgsConstructor
@@ -87,34 +94,57 @@ public class StatisticService {
     }
 
 
-    public ApiResponse getStudentStatisticByGroup(Long groupId, User user) {
-        Group group;
-        if (user.getRole().equals(Role.ROLE_STUDENT)){
-           group = groupRepository.findByStudentId(user.getId()).orElse(null);
-        }else {
-            group = groupRepository.findById(groupId).orElse(null);
-        }
+    public ApiResponse getStudentStatisticByGroup(Long groupId, User user, int page, int size) {
+        Group group = user.getRole().equals(Role.ROLE_STUDENT)
+                ? groupRepository.findByStudentId(user.getId()).orElse(null)
+                : groupRepository.findById(groupId).orElse(null);
 
         if (group == null) {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
 
-        List<ResStudentRank> allByStudentRank = new ArrayList<>();
-        for (User student : group.getStudents()) {
-            allByStudentRank.addAll(groupRepository.findAllByStudentRank(student.getId()));
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> studentsPage = groupRepository.findStudentsByGroupId(group.getId(), pageable);
+
+        Page<ResStudentRank> allByStudentRank = null;
+        for (User user1 : studentsPage.getContent()) {
+            allByStudentRank = groupRepository.findStudentRankingInGroups(user1.getId(), pageable);
         }
 
-        return new ApiResponse(allByStudentRank);
+
+        if (allByStudentRank == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Barcha student reytinglari"));
+        }
+
+        ResPageable resPageable = ResPageable.builder()
+                .page(page)
+                .size(size)
+                .totalPage(allByStudentRank.getTotalPages())
+                .totalElements(allByStudentRank.getTotalElements())
+                .body(allByStudentRank.getContent())
+                .build();
+
+        return new ApiResponse(resPageable);
     }
 
 
-    public ApiResponse getStudentRank(User user) {
-        List<ResStudentRank> ranks = groupRepository.findAllByStudentRank(user.getId());
+
+    public ApiResponse getStudentRank(User user, int page, int size) {
+        Page<ResStudentRank> ranks = groupRepository.findAllByStudentRank(user.getId(), PageRequest.of(page, size));
 
         if (ranks.isEmpty()){
             return new ApiResponse(ResponseError.NOTFOUND("Rank not found"));
         }
-        return new ApiResponse(ranks);
+
+        ResPageable resPageable = ResPageable.builder()
+                .page(page)
+                .size(size)
+                .totalPage(ranks.getTotalPages())
+                .totalElements(ranks.getTotalElements())
+                .body(ranks.getContent())
+                .build();
+
+        return new ApiResponse(resPageable);
     }
 
     public ApiResponse getNewStudent(){
