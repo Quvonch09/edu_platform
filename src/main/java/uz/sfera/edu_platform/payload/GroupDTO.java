@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.payload;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -28,7 +29,9 @@ public class GroupDTO {
     private Boolean active;
     private String roomName;
     private Long roomId;
+    @JsonFormat(pattern = "HH:mm")
     private LocalTime startTime;
+    @JsonFormat(pattern = "HH:mm")
     private LocalTime endTime;
     private List<String> weekDays;
 
