@@ -66,13 +66,16 @@ public class CategoryService {
     }
 
 
-    public ApiResponse getAllList() {
-        return new ApiResponse(
-                categoryRepository.findAllByActive((byte) 1)
+    public ApiResponse getAllList(User user) {
+        boolean isTeacher = user.getRole().equals(Role.ROLE_TEACHER);
+        Long teacherId = isTeacher ? user.getId() : null;
+
+        List<CategoryDTO> categories = categoryRepository.findAllByActiveAndTeacherId((byte) 1,teacherId)
                         .stream()
                         .map(this::convertCategoryToCategoryDTO)
-                        .toList()
-        );
+                        .toList();
+
+        return new ApiResponse(categories);
     }
 
 
