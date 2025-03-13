@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.payload;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import uz.sfera.edu_platform.entity.enums.PaymentStatusEnum;
 import lombok.*;
 
@@ -16,4 +17,5 @@ public class PaymentDTO {
     private PaymentStatusEnum paymentStatus;
     private LocalDate paymentDate;
     private Double price;
+    private boolean paid;
 }

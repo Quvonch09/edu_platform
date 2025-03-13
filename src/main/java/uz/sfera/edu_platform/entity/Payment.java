@@ -23,6 +23,8 @@ public class Payment extends AbsEntity {
     @ManyToOne
     private User student;
 
+    private String userName;
+
     private LocalDate paymentDate;
 
     @Enumerated(EnumType.STRING)
@@ -30,4 +32,6 @@ public class Payment extends AbsEntity {
 
     @Enumerated(EnumType.STRING)
     private PaymentEnum paymentType;
+
+    private byte paid;
 }

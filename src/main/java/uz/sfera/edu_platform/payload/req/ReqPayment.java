@@ -12,12 +12,15 @@ import java.time.LocalDate;
 @Builder
 public class ReqPayment {
 
-    @NotNull(message = "Bush bulmasin")
     private Long userId;
+
+    private String userName;
 
     @NotNull(message = "Narx bo‘sh bo‘lishi mumkin emas")
     private Double price;
 
     @NotNull(message = "Payment date bush bulmasin")
     private LocalDate paymentDate;
+
+    private boolean paid;
 }

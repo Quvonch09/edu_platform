@@ -47,10 +47,12 @@ public class PaymentController {
     public ResponseEntity<ApiResponse> searchPayment(
             @RequestParam(required = false, value = "fullName")String fullName,
             @RequestParam(value = "status" , required = false) PaymentStatusEnum statusEnum,
+            @RequestParam(value = "type" , required = false) PaymentEnum paymentEnum,
+            @RequestParam(value = "paid", required = false) Boolean paid,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-        ApiResponse search = paymentService.search(fullName, statusEnum, page, size);
+        ApiResponse search = paymentService.search(fullName, statusEnum,paymentEnum, paid, page, size);
         return ResponseEntity.ok(search);
     }
 

@@ -21,11 +21,16 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Double countPrice(@Param("paymentType") PaymentEnum paymentType);
 
 
-    @Query(value = "select p.* from payment p join users u on p.student_id = u.id where " +
-            "(:name IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
-            "and (:paymentStatus IS NULL OR p.payment_status = :paymentStatus)", nativeQuery = true)
+    @Query(value = "select p.* from payment p left join users u on p.student_id = u.id where\n" +
+            "            (:name IS NULL OR LOWER(p.user_name) LIKE LOWER(CONCAT('%', :name, '%')))\n" +
+            "            and (:paymentStatus IS NULL OR p.payment_status = :paymentStatus)\n" +
+            "            and (:paymentEnum IS NULL OR p.payment_type = :paymentEnum)\n" +
+            "            and (:paid IS NULL OR p.paid = :paid)", nativeQuery = true)
     Page<Payment> searchPayments(@Param("name") String name,
-                                 @Param("paymentStatus") String paymentStatus, Pageable pageable);
+                                 @Param("paid") Byte paid,
+                                 @Param("paymentStatus") String paymentStatus,
+                                 @Param("paymentEnum") String paymentEnum,
+                                 Pageable pageable);
 
     @Query("select  coalesce( avg(p.price) , 0.0 )  from Payment p where p.paymentType = 'TUSHUM' and extract(month from p.paymentDate) = "
         +" extract(month from current_date ) ")
