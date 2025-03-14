@@ -203,7 +203,7 @@ ORDER BY u.created_at DESC
 
 
     @Query(value = "select coalesce(count(u.*) , 0) from users u join income p on u.id = p.student_id and u.role = 'ROLE_STUDENT'" +
-            "and EXTRACT(month from p.payment_date) = EXTRACT(month from current_date) where p.paid = 1", nativeQuery = true)
+            "and EXTRACT(month from p.payment_date) = EXTRACT(month from current_date) where p.paid = true", nativeQuery = true)
     Integer countStudentsHasPaid();
 
     List<User> findAllByRoleAndDeletedFalse ( Role role);
