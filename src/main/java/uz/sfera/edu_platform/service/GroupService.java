@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.*;
 import uz.sfera.edu_platform.entity.enums.Role;
+import uz.sfera.edu_platform.entity.enums.UserStatus;
 import uz.sfera.edu_platform.entity.enums.WeekDay;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.GroupDTO;
@@ -57,27 +58,27 @@ public class GroupService {
 
 
     @Transactional
-    public ApiResponse search(String groupName, String teacherName, LocalDate startDate,
-                              LocalDate endDate, Long categoryId, Long teacherId, int page, int size) {
+    public ApiResponse search(User user, String groupName, String teacherName, LocalDate startDate,
+                              LocalDate endDate, Long categoryId, int page, int size) {
+        boolean isTeacher = user.getRole().equals(Role.ROLE_TEACHER);
+        Long teacherId = isTeacher ? user.getId() : null; // teacherId dinamik belgilanadi
 
         Page<Group> groups;
         if (startDate != null && endDate != null) {
             groups = groupRepository.searchGroupDate(groupName, teacherName, startDate, endDate, categoryId, teacherId,
                     PageRequest.of(page, size));
-        }else if (startDate != null || endDate != null) {
+        } else if (startDate != null || endDate != null) {
             LocalDate date = startDate != null ? startDate : endDate;
             groups = groupRepository.searchGroupDate(groupName, teacherName, categoryId, teacherId, date, startDate != null,
                     PageRequest.of(page, size));
-        }else {
+        } else {
             groups = groupRepository.searchGroup(groupName, teacherName, categoryId, teacherId,
                     PageRequest.of(page, size));
         }
 
-
         Map<Long, GraphicDay> graphicDays = graphicDayRepository.findAllByGroupIds(
                 groups.getContent().stream().map(Group::getId).collect(Collectors.toList())
         ).stream().collect(Collectors.toMap(GraphicDay::getId, Function.identity()));
-
 
         List<GroupDTO> list = groups.getContent().stream().map(group -> {
             GraphicDay graphicDay = graphicDays.get(group.getId()); // Xatolikni oldini olish
@@ -88,7 +89,6 @@ public class GroupService {
 
             return convertGroupToGroupDTO(group, days, graphicDay);
         }).collect(Collectors.toList());
-
 
         return new ApiResponse(ResPageable.builder()
                 .page(page)
@@ -257,6 +257,10 @@ public class GroupService {
 
         for (Group group : groups) {
             group.setActive(false);
+            for (User student : group.getStudents()) {
+                student.setUserStatus(UserStatus.TUGATGAN);
+                userRepository.save(student);
+            }
             groupRepository.save(group);
         }
 

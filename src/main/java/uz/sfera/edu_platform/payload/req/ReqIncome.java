@@ -10,14 +10,15 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ReqPayment {
+public class ReqIncome {
 
-    @NotNull(message = "Bush bulmasin")
-    private Long userId;
+    private Long studentId;
 
     @NotNull(message = "Narx bo‘sh bo‘lishi mumkin emas")
     private Double price;
 
     @NotNull(message = "Payment date bush bulmasin")
     private LocalDate paymentDate;
+
+    private boolean paid;
 }

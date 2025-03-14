@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.repository;
 
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import uz.sfera.edu_platform.entity.Category;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,9 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
             "            and (?2 IS NULL OR LOWER(c.description) LIKE LOWER(CONCAT('%', ?2, '%'))) and c.active = 1 order by c.created_at desc", nativeQuery = true)
     Page<Category> getAllCategory(String name, String description, Pageable pageable);
 
-    List<Category> findAllByActive(byte active);
+        @Query("SELECT c FROM Category c " +
+                "WHERE c.active = :active " +
+                "AND (:userId IS NULL OR c IN (SELECT cat FROM User u JOIN u.categories cat WHERE u.id = :userId))")
+        List<Category> findAllByActiveAndTeacherId(@Param("active") byte active, @Param("userId") Long userId);
 
 }

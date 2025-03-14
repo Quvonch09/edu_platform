@@ -83,10 +83,14 @@ public class StudentService {
     }
 
 
-    public ApiResponse searchStudent(String fullName, String phoneNumber,
+    public ApiResponse searchStudent(User user, String fullName, String phoneNumber,
                                      UserStatus userStatus, String groupName,
                                      Long teacherId, Integer startAge, Integer endAge, Boolean hasPaid,
                                      int page, int size) {
+
+        if (user.getRole().equals(Role.ROLE_TEACHER)) {
+            teacherId = user.getId();
+        }
 
         PageRequest pageRequest = PageRequest.of(page, size);
 
@@ -97,7 +101,7 @@ public class StudentService {
                 teacherId, startAge, endAge, hasPaid, pageRequest
         );
 
-        if (users.isEmpty()){
+        if (users.isEmpty()) {
             return new ApiResponse(ResponseError.NOTFOUND("Hech qanday student"));
         }
 
@@ -198,7 +202,7 @@ public class StudentService {
 
     public ApiResponse getStudentGroupBy(Long groupId) {
         Group group = groupRepository.findById(groupId).orElse(null);
-        if (group == null) {
+        if (group == null || !group.isActive()) {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
         List<User> students = groupRepository.findByGroup(groupId);

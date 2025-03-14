@@ -59,8 +59,8 @@ public class CategoryController {
     @PreAuthorize("hasAnyRole('ROLE_CEO','ROLE_ADMIN','ROLE_TEACHER','ROLE_STUDENT')")
     @Operation(summary = "Barcha categoryni listini kurish")
     @GetMapping("/list")
-    public ResponseEntity<ApiResponse> getCategoryList() {
-        ApiResponse categoryById = categoryService.getAllList();
+    public ResponseEntity<ApiResponse> getCategoryList(@CurrentUser User user) {
+        ApiResponse categoryById = categoryService.getAllList(user);
         return ResponseEntity.ok(categoryById);
     }
 
