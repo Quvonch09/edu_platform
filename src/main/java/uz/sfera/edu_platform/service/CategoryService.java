@@ -116,13 +116,22 @@ public class CategoryService {
 
 
     public ApiResponse updateActiveCategory(Long categoryId, boolean active) {
-        return categoryRepository.findById(categoryId)
-                .map(category -> {
-                    category.setActive(active ? (byte) 1 : 0);
-                    categoryRepository.save(category);
-                    return new ApiResponse("Category successfully updated");
-                })
-                .orElseGet(() -> new ApiResponse(ResponseError.NOTFOUND("Category")));
+
+        Category category1 = categoryRepository.findById(categoryId).orElse(null);
+        if (category1 == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Category"));
+        }
+
+        List<User> allByCategories = userRepository.findAllByCategories(category1.getId());
+        for (User allByCategory : allByCategories) {
+            allByCategory.getCategories().remove(category1);
+            userRepository.save(allByCategory);
+        }
+
+        category1.setActive(active ? (byte) 1 : 0);
+        categoryRepository.save(category1);
+
+        return new ApiResponse("Category successfully updated");
     }
 
 

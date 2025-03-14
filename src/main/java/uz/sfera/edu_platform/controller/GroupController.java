@@ -78,7 +78,7 @@ public class GroupController {
     }
 
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_CEO')")
     @Operation(summary = "ADMIN groupni update qilish")
     @PutMapping("/{groupId}")
     public ResponseEntity<ApiResponse> updateGroup(
