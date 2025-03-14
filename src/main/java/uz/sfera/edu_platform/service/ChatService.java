@@ -1,20 +1,25 @@
 package uz.sfera.edu_platform.service;
 
 
+import org.springframework.transaction.annotation.Transactional;
 import uz.sfera.edu_platform.entity.Chat;
+import uz.sfera.edu_platform.entity.ChatGroup;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.entity.enums.Role;
 import uz.sfera.edu_platform.exception.BadRequestException;
 import uz.sfera.edu_platform.exception.NotFoundException;
 import uz.sfera.edu_platform.payload.*;
+import uz.sfera.edu_platform.repository.ChatGroupRepository;
 import uz.sfera.edu_platform.repository.ChatRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uz.sfera.edu_platform.repository.UserRepository;
 
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.DataFormatException;
 
 
 @Slf4j
@@ -26,6 +31,12 @@ public class ChatService {
     private final UserService userService;
     private final FileService fileService;
 
+
+
+
+    private final ChatGroupRepository chatGroupRepository;
+
+    private final UserRepository userRepository;
 
 
     public ApiResponse onlineOffline(boolean isActive, User user) {

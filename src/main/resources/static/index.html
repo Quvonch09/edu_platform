@@ -9,9 +9,9 @@
         let stompClient = null;
 
         function connect() {
-            const socket = new SockJS('http://142.93.106.195:8080/ws');
+            // const socket = new SockJS('http://142.93.106.195:8080/ws');
 
-            // const socket = new SockJS('http://localhost/ws');
+            const socket = new SockJS('http://localhost/ws');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
                 console.log('Socket ishladi: ' + frame);
@@ -19,6 +19,10 @@
                 //'/user/ilovaga_kirgan_userni_ID_si_bulishi_kerak/queue/messages'
                 stompClient.subscribe('/user/69e4fb58-006f-4c24-856d-b05452b669a7/queue/messages', function (response) {
                     showGreeting(response.body);
+                });
+
+                stompClient.subscribe('/topic/group/3', function (messageOutput) {
+                    console.log(messageOutput.body);
                 });
 
             }, function (error) {
@@ -96,6 +100,33 @@
             connect();
         });
 
+
+        function sendMessageToGroup() {
+            var groupId = 1;  // Replace with your group ID
+            var messageContent = document.getElementById('messageInput').value;
+            var sender = "user1";  // Replace with the current user’s identifier
+
+            // Create the message object
+            var message = {
+                sender: 2,
+                content: messageContent
+            };
+
+            // Send the message to the server using STOMP
+            stompClient.send("/app/send/" + groupId, {}, JSON.stringify(message));
+
+            // Clear the input field
+            document.getElementById('messageInput').value = '';
+        }
+
+        // Function to display messages in the HTML
+        function displayMessage(message) {
+            var messagesDiv = document.getElementById('messages');
+            var messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.textContent = message;
+            messagesDiv.appendChild(messageElement);
+        }
     </script>
 </head>
 <body>
@@ -124,6 +155,18 @@
     <input type="text" id="replayChatId" placeholder="Replay chat id">
     <button onclick="replayChatMessage();">REPLAY</button><br><br>
 
+
+    <h2>WebSocket Chat</h2>
+    <p>Enter your message and send it to the group.</p>
+
+    <!-- Form for entering messages -->
+    <div>
+        <input type="text" id="messageInput" placeholder="Type your message" style="width: 300px; padding: 10px; margin-right: 10px;">
+        <button onclick="sendMessageToGroup()">Send</button>
+    </div>
+
+    <!-- Display the messages from the server -->
+    <div id="messages"></div>
 
 </div>
 <div id="response"></div>

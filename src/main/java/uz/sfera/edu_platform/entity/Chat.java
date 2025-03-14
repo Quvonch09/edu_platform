@@ -32,5 +32,8 @@ public class Chat extends AbsEntity {
     private Set<Long> attachmentIds;
 
     @ManyToOne
+    private ChatGroup chatGroup;
+
+    @ManyToOne
     private Chat replayChat;
 }

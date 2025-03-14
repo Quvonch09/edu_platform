@@ -31,13 +31,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class StudentService {
+
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
     private final FileRepository fileRepository;

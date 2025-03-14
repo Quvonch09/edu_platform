@@ -32,4 +32,10 @@ public class GlobalException {
         String message = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> runTimeExCEPTIIN(RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
 }
