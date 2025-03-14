@@ -14,25 +14,17 @@ import java.time.Month;
 @NoArgsConstructor
 @Builder
 @Entity
-public class Payment extends AbsEntity {
+public class Income extends AbsEntity {
 
     private Double price;
 
-    @OneToOne
+    @ManyToOne
     private User student;
-
-    private String userName;
 
     private LocalDate paymentDate;
 
     @Enumerated(EnumType.STRING)
     private Month month;
 
-    @Enumerated(EnumType.STRING)
-    private OutcomeStatus paymentStatus;
-//
-//    @Enumerated(EnumType.STRING)
-//    private PaymentEnum paymentType;
-
-    private byte paid;
+    private boolean paid;
 }
