@@ -10,9 +10,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ReqPayment {
+public class ReqIncome {
 
-    private String userName;
+    private Long studentId;
 
     @NotNull(message = "Narx bo‘sh bo‘lishi mumkin emas")
     private Double price;
