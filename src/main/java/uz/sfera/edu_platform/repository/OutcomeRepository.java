@@ -27,7 +27,7 @@ public interface OutcomeRepository extends JpaRepository<Outcome, Long> {
                                 @Param("status") String status, Pageable pageable);
 
 
-    @Query(value = "select sum(price) from outcome", nativeQuery=true)
+    @Query(value = "select coalesce(sum(price), 0) from outcome", nativeQuery=true)
     Double countPrice();
 
 
