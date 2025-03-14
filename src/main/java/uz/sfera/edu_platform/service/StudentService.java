@@ -52,9 +52,10 @@ public class StudentService {
         }
 
         Group group = groupRepository.findById(reqStudent.getGroupId()).orElse(null);
-        if (group == null) {
+        if (group == null || !group.isActive()) {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
+
         File file = (reqStudent.getFileId() != null)
                 ? fileRepository.findById(reqStudent.getFileId()).orElse(null)
                 : null;
@@ -144,10 +145,14 @@ public class StudentService {
     @Transactional
     public ApiResponse updateStudent(Long studentId, ReqStudent reqStudent) {
         User user = userRepository.findById(studentId).orElse(null);
-        if (user == null || user.isEnabled()) {
+        if (user == null || !user.isEnabled()) {
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
         Group newGroup = groupRepository.findById(reqStudent.getGroupId()).orElse(null);
+        if (newGroup == null || !newGroup.isActive()) {
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
+
         Group oldGroup = groupRepository.findByStudentId(user.getId()).orElse(null);
         if (oldGroup != null) {
             oldGroup.getStudents().remove(user);
