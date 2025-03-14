@@ -1,7 +1,6 @@
 package uz.sfera.edu_platform.service;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import uz.sfera.edu_platform.entity.Group;
@@ -13,17 +12,9 @@ import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.res.*;
 import uz.sfera.edu_platform.repository.CategoryRepository;
 import uz.sfera.edu_platform.repository.GroupRepository;
-import uz.sfera.edu_platform.repository.PaymentRepository;
 import uz.sfera.edu_platform.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.fasterxml.jackson.databind.type.LogicalType.Collection;
 
 @Service
 @RequiredArgsConstructor
