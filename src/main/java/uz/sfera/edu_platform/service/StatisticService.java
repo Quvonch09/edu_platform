@@ -1,29 +1,19 @@
 package uz.sfera.edu_platform.service;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import uz.sfera.edu_platform.entity.Group;
 import uz.sfera.edu_platform.entity.User;
-import uz.sfera.edu_platform.entity.enums.PaymentEnum;
 import uz.sfera.edu_platform.entity.enums.Role;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.res.*;
 import uz.sfera.edu_platform.repository.CategoryRepository;
 import uz.sfera.edu_platform.repository.GroupRepository;
-import uz.sfera.edu_platform.repository.PaymentRepository;
 import uz.sfera.edu_platform.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.fasterxml.jackson.databind.type.LogicalType.Collection;
 
 @Service
 @RequiredArgsConstructor
@@ -33,26 +23,25 @@ public class StatisticService {
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
     private final CategoryRepository categoryRepository;
-    private final PaymentRepository paymentRepository;
 
-    public ApiResponse getCEOStatistics() {
-
-        ResCEOStatistic statistic = new ResCEOStatistic();
-
-        statistic.setTeacherCount(userRepository.countAllByTeacher());
-        statistic.setStudentCount(userRepository.countAllByStudent());
-        statistic.setGroupCount(groupRepository.countAllByGroup());
-        statistic.setCategoryCount(categoryRepository.countAllByCategory());
-        statistic.setInCome(paymentRepository.countPrice(PaymentEnum.CHIQIM));
-        statistic.setOutCome(paymentRepository.countPrice(PaymentEnum.TUSHUM));
-        statistic.setAvgMonPayment(paymentRepository.avgPayment());
-        statistic.setPaidAllCount(userRepository.countAllByStudent());
-        statistic.setPaidCount(userRepository.countStudentsHasPaid());
-
-
-        return new ApiResponse(statistic);
-
-    }
+//    public ApiResponse getCEOStatistics() {
+//
+//        ResCEOStatistic statistic = new ResCEOStatistic();
+//
+//        statistic.setTeacherCount(userRepository.countAllByTeacher());
+//        statistic.setStudentCount(userRepository.countAllByStudent());
+//        statistic.setGroupCount(groupRepository.countAllByGroup());
+//        statistic.setCategoryCount(categoryRepository.countAllByCategory());
+//        statistic.setInCome(paymentRepository.countPrice(PaymentEnum.CHIQIM));
+//        statistic.setOutCome(paymentRepository.countPrice(PaymentEnum.TUSHUM));
+//        statistic.setAvgMonPayment(paymentRepository.avgPayment());
+//        statistic.setPaidAllCount(userRepository.countAllByStudent());
+//        statistic.setPaidCount(userRepository.countStudentsHasPaid());
+//
+//
+//        return new ApiResponse(statistic);
+//
+//    }
 
     public ApiResponse getAdminStatistics() {
 

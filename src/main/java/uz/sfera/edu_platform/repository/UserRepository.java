@@ -233,4 +233,10 @@ ORDER BY u.created_at DESC
           AND g.active = TRUE""" , nativeQuery = true
     )
     List<User> searchForTeacher(@Param("studentId") Long studentId);
+
+
+    @Query(value = """
+    select u.* from users u join users_categories uc on u.id = uc.user_id where uc.categories_id = :categoryId
+""", nativeQuery = true)
+    List<User> findAllByCategories(@Param("categoryId") Long categoryId);
 }

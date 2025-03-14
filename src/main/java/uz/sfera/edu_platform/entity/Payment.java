@@ -1,12 +1,8 @@
 package uz.sfera.edu_platform.entity;
 
-import uz.sfera.edu_platform.entity.enums.PaymentEnum;
-import uz.sfera.edu_platform.entity.enums.PaymentStatusEnum;
+import jakarta.persistence.*;
+import uz.sfera.edu_platform.entity.enums.OutcomeStatus;
 import uz.sfera.edu_platform.entity.template.AbsEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.ManyToOne;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -22,6 +18,9 @@ public class Payment extends AbsEntity {
 
     private Double price;
 
+    @OneToOne
+    private User student;
+
     private String userName;
 
     private LocalDate paymentDate;
@@ -30,10 +29,10 @@ public class Payment extends AbsEntity {
     private Month month;
 
     @Enumerated(EnumType.STRING)
-    private PaymentStatusEnum paymentStatus;
-
-    @Enumerated(EnumType.STRING)
-    private PaymentEnum paymentType;
+    private OutcomeStatus paymentStatus;
+//
+//    @Enumerated(EnumType.STRING)
+//    private PaymentEnum paymentType;
 
     private byte paid;
 }

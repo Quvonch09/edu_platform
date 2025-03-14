@@ -203,7 +203,7 @@ public class GroupService {
             return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
         }
 
-        if (graphicDayRepository.existsByGraphicDayInGroup(reqGroup.getRoomId(), reqGroup.getStartTime(), reqGroup.getEndTime())) {
+        if (isRoomOccupied(room.getId(),reqGroup.getStartTime(),reqGroup.getEndTime())) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
         }
 
@@ -211,7 +211,6 @@ public class GroupService {
         if (group.getDays() != null) {
             group.setDays(null);
             groupRepository.save(group); // Oldin bog‘liqlikni olib tashlab saqlaymiz
-            graphicDayRepository.delete(group.getDays()); // Keyin eski GraphicDay’ni o‘chiramiz
         }
 
         // Yangi GraphicDay yaratish
