@@ -8,6 +8,7 @@ import uz.sfera.edu_platform.entity.Income;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.IncomeDTO;
+import uz.sfera.edu_platform.payload.PaymentDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.req.ReqIncome;
 import uz.sfera.edu_platform.payload.res.ResPageable;
@@ -47,10 +48,15 @@ public class IncomeService {
         Long count = incomeRepository.countIncomes(studentName,month != null ? month.name() : null, paid);
         Double price = incomeRepository.getTotalIncomePrice(studentName,month != null ? month.name() : null,paid);
 
-        return new ApiResponse("To'lovlar soni: " + count +" " + "Umumiy summa: " + price);
+        PaymentDTO paymentDTO = PaymentDTO.builder()
+                .countPayment(count)
+                .totalPrice(price)
+                .build();
+
+        return new ApiResponse(paymentDTO);
     }
 
-    public ApiResponse search(String studentName,boolean paid,Month month,int page,int size) {
+    public ApiResponse search(String studentName,Boolean paid,Month month,int page,int size) {
         Page<Income> incomes = incomeRepository.search(studentName,month != null ? month.name() : null,paid, PageRequest.of(page,size));
 
         if (incomes.isEmpty()){
