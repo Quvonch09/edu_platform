@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.controller;
 
+import uz.sfera.edu_platform.entity.Chat;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.payload.*;
 import uz.sfera.edu_platform.security.CurrentUser;
@@ -26,6 +27,7 @@ public class ChatController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatService chatService;
+
 
 
     @Operation(summary = "Userlar chatda yozishgan userlarni chiqaradi")

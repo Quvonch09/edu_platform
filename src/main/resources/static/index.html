@@ -21,6 +21,16 @@
                     showGreeting(response.body);
                 });
 
+                stompClient.subscribe('/topic/group/1', function (messageOutput) {
+                    console.log(messageOutput.body);
+                });
+
+                // Отправка сообщения
+                stompClient.send("/chat.send/1", {}, JSON.stringify({
+                    senderId: 1,
+                    content: "Hello, Group 1!"
+                }));
+
             }, function (error) {
                 console.error('Error connecting: ', error); // Add error callback
             });

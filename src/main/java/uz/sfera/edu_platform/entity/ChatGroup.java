@@ -17,6 +17,9 @@ public class ChatGroup extends AbsEntity {
     @Column(nullable = false)
     private String groupName;
 
+    @OneToOne
+    private File file;
+
     @ManyToMany(fetch = FetchType.LAZY)
     private Set<User> members;
 

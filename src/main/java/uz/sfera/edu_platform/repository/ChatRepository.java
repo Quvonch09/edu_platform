@@ -72,10 +72,17 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     Integer numberOfUnreadMessages(@Param("sender") Long sender, @Param("receiver") Long receiver);
 
 
+    List<Chat> findAllByChatGroupId(Long groupId);
+
     @Transactional
     @Modifying
     @Query("delete from Chat " +
             "where (sender = :sender and receiver = :receiver) " +
             "or (sender = :receiver and receiver = :sender)")
     void deleteChat(@Param("sender") Long sender, @Param("receiver") Long receiver);
+
+    @Transactional
+    @Modifying
+    @Query(value = "delete from chat ch where ch.chat_group_id=?1", nativeQuery = true)
+    void deleteChatByChatGroupId(Long groupId);
 }
