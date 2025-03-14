@@ -49,12 +49,12 @@ public class StatisticController {
         return ResponseEntity.ok(statisticService.getGroupEndDateStatistic());
     }
 
-//    @Operation(summary =" CEO uchun sonlarda statistika  ")
-//    @PreAuthorize("hasAnyRole('ROLE_CEO')")
-//    @GetMapping("/ceo-dashboard")
-//    public ResponseEntity<ApiResponse> getCeoDashboardStatistic(){
-//        return ResponseEntity.ok(statisticService.getCEOStatistics());
-//    }
+    @Operation(summary =" CEO uchun sonlarda statistika  ")
+    @PreAuthorize("hasAnyRole('ROLE_CEO')")
+    @GetMapping("/ceo-dashboard")
+    public ResponseEntity<ApiResponse> getCeoDashboardStatistic(){
+        return ResponseEntity.ok(statisticService.getCEOStatistics());
+    }
 
 
     @Operation(summary =" Admin uchun sonlarda statistika  ")
