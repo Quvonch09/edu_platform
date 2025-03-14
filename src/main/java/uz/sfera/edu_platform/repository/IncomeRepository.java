@@ -20,11 +20,23 @@ public interface IncomeRepository extends JpaRepository<Income,Long> {
                             @Param("paid") Boolean paid,
                             Pageable pageable);
 
-    @Query("SELECT i FROM Income i WHERE " +
+    @Query("SELECT COUNT(i) FROM Income i WHERE " +
             "(:studentName IS NULL OR UPPER(i.student.fullName) LIKE UPPER(CONCAT('%', :studentName, '%'))) AND " +
             "(:month IS NULL OR i.month = :month) AND " +
             "(:paid IS NULL OR i.paid = :paid)")
-    List<Income> searchIncome(@Param("studentName") String studentName,
-                        @Param("month") Month month,
-                        @Param("paid") Boolean paid);
+    Long countIncomes(@Param("studentName") String studentName,
+                      @Param("month") Month month,
+                      @Param("paid") Boolean paid);
+
+    @Query("SELECT COALESCE(SUM(i.price), 0.0) FROM Income i WHERE " +
+            "(:studentName IS NULL OR UPPER(i.student.fullName) LIKE UPPER(CONCAT('%', :studentName, '%'))) AND " +
+            "(:month IS NULL OR i.month = :month) AND " +
+            "(:paid IS NULL OR i.paid = :paid)")
+    Double getTotalIncomePrice(@Param("studentName") String studentName,
+                               @Param("month") Month month,
+                               @Param("paid") Boolean paid);
+
+    @Query("SELECT COALESCE(AVG(i.price), 0.0) FROM Income i WHERE " +
+            "(:month IS NULL OR i.month = :month)")
+    Double avgIncome(@Param("month") Month month);
 }

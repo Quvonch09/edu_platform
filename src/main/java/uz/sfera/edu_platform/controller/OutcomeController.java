@@ -11,6 +11,7 @@ import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.req.ReqOutcome;
 import uz.sfera.edu_platform.service.OutcomeService;
 
+import java.time.LocalDate;
 import java.time.Month;
 
 @RestController
@@ -38,6 +39,17 @@ public class OutcomeController {
                                                   @RequestParam(defaultValue = "0") int page,
                                                   @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(outcomeService.searchOutcome(teacherName, month, outcomeStatus, page, size));
+    }
+
+
+    @PreAuthorize("hasAnyRole('ROLE_CEO', 'ROLE_ADMIN')")
+    @Operation(summary = "CEO/ADMIN outcome sonlarini kurish")
+    @GetMapping("/count")
+    public ResponseEntity<ApiResponse> getOutcomeCount(@RequestParam(required = false) String teacherName,
+                                                       @RequestParam(required = false) Month month,
+                                                       @RequestParam(required = false) OutcomeStatus outcomeStatus,
+                                                       @RequestParam(required = false)LocalDate date){
+        return ResponseEntity.ok(outcomeService.getCountOutcome(teacherName,month,outcomeStatus,date));
     }
 
 

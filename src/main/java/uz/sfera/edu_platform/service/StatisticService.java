@@ -9,11 +9,11 @@ import uz.sfera.edu_platform.entity.enums.Role;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.res.*;
-import uz.sfera.edu_platform.repository.CategoryRepository;
-import uz.sfera.edu_platform.repository.GroupRepository;
-import uz.sfera.edu_platform.repository.UserRepository;
+import uz.sfera.edu_platform.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -23,25 +23,27 @@ public class StatisticService {
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
     private final CategoryRepository categoryRepository;
+    private final IncomeRepository incomeRepository;
+    private final OutcomeRepository outcomeRepository;
 
-//    public ApiResponse getCEOStatistics() {
-//
-//        ResCEOStatistic statistic = new ResCEOStatistic();
-//
-//        statistic.setTeacherCount(userRepository.countAllByTeacher());
-//        statistic.setStudentCount(userRepository.countAllByStudent());
-//        statistic.setGroupCount(groupRepository.countAllByGroup());
-//        statistic.setCategoryCount(categoryRepository.countAllByCategory());
-//        statistic.setInCome(paymentRepository.countPrice(PaymentEnum.CHIQIM));
-//        statistic.setOutCome(paymentRepository.countPrice(PaymentEnum.TUSHUM));
-//        statistic.setAvgMonPayment(paymentRepository.avgPayment());
-//        statistic.setPaidAllCount(userRepository.countAllByStudent());
-//        statistic.setPaidCount(userRepository.countStudentsHasPaid());
-//
-//
-//        return new ApiResponse(statistic);
-//
-//    }
+    public ApiResponse getCEOStatistics() {
+
+        ResCEOStatistic statistic = new ResCEOStatistic();
+
+        statistic.setTeacherCount(userRepository.countAllByTeacher());
+        statistic.setStudentCount(userRepository.countAllByStudent());
+        statistic.setGroupCount(groupRepository.countAllByGroup());
+        statistic.setCategoryCount(categoryRepository.countAllByCategory());
+        statistic.setInCome(incomeRepository.getTotalIncomePrice(null,null,null));
+        statistic.setOutCome(outcomeRepository.countPrice());
+        statistic.setAvgMonPayment(incomeRepository.avgIncome(LocalDate.now().getMonth()));
+        statistic.setPaidAllCount(userRepository.countAllByStudent());
+        statistic.setPaidCount(userRepository.countStudentsHasPaid());
+
+
+        return new ApiResponse(statistic);
+
+    }
 
     public ApiResponse getAdminStatistics() {
 

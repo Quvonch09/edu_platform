@@ -127,10 +127,10 @@ SELECT
     u2.full_name AS teacherName,
     CASE
         WHEN EXISTS (
-            SELECT 1 FROM payment ps
-            WHERE ps.student_id = u.id and ps.paid = 1
-              AND EXTRACT(MONTH FROM ps.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
-              AND EXTRACT(YEAR FROM ps.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+            SELECT 1 FROM income inc
+            WHERE inc.student_id = u.id AND inc.paid = TRUE
+              AND EXTRACT(MONTH FROM inc.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+              AND EXTRACT(YEAR FROM inc.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
         ) THEN TRUE
         ELSE FALSE
         END AS hasPaid,
@@ -140,27 +140,27 @@ FROM users u
          JOIN groups g ON gsl.group_id = g.id
          LEFT JOIN users u2 ON u2.id = g.teacher_id
          LEFT JOIN homework h ON u.id = h.student_id
-         LEFT JOIN payment p ON p.student_id = u.id
+         LEFT JOIN income inc ON inc.student_id = u.id
 WHERE
     (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', COALESCE(:fullName, ''), '%')))
-  AND (COALESCE(:phoneNumber , '') = '' OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', COALESCE(:phoneNumber, ''), '%')) )
-  AND (COALESCE(:userStatus ,'') = ''  OR u.user_status = :userStatus)
-  AND (COALESCE(:groupName ,'') = '' OR LOWER(g.name) LIKE LOWER(CONCAT('%', COALESCE(:groupName, ''), '%')) )
+  AND (COALESCE(:phoneNumber, '') = '' OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', COALESCE(:phoneNumber, ''), '%')))
+  AND (COALESCE(:userStatus, '') = '' OR u.user_status = :userStatus)
+  AND (COALESCE(:groupName, '') = '' OR LOWER(g.name) LIKE LOWER(CONCAT('%', COALESCE(:groupName, ''), '%')))
   AND (:teacherId IS NULL OR g.teacher_id = :teacherId)
   AND (:startAge IS NULL OR u.age >= :startAge)
   AND (:endAge IS NULL OR u.age <= :endAge)
   AND u.role = 'ROLE_STUDENT'
   AND (
     :hasPaid IS NULL OR EXISTS (
-        SELECT 1 FROM payment p2
-        WHERE p2.student_id = u.id
-          AND p2.paid = CASE WHEN :hasPaid THEN 1 ELSE 0 END
-          AND EXTRACT(MONTH FROM p2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
-          AND EXTRACT(YEAR FROM p2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+        SELECT 1 FROM income inc2
+        WHERE inc2.student_id = u.id
+          AND inc2.paid = CASE WHEN :hasPaid THEN TRUE ELSE FALSE END
+          AND EXTRACT(MONTH FROM inc2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+          AND EXTRACT(YEAR FROM inc2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
     ))
 GROUP BY
     u.id, u.full_name, u.phone_number, g.name, g.id,
-    u.created_at, u.age, u.user_status,u.departure_date, u.departure_description, u.parent_phone_number, u2.full_name
+    u.created_at, u.age, u.user_status, u.departure_date, u.departure_description, u.parent_phone_number, u2.full_name
 ORDER BY u.created_at DESC
 """,
             countQuery = """
@@ -169,25 +169,26 @@ ORDER BY u.created_at DESC
     JOIN groups_students gsl ON u.id = gsl.students_id
     JOIN groups g ON gsl.group_id = g.id
     LEFT JOIN users u2 ON u2.id = g.teacher_id
-    LEFT JOIN payment p ON p.student_id = u.id
+    LEFT JOIN income inc ON inc.student_id = u.id
     WHERE
         (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', COALESCE(:fullName, ''), '%')))
-        AND (COALESCE(:phoneNumber , '') = '' OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', COALESCE(:phoneNumber, ''), '%')) )
-        AND (COALESCE(:userStatus ,'') = ''  OR u.user_status = :userStatus)
-        AND (COALESCE(:groupName ,'') = '' OR LOWER(g.name) LIKE LOWER(CONCAT('%', COALESCE(:groupName, ''), '%')) )
+        AND (COALESCE(:phoneNumber, '') = '' OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', COALESCE(:phoneNumber, ''), '%')))
+        AND (COALESCE(:userStatus, '') = '' OR u.user_status = :userStatus)
+        AND (COALESCE(:groupName, '') = '' OR LOWER(g.name) LIKE LOWER(CONCAT('%', COALESCE(:groupName, ''), '%')))
         AND (:teacherId IS NULL OR g.teacher_id = :teacherId)
         AND (:startAge IS NULL OR u.age >= :startAge)
         AND (:endAge IS NULL OR u.age <= :endAge)
         AND u.role = 'ROLE_STUDENT'
         AND (
     :hasPaid IS NULL OR EXISTS (
-        SELECT 1 FROM payment p2
-        WHERE p2.student_id = u.id
-          AND p2.paid = CASE WHEN :hasPaid THEN 1 ELSE 0 END
-          AND EXTRACT(MONTH FROM p2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
-          AND EXTRACT(YEAR FROM p2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+        SELECT 1 FROM income inc2
+        WHERE inc2.student_id = u.id
+          AND inc2.paid = CASE WHEN :hasPaid THEN TRUE ELSE FALSE END
+          AND EXTRACT(MONTH FROM inc2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+          AND EXTRACT(YEAR FROM inc2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
     ))
-""", nativeQuery = true)
+""",
+            nativeQuery = true)
 
     Page<ResStudent> searchStudents(
             @Param("fullName") String fullName,
@@ -201,7 +202,7 @@ ORDER BY u.created_at DESC
             Pageable pageable);
 
 
-    @Query(value = "select coalesce(count(u.*) , 0) from users u join payment p on u.id = p.student_id and u.role = 'ROLE_STUDENT'" +
+    @Query(value = "select coalesce(count(u.*) , 0) from users u join income p on u.id = p.student_id and u.role = 'ROLE_STUDENT'" +
             "and EXTRACT(month from p.payment_date) = EXTRACT(month from current_date) where p.paid = 1", nativeQuery = true)
     Integer countStudentsHasPaid();
 

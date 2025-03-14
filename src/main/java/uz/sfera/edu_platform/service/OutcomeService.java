@@ -3,10 +3,8 @@ package uz.sfera.edu_platform.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.Outcome;
-import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.entity.enums.OutcomeStatus;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.ResponseError;
@@ -15,6 +13,7 @@ import uz.sfera.edu_platform.payload.res.ResPageable;
 import uz.sfera.edu_platform.repository.OutcomeRepository;
 import uz.sfera.edu_platform.repository.UserRepository;
 
+import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OutcomeService {
     private final OutcomeRepository outcomeRepository;
-    private final UserRepository userRepository;
 
     public ApiResponse saveOutcome(ReqOutcome reqOutcome, OutcomeStatus outcomeStatus) {
 
@@ -70,6 +68,14 @@ public class OutcomeService {
                 .body(reqOutcomes)
                 .build();
         return new ApiResponse(resPageable);
+    }
+
+
+    public ApiResponse getCountOutcome(String teacherName, Month month, OutcomeStatus outcomeStatus, LocalDate date) {
+        Long count = outcomeRepository.countOutcomes(teacherName,month, outcomeStatus, date);
+        Double price = outcomeRepository.getTotalPrice(teacherName, month, outcomeStatus, date);
+
+        return new ApiResponse("To'lovlar soni: " + count +" " + "Umumiy summa: " + price);
     }
 
 
