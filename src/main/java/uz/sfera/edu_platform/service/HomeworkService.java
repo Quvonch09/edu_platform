@@ -60,9 +60,7 @@ public class HomeworkService {
         PageRequest pageRequest = PageRequest.of(page, size);
         byte checkedValue = (byte) (isChecked ? 1 : 0);
 
-        Page<Homework> homeworks = (taskId == 0)
-                ? homeworkRepository.findByCheckedAndStudentId(checkedValue, student.getId(), pageRequest)
-                : homeworkRepository.findByCheckedAndTaskId(checkedValue, taskId, pageRequest);
+        Page<Homework> homeworks = homeworkRepository.findByDynamicParams(checkedValue, student.getId(),taskId,pageRequest);
 
         return homeworks.isEmpty()
                 ? new ApiResponse(ResponseError.NOTFOUND("Homeworklar"))
