@@ -71,9 +71,9 @@ public class OutcomeService {
     }
 
 
-    public ApiResponse getCountOutcome(String teacherName, Month month, OutcomeStatus outcomeStatus, LocalDate date) {
-        Long count = outcomeRepository.countOutcomes(teacherName,month, outcomeStatus, date);
-        Double price = outcomeRepository.getTotalPrice(teacherName, month, outcomeStatus, date);
+    public ApiResponse getCountOutcome(String teacherName, Month month, OutcomeStatus outcomeStatus) {
+        Long count = outcomeRepository.countOutcomes(teacherName,month != null ? month.name() : null, outcomeStatus != null ? outcomeStatus.name() : null);
+        Double price = outcomeRepository.getTotalPrice(teacherName, month != null ? month.name() : null, outcomeStatus != null ? outcomeStatus.name() : null);
 
         return new ApiResponse("To'lovlar soni: " + count +" " + "Umumiy summa: " + price);
     }

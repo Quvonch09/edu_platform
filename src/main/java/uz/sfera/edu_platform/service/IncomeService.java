@@ -44,14 +44,14 @@ public class IncomeService {
 
 
     public ApiResponse getIncomeCount(String studentName,boolean paid,Month month){
-        Long count = incomeRepository.countIncomes(studentName,month, paid);
-        Double price = incomeRepository.getTotalIncomePrice(studentName,month,paid);
+        Long count = incomeRepository.countIncomes(studentName,month != null ? month.name() : null, paid);
+        Double price = incomeRepository.getTotalIncomePrice(studentName,month != null ? month.name() : null,paid);
 
         return new ApiResponse("To'lovlar soni: " + count +" " + "Umumiy summa: " + price);
     }
 
     public ApiResponse search(String studentName,boolean paid,Month month,int page,int size) {
-        Page<Income> incomes = incomeRepository.search(studentName,month,paid, PageRequest.of(page,size));
+        Page<Income> incomes = incomeRepository.search(studentName,month != null ? month.name() : null,paid, PageRequest.of(page,size));
 
         if (incomes.isEmpty()){
             return new ApiResponse(ResponseError.NOTFOUND("To'lovlar"));
