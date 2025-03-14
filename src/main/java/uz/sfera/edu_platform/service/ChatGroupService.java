@@ -198,7 +198,7 @@ public class ChatGroupService {
                 .createdAt(String.valueOf(chat.getCreatedAt()))
                 .isEdited(chat.getIsEdited() != 0)
                 .senderImg(user.getFile()!=null ? user.getFile().getId():null)
-                .receiverName(user.getFullName())
+                .senderName(user.getFullName())
                 .build();
     }
 }
