@@ -31,25 +31,23 @@ public interface OutcomeRepository extends JpaRepository<Outcome, Long> {
     Double countPrice();
 
 
-    @Query("SELECT COUNT(o) FROM Outcome o WHERE " +
-            "(:username IS NULL OR UPPER(o.teacherName) LIKE UPPER(CONCAT('%', :username, '%'))) AND " +
-            "(:month IS NULL OR o.month = :month) AND " +
-            "(:status IS NULL OR o.outcomeStatus = :status) AND " +
-            "(:date IS NULL OR o.paymentDate = :date)")
-    Long countOutcomes(@Param("username") String username,
-                       @Param("month") Month month,
-                       @Param("status") OutcomeStatus status,
-                       @Param("date") LocalDate date);
+    @Query(value = "select count(o.*) from outcome o" +
+            "    where (:teacherName IS NULL OR LOWER(o.teacher_name) LIKE LOWER(CONCAT('%', :teacherName, '%')))\n" +
+            "    and (:month IS NULL OR o.month = :month)\n" +
+            "    and (:status IS NULL OR o.outcome_status = :status)"
+            , nativeQuery = true)
+    Long countOutcomes(@Param("teacherName") String username,
+                       @Param("month") String month,
+                       @Param("status") String status);
 
 
-    @Query("SELECT COALESCE(SUM(o.price), 0.0) FROM Outcome o WHERE " +
-            "(:username IS NULL OR UPPER(o.teacherName) LIKE UPPER(CONCAT('%', :username, '%'))) AND " +
-            "(:month IS NULL OR o.month = :month) AND " +
-            "(:status IS NULL OR o.outcomeStatus = :status) AND " +
-            "(:date IS NULL OR o.paymentDate = :date)")
-    Double getTotalPrice(@Param("username") String username,
-                         @Param("month") Month month,
-                         @Param("status") OutcomeStatus status,
-                         @Param("date") LocalDate date);
+    @Query(value = "select coalesce(sum(o.price), 0) from outcome o\n" +
+            "                           where (:teacherName IS NULL OR LOWER(o.teacher_name) LIKE LOWER(CONCAT('%', :teacherName, '%')))\n" +
+            "                           and (:month IS NULL OR o.month = :month)\n" +
+            "                           and (:status IS NULL OR o.outcome_status = :status)\n"
+            , nativeQuery = true)
+    Double getTotalPrice(@Param("teacherName") String username,
+                         @Param("month") String month,
+                         @Param("status") String status);
 
 }
