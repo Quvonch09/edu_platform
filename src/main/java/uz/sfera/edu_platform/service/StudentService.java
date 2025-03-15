@@ -93,13 +93,12 @@ public class StudentService {
             teacherId = user.getId();
         }
 
-        PageRequest pageRequest = PageRequest.of(page, size);
 
         String userStatusStr = (userStatus != null) ? userStatus.name() : null;
 
         Page<ResStudent> users = userRepository.searchStudents(
                 fullName, phoneNumber, userStatusStr, groupName,
-                teacherId, startAge, endAge, hasPaid, pageRequest
+                teacherId, startAge, endAge, hasPaid, PageRequest.of(page, size)
         );
 
         if (users.isEmpty()) {
