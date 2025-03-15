@@ -123,9 +123,17 @@ public class QuestionService {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Har bir savol uchun faqat 1 ta to‘g‘ri javob bo‘lishi kerak"));
         }
 
+        File file = null;
+        if (reqQuestion.getFileId() != null){
+            file = fileRepository.findById(reqQuestion.getFileId()).orElse(null);
+            if (file == null){
+                return new ApiResponse(ResponseError.NOTFOUND("File"));
+            }
+        }
+
         // Savolni yangilash
         question.setQuestion(reqQuestion.getQuestionText());
-        question.setFile(fileRepository.findById(reqQuestion.getFileId()).orElse(null));
+        question.setFile(file != null ? file : null);
         question.setQuestionEnum(difficulty);
         question.setQuiz(quiz);
 
