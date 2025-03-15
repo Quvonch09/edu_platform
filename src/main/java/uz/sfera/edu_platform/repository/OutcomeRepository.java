@@ -18,7 +18,7 @@ public interface OutcomeRepository extends JpaRepository<Outcome, Long> {
 
     @Query(value = """
     select o.* from outcome o
-    where (:teacherName IS NULL OR LOWER(o.teacher_name) LIKE LOWER(CONCAT('%', :teacherName, '%')))
+    where (:teacherName IS NULL OR LOWER(o.) LIKE LOWER(CONCAT('%', :teacherName, '%')))
     and (:month IS NULL OR o.month = :month)
     and (:status IS NULL OR o.outcome_status = :status)
 """, nativeQuery=true)
