@@ -24,9 +24,9 @@ public interface IncomeRepository extends JpaRepository<Income,Long> {
             "from income i \n" +
             "join users u on u.id = i.student_id \n" +
             "where \n" +
-            "    (:studentName IS NOT NULL AND UPPER(u.full_name) LIKE UPPER(CONCAT('%', :studentName, '%')) OR :studentName IS NULL)\n" +
-            "    and (:month IS NOT NULL AND i.month = :month OR :month IS NULL)\n" +
-            "    and (:paid IS NOT NULL AND i.paid = :paid OR :paid IS NULL)\n", nativeQuery = true)
+            "    (:studentName IS NULL OR UPPER(u.full_name) LIKE UPPER(CONCAT('%', :studentName, '%')))\n" +
+                          "    and (:month IS NULL OR i.month = :month)\n" +
+                            "    and (:paid IS NULL OR i.paid = :paid)\n", nativeQuery = true)
     Long countIncomes(@Param("studentName") String studentName,
                       @Param("month") String month,
                       @Param("paid") Boolean paid);
@@ -35,9 +35,9 @@ public interface IncomeRepository extends JpaRepository<Income,Long> {
             "from income i \n" +
             "join users u on i.student_id = u.id \n" +
             "where \n" +
-            "    (:studentName IS NOT NULL AND UPPER(u.full_name) LIKE UPPER(CONCAT('%', :studentName, '%')) OR :studentName IS NULL)\n" +
-            "    and (:month IS NOT NULL AND i.month = :month OR :month IS NULL)\n" +
-            "    and (:paid IS NOT NULL AND i.paid = :paid OR :paid IS NULL)\n", nativeQuery = true)
+            "    (:studentName IS NULL OR UPPER(u.full_name) LIKE UPPER(CONCAT('%', :studentName, '%')) OR :studentName IS NULL)\n" +
+            "    and (:month IS NULL OR i.month = :month OR :month IS NULL)\n" +
+            "    and (:paid IS NULL OR i.paid = :paid OR :paid IS NULL)\n", nativeQuery = true)
     Double getTotalIncomePrice(@Param("studentName") String studentName,
                                @Param("month") String month,
                                @Param("paid") Boolean paid);

@@ -36,7 +36,7 @@ public class IncomeController {
     public ResponseEntity<ApiResponse> getPaymentCount(
             @RequestParam(required = false) String studentName,
             @RequestParam(required = false) Month month,
-            @RequestParam(required = false) boolean paid
+            @RequestParam(required = false) Boolean paid
     ){
         return ResponseEntity.ok(incomeService.getIncomeCount(studentName, paid, month));
     }

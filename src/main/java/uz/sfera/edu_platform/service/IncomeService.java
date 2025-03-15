@@ -45,7 +45,7 @@ public class IncomeService {
     }
 
 
-    public ApiResponse getIncomeCount(String studentName,boolean paid,Month month){
+    public ApiResponse getIncomeCount(String studentName,Boolean paid,Month month){
         Long count = incomeRepository.countIncomes(studentName,month != null ? month.name() : null, paid);
         Double price = incomeRepository.getTotalIncomePrice(studentName,month != null ? month.name() : null,paid);
 
