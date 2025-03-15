@@ -96,7 +96,7 @@ public class ChatGroupService {
     }
 
     @Transactional
-    public ChatGroup addMembersToGroup(Long groupId, Set<Long> newMemberIds) {
+    public ApiResponse addMembersToGroup(Long groupId, Set<Long> newMemberIds) {
         Optional<ChatGroup> chatGroupOptional = chatGroupRepository.findById(groupId);
 
         if (chatGroupOptional.isEmpty()) {
@@ -111,11 +111,12 @@ public class ChatGroupService {
                         chatGroupRepository.addMemberToChatGroup(chatGroup.getId(), userId));
             }
         }
-        return chatGroupRepository.save(chatGroup);
+       chatGroupRepository.save(chatGroup);
+        return new ApiResponse("Студент был добавлен в группу");
     }
 
     @Transactional
-    public ChatGroup removeMemberFromGroup(Long groupId, Long userId) {
+    public ApiResponse removeMemberFromGroup(Long groupId, Long userId) {
         Optional<ChatGroup> chatGroupOptional = chatGroupRepository.findById(groupId);
 
         if (chatGroupOptional.isEmpty()) {
@@ -124,8 +125,7 @@ public class ChatGroupService {
 
         ChatGroup chatGroup = chatGroupOptional.get();
         chatGroupRepository.removeMemberFromChatGroup(chatGroup.getId(), userId);
-        chatGroup = chatGroupRepository.findById(groupId).get();
-        return chatGroup;
+        return new ApiResponse("Студент исключен из группы");
     }
 
 
@@ -184,7 +184,7 @@ public class ChatGroupService {
                 .chats(chatDtos)
                 .groupName(group.getGroupName())
                 .fileId(group.getFile()!=null ? group.getFile().getId() : null)
-                .totalMembers(chatGroupRepository.countAllMembersInChatGroup(group.getId()))
+                .totalMembers(chatGroupRepository.countAllMembersInChatGroup(group.getId())+1)
                 .build();
     }
 
