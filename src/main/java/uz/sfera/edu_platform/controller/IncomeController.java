@@ -20,7 +20,7 @@ public class IncomeController {
 
 
     @PreAuthorize("hasAnyRole('ROLE_CEO','ROLE_ADMIN')")
-    @Operation(summary = "CEO paymnet saqlash uchun", description = "Agar payType TUSHUM bulsa paymentStatus shartmas")
+    @Operation(summary = "Admin/ceo tushum saqlash uchun")
     @PostMapping
     public ResponseEntity<ApiResponse> saveRipPayment(
             @Valid @RequestBody ReqIncome reqIncome
@@ -31,7 +31,7 @@ public class IncomeController {
 
 
     @PreAuthorize("hasAnyRole('ROLE_CEO','ROLE_ADMIN')")
-    @Operation(summary = "CEO tulov qilgan/qilmagan uquvchilar sonini kurish")
+    @Operation(summary = "CEO/admin tulov qilgan/qilmagan uquvchilar sonini kurish")
     @GetMapping("/count")
     public ResponseEntity<ApiResponse> getPaymentCount(
             @RequestParam(required = false) String studentName,
@@ -44,7 +44,7 @@ public class IncomeController {
 
 
     @PreAuthorize("hasAnyRole('ROLE_CEO','ROLE_ADMIN')")
-    @Operation(summary = "CEO paymentni search qilish")
+    @Operation(summary = "CEO/admin paymentni search qilish")
     @GetMapping("/search")
     public ResponseEntity<ApiResponse> searchPayment(
             @RequestParam(required = false, value = "studentName")String fullName,
@@ -57,3 +57,4 @@ public class IncomeController {
         return ResponseEntity.ok(search);
     }
 }
+

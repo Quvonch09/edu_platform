@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.Income;
 import uz.sfera.edu_platform.entity.User;
+import uz.sfera.edu_platform.entity.enums.Role;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.IncomeDTO;
 import uz.sfera.edu_platform.payload.PaymentDTO;
@@ -27,7 +28,7 @@ public class IncomeService {
     public ApiResponse createRipPayment(ReqIncome reqPayment) {
         User student = userRepository.findById(reqPayment.getStudentId()).orElse(null);
 
-        if (student == null || student.isDeleted()){
+        if (student == null || student.isDeleted() || student.getRole().equals(Role.ROLE_STUDENT)){
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
 
