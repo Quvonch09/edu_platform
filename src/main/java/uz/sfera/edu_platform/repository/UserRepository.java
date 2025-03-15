@@ -151,13 +151,24 @@ WHERE
   AND (:endAge IS NULL OR u.age <= :endAge)
   AND u.role = 'ROLE_STUDENT'
   AND (
-    :hasPaid IS NULL OR EXISTS (
-        SELECT 1 FROM income inc2
-        WHERE inc2.student_id = u.id
-          AND inc2.paid = CASE WHEN :hasPaid THEN TRUE ELSE FALSE END
-          AND EXTRACT(MONTH FROM inc2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
-          AND EXTRACT(YEAR FROM inc2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
-    ))
+          :hasPaid IS NULL
+              OR (
+              (:hasPaid = TRUE AND EXISTS (
+                  SELECT 1 FROM income inc2
+                  WHERE inc2.student_id = u.id
+                    AND inc2.paid = TRUE
+                    AND EXTRACT(MONTH FROM inc2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+                    AND EXTRACT(YEAR FROM inc2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+              ))
+                  OR (:hasPaid = FALSE AND NOT EXISTS (
+                  SELECT 1 FROM income inc2
+                  WHERE inc2.student_id = u.id
+                    AND inc2.paid = TRUE
+                    AND EXTRACT(MONTH FROM inc2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+                    AND EXTRACT(YEAR FROM inc2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+              ))
+              )
+          )
 GROUP BY
     u.id, u.full_name, u.phone_number, g.name, g.id,
     u.created_at, u.age, u.user_status, u.departure_date, u.departure_description, u.parent_phone_number, u2.full_name
