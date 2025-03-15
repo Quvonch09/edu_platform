@@ -73,7 +73,7 @@ public class ChatGroupController {
 
     @MessageMapping("/send/group")
     public void sendMessage(@Payload ChatDto message) {
-        Long groupId = message.getGroupId();
+        Long groupId = message.getGroup();
         ChatDto chatDto = chatGroupService.sendMessageToGroup(message.getSender(), message.getContent(), groupId);
         log.info("Sent message");
         messagingTemplate.convertAndSend(
@@ -85,7 +85,7 @@ public class ChatGroupController {
     // Ответить на сообщение в группе
     @MessageMapping("/reply/group")
     public void replyToMessage(@Payload ChatMessageEditOrReplay message) {
-        Long groupId = message.chatDto().getGroupId();
+        Long groupId = message.chatDto().getGroup();
         ChatDto chatDto = chatGroupService.replyToMessage(message.chatDto().getSender(), message.chatDto().getContent(),
                 groupId, message.messageId());
 
