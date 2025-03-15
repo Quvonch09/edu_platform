@@ -31,8 +31,8 @@ public class ChatDto {
     @JsonCreator
     public ChatDto(@JsonProperty("id") Long id,
                    @JsonProperty("sender") Long sender,
-                   @JsonProperty("group") Long group,
                    @JsonProperty("receiver") Long receiver,
+                   @JsonProperty("group") Long group,
                    @JsonProperty("content") String content,
                    @JsonProperty("isRead") boolean isRead,
                    @JsonProperty("senderName") String senderName,
