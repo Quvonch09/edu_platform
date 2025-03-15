@@ -12,8 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface GraphicDayRepository extends JpaRepository<GraphicDay, Long> {
-    @Query(value = "select gd.* from graphic_day gd join groups g on gd.id = g.days_id where g.id = ?1 limit 1", nativeQuery = true)
-    Optional<GraphicDay> findGraphicDay(Long id);
+
 
 
     @Query(value = """
