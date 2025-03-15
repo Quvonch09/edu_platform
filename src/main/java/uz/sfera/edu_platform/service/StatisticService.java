@@ -34,7 +34,7 @@ public class StatisticService {
         statistic.setStudentCount(userRepository.countAllByStudent());
         statistic.setGroupCount(groupRepository.countAllByGroup());
         statistic.setCategoryCount(categoryRepository.countAllByCategory());
-        statistic.setInCome(incomeRepository.getTotalIncomePrice(null,null,null));
+        statistic.setInCome(incomeRepository.countPrice());
         statistic.setOutCome(outcomeRepository.countPrice());
         statistic.setAvgMonPayment(incomeRepository.avgIncome(LocalDate.now().getMonth()));
         statistic.setPaidAllCount(userRepository.countAllByStudent());
