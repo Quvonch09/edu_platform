@@ -6,8 +6,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.Income;
 import uz.sfera.edu_platform.entity.User;
+import uz.sfera.edu_platform.entity.enums.Role;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.IncomeDTO;
+import uz.sfera.edu_platform.payload.PaymentDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.req.ReqIncome;
 import uz.sfera.edu_platform.payload.res.ResPageable;
@@ -26,7 +28,7 @@ public class IncomeService {
     public ApiResponse createRipPayment(ReqIncome reqPayment) {
         User student = userRepository.findById(reqPayment.getStudentId()).orElse(null);
 
-        if (student == null || !student.isDeleted()){
+        if (student == null || student.isDeleted() || !student.getRole().equals(Role.ROLE_STUDENT)){
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
 
@@ -43,15 +45,20 @@ public class IncomeService {
     }
 
 
-    public ApiResponse getIncomeCount(String studentName,boolean paid,Month month){
-        Long count = incomeRepository.countIncomes(studentName,month, paid);
-        Double price = incomeRepository.getTotalIncomePrice(studentName,month,paid);
+    public ApiResponse getIncomeCount(String studentName,Boolean paid,Month month){
+        Long count = incomeRepository.countIncomes(studentName,month != null ? month.name() : null, paid);
+        Double price = incomeRepository.getTotalIncomePrice(studentName,month != null ? month.name() : null,paid);
 
-        return new ApiResponse("To'lovlar soni: " + count +" " + "Umumiy summa: " + price);
+        PaymentDTO paymentDTO = PaymentDTO.builder()
+                .countPayment(count)
+                .totalPrice(price)
+                .build();
+
+        return new ApiResponse(paymentDTO);
     }
 
-    public ApiResponse search(String studentName,boolean paid,Month month,int page,int size) {
-        Page<Income> incomes = incomeRepository.search(studentName,month,paid, PageRequest.of(page,size));
+    public ApiResponse search(String studentName,Boolean paid,Month month,int page,int size) {
+        Page<Income> incomes = incomeRepository.search(studentName,month != null ? month.name() : null,paid, PageRequest.of(page,size));
 
         if (incomes.isEmpty()){
             return new ApiResponse(ResponseError.NOTFOUND("To'lovlar"));

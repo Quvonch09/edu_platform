@@ -11,29 +11,35 @@ import java.time.Month;
 import java.util.List;
 
 public interface IncomeRepository extends JpaRepository<Income,Long> {
-        @Query("SELECT i FROM Income i WHERE " +
-                "(:studentName IS NULL OR UPPER(i.student.fullName) LIKE UPPER(CONCAT('%', :studentName, '%'))) AND " +
-                "(:month IS NULL OR i.month = :month) AND " +
-                "(:paid IS NULL OR i.paid = :paid)")
+        @Query(value = "select i.* from income i join users u on u.id = i.student_id where\n" +
+                "    (:studentName IS NULL OR UPPER(u.full_name) LIKE UPPER(CONCAT('%', :studentName, '%')))\n" +
+                "    and (:month IS NULL OR i.month = :month)\n" +
+                "    and (:paid IS NULL OR i.paid = :paid)" ,nativeQuery = true)
         Page<Income> search(@Param("studentName") String studentName,
-                            @Param("month") Month month,
+                            @Param("month") String month,
                             @Param("paid") Boolean paid,
                             Pageable pageable);
 
-    @Query("SELECT COUNT(i) FROM Income i WHERE " +
-            "(:studentName IS NULL OR UPPER(i.student.fullName) LIKE UPPER(CONCAT('%', :studentName, '%'))) AND " +
-            "(:month IS NULL OR i.month = :month) AND " +
-            "(:paid IS NULL OR i.paid = :paid)")
+    @Query(value = "select count(*) \n" +
+            "from income i \n" +
+            "join users u on u.id = i.student_id \n" +
+            "where \n" +
+            "    (:studentName IS NULL OR UPPER(u.full_name) LIKE UPPER(CONCAT('%', :studentName, '%')))\n" +
+                          "    and (:month IS NULL OR i.month = :month)\n" +
+                            "    and (:paid IS NULL OR i.paid = :paid)\n", nativeQuery = true)
     Long countIncomes(@Param("studentName") String studentName,
-                      @Param("month") Month month,
+                      @Param("month") String month,
                       @Param("paid") Boolean paid);
 
-    @Query("SELECT COALESCE(SUM(i.price), 0.0) FROM Income i WHERE " +
-            "(:studentName IS NULL OR UPPER(i.student.fullName) LIKE UPPER(CONCAT('%', :studentName, '%'))) AND " +
-            "(:month IS NULL OR i.month = :month) AND " +
-            "(:paid IS NULL OR i.paid = :paid)")
+    @Query(value = "select coalesce(sum(i.price), 0) \n" +
+            "from income i \n" +
+            "join users u on i.student_id = u.id \n" +
+            "where \n" +
+            "    (:studentName IS NULL OR UPPER(u.full_name) LIKE UPPER(CONCAT('%', :studentName, '%')) OR :studentName IS NULL)\n" +
+            "    and (:month IS NULL OR i.month = :month OR :month IS NULL)\n" +
+            "    and (:paid IS NULL OR i.paid = :paid OR :paid IS NULL)\n", nativeQuery = true)
     Double getTotalIncomePrice(@Param("studentName") String studentName,
-                               @Param("month") Month month,
+                               @Param("month") String month,
                                @Param("paid") Boolean paid);
 
     @Query("SELECT COALESCE(AVG(i.price), 0.0) FROM Income i WHERE " +
