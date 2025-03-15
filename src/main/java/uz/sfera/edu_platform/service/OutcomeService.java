@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uz.sfera.edu_platform.entity.Outcome;
 import uz.sfera.edu_platform.entity.enums.OutcomeStatus;
 import uz.sfera.edu_platform.payload.ApiResponse;
+import uz.sfera.edu_platform.payload.PaymentDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.req.ReqOutcome;
 import uz.sfera.edu_platform.payload.res.ResPageable;
@@ -71,11 +72,16 @@ public class OutcomeService {
     }
 
 
-    public ApiResponse getCountOutcome(String teacherName, Month month, OutcomeStatus outcomeStatus, LocalDate date) {
-        Long count = outcomeRepository.countOutcomes(teacherName,month, outcomeStatus, date);
-        Double price = outcomeRepository.getTotalPrice(teacherName, month, outcomeStatus, date);
+    public ApiResponse getCountOutcome(String teacherName, Month month, OutcomeStatus outcomeStatus) {
+        Long count = outcomeRepository.countOutcomes(teacherName,month != null ? month.name() : null, outcomeStatus != null ? outcomeStatus.name() : null);
+        Double price = outcomeRepository.getTotalPrice(teacherName, month != null ? month.name() : null, outcomeStatus != null ? outcomeStatus.name() : null);
 
-        return new ApiResponse("To'lovlar soni: " + count +" " + "Umumiy summa: " + price);
+        PaymentDTO paymentDTO = PaymentDTO.builder()
+                .totalPrice(price)
+                .countPayment(count)
+                .build();
+
+        return new ApiResponse(paymentDTO);
     }
 
 

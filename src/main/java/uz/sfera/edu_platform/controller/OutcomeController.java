@@ -47,9 +47,8 @@ public class OutcomeController {
     @GetMapping("/count")
     public ResponseEntity<ApiResponse> getOutcomeCount(@RequestParam(required = false) String teacherName,
                                                        @RequestParam(required = false) Month month,
-                                                       @RequestParam(required = false) OutcomeStatus outcomeStatus,
-                                                       @RequestParam(required = false)LocalDate date){
-        return ResponseEntity.ok(outcomeService.getCountOutcome(teacherName,month,outcomeStatus,date));
+                                                       @RequestParam(required = false) OutcomeStatus outcomeStatus){
+        return ResponseEntity.ok(outcomeService.getCountOutcome(teacherName,month,outcomeStatus));
     }
 
 
