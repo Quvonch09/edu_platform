@@ -2,6 +2,7 @@ package uz.sfera.edu_platform.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -19,6 +20,7 @@ import uz.sfera.edu_platform.service.ChatGroupService;
 
 import java.util.Set;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/chat/group")
 @RequiredArgsConstructor
@@ -69,24 +71,21 @@ public class ChatGroupController {
         return ResponseEntity.ok(apiResponse);
     }
 
-    @MessageMapping("/send/{groupId}")
-    @SendTo("/topic/group/{groupId}")
-    public ChatDto sendMessage(@PathVariable Long groupId, @Payload ChatDto message) {
-
+    @MessageMapping("/send/group")
+    public void sendMessage(@Payload ChatDto message) {
+        Long groupId = message.getGroupId();
         ChatDto chatDto = chatGroupService.sendMessageToGroup(message.getSender(), message.getContent(), groupId);
-
+        log.info("Sent message");
         messagingTemplate.convertAndSend(
                 "/topic/group/" + groupId,
                 chatDto
         );
-        return chatDto;
     }
 
     // Ответить на сообщение в группе
-    @MessageMapping("/reply/{groupId}")
-    @SendTo("/topic/group/{groupId}")
-    public ChatDto replyToMessage(@PathVariable Long groupId, @Payload ChatMessageEditOrReplay message) {
-        // Отправляем ответ на сообщение
+    @MessageMapping("/reply/group")
+    public void replyToMessage(@Payload ChatMessageEditOrReplay message) {
+        Long groupId = message.chatDto().getGroupId();
         ChatDto chatDto = chatGroupService.replyToMessage(message.chatDto().getSender(), message.chatDto().getContent(),
                 groupId, message.messageId());
 
@@ -94,19 +93,18 @@ public class ChatGroupController {
                 "/topic/group/" + groupId,  // Путь темы, на который подписываются участники группы
                 chatDto                         // Сообщение, которое отправляется группе
         );
-        return chatDto;
     }
 
-    // Добавление участника в группу
-    @MessageMapping("/addMember/{groupId}")
-    @SendTo("/topic/group/{groupId}")
-    public ChatGroup addMember(@PathVariable Long groupId, @Payload Set<Long> newMemberIds) {
-        return chatGroupService.addMembersToGroup(groupId, newMemberIds);
+
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @PutMapping("/addMember/{groupId}")
+    public ResponseEntity<ApiResponse> addMember(@PathVariable Long groupId, @RequestParam Set<Long> newMemberIds) {
+        return ResponseEntity.ok(chatGroupService.addMembersToGroup(groupId, newMemberIds));
     }
 
-    @MessageMapping("/deleteMember/{groupId}")
-    @SendTo("/topic/group/{groupId}")
-    public ChatGroup deleteMember(@PathVariable Long groupId, @Payload Long memberId) {
-        return chatGroupService.removeMemberFromGroup(groupId, memberId);
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @PutMapping("/deleteMember/{groupId}")
+    public ResponseEntity<ApiResponse> deleteMember(@PathVariable Long groupId, @RequestParam Long memberId) {
+        return ResponseEntity.ok(chatGroupService.removeMemberFromGroup(groupId, memberId));
     }
 }

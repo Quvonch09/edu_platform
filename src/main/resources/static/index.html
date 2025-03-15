@@ -11,7 +11,7 @@
         function connect() {
             // const socket = new SockJS('http://142.93.106.195:8080/ws');
 
-            const socket = new SockJS('http://localhost/ws');
+            const socket = new SockJS('http://localhost:8080/ws');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
                 console.log('Socket ishladi: ' + frame);
@@ -21,7 +21,7 @@
                     showGreeting(response.body);
                 });
 
-                stompClient.subscribe('/topic/group/3', function (messageOutput) {
+                stompClient.subscribe('/topic/group/1', function (messageOutput) {
                     console.log(messageOutput.body);
                 });
 
@@ -34,26 +34,26 @@
             const chatMessage = {
                 sender: document.getElementById('sender').value,
                 receiver: document.getElementById('receiver').value,
-                content : document.getElementById('content').value,
-                isRead : false,
-                attachmentIds : [],
+                content: document.getElementById('content').value,
+                isRead: false,
+                attachmentIds: [],
             }
             stompClient.send("/app/chat", {}, JSON.stringify(chatMessage));
         }
 
-        function messageDelete(){
+        function messageDelete() {
             let list = {
-                ids : [
+                ids: [
                     document.getElementById('deleteChatId').value,
                 ]
             }
-            stompClient.send("/app/deleteMessage/list",{}, JSON.stringify(list))
+            stompClient.send("/app/deleteMessage/list", {}, JSON.stringify(list))
         }
 
         function editMessage() {
             const editMessage = {
-                messageId : document.getElementById('chatIdEdit').value,
-                chatDto : {
+                messageId: document.getElementById('chatIdEdit').value,
+                chatDto: {
                     sender: document.getElementById('senderEdit').value,
                     receiver: document.getElementById('recipientEdit').value,
                     content: document.getElementById('contentEdit').value,
@@ -61,14 +61,13 @@
                     attachmentIds: []
                 }
             };
-            stompClient.send("/app/editMessage",{}, JSON.stringify(editMessage))
+            stompClient.send("/app/editMessage", {}, JSON.stringify(editMessage))
         }
 
-        function replayChatMessage()
-        {
+        function replayChatMessage() {
             const replayChat = {
-                messageId : document.getElementById('replayChatId').value,
-                chatDto : {
+                messageId: document.getElementById('replayChatId').value,
+                chatDto: {
                     sender: document.getElementById('senderReplay').value,
                     receiver: document.getElementById('recipientReplay').value,
                     content: document.getElementById('contentReplay').value,
@@ -76,17 +75,16 @@
                     attachmentIds: []
                 }
             };
-            stompClient.send("/app/replay",{}, JSON.stringify(replayChat))
+            stompClient.send("/app/replay", {}, JSON.stringify(replayChat))
         }
 
-        function isReadMessage()
-        {
+        function isReadMessage() {
             let list = {
-                ids : [
+                ids: [
                     document.getElementById('isReadMessageId').value,
                 ]
             }
-            stompClient.send("/app/isRead",{}, JSON.stringify(list))
+            stompClient.send("/app/isRead", {}, JSON.stringify(list))
         }
 
         function showGreeting(message) {
@@ -104,18 +102,45 @@
         function sendMessageToGroup() {
             var groupId = 1;  // Replace with your group ID
             var messageContent = document.getElementById('messageInput').value;
-            var sender = "user1";  // Replace with the current user’s identifier
 
-            // Create the message object
-            var message = {
+            const chatMessage = {
                 sender: 2,
-                content: messageContent
-            };
+                groupId: groupId,
+                content: messageContent,
+                isRead: false,
+                attachmentIds: [],
+            }
 
             // Send the message to the server using STOMP
-            stompClient.send("/app/send/" + groupId, {}, JSON.stringify(message));
+            stompClient.send("/app/send/group", {}, JSON.stringify(chatMessage));
 
+            stompClient.subscribe('/topic/group/1', function (messageOutput) {
+                console.log(messageOutput.chatDto);
+            });
             // Clear the input field
+            document.getElementById('messageInput').value = '';
+        }
+
+        function replyToMessage() {
+            var groupId = 1;  // Идентификатор группы (замените на нужный)
+            var messageContent = document.getElementById('messageInput').value;  // Получаем содержимое сообщения из поля ввода
+            var sender = "user1";  // Идентификатор текущего пользователя (замените на динамический идентификатор пользователя)
+            var messageId = 123;  // Идентификатор сообщения, на которое отвечаем (замените на нужный)
+
+            // Создаем объект сообщения
+            var message = {
+                messageId: messageId,
+                chatDto: {
+                    sender: sender,
+                    content: messageContent,
+                    groupId: groupId
+                }
+            };
+
+            // Отправляем сообщение на сервер с помощью STOMP для ответа
+            stompClient.send("/app/reply/group", {}, JSON.stringify(message));
+
+            // Очищаем поле ввода после отправки
             document.getElementById('messageInput').value = '';
         }
 
@@ -134,26 +159,31 @@
     <textarea type="text" id="content" placeholder="Enter your text"></textarea>
     <input type="text" id="sender" placeholder="Sender id">
     <input type="text" id="receiver" placeholder="Recipient id">
-    <button onclick="sendMessage();">Send</button><br><br>
+    <button onclick="sendMessage();">Send</button>
+    <br><br>
 
     <textarea type="text" id="contentEdit" placeholder="Enter your text"></textarea>
     <input type="text" id="senderEdit" placeholder="Sender id">
     <input type="text" id="recipientEdit" placeholder="Recipient id">
     <input type="text" id="chatIdEdit" placeholder="Edit chat id">
-    <button onclick="editMessage();">EDIT</button><br><br>
+    <button onclick="editMessage();">EDIT</button>
+    <br><br>
 
     <input type="text" id="deleteChatId" placeholder="Delete chat id">
-    <button onclick="messageDelete();">DELETE</button><br><br>
+    <button onclick="messageDelete();">DELETE</button>
+    <br><br>
 
     <input type="text" id="isReadMessageId" placeholder="isRead chat id">
-    <button onclick="isReadMessage();">READ</button><br><br>
+    <button onclick="isReadMessage();">READ</button>
+    <br><br>
 
 
     <textarea type="text" id="contentReplay" placeholder="Enter your text"></textarea>
     <input type="text" id="senderReplay" placeholder="Sender id">
     <input type="text" id="recipientReplay" placeholder="Recipient id">
     <input type="text" id="replayChatId" placeholder="Replay chat id">
-    <button onclick="replayChatMessage();">REPLAY</button><br><br>
+    <button onclick="replayChatMessage();">REPLAY</button>
+    <br><br>
 
 
     <h2>WebSocket Chat</h2>
@@ -161,7 +191,8 @@
 
     <!-- Form for entering messages -->
     <div>
-        <input type="text" id="messageInput" placeholder="Type your message" style="width: 300px; padding: 10px; margin-right: 10px;">
+        <input type="text" id="messageInput" placeholder="Type your message"
+               style="width: 300px; padding: 10px; margin-right: 10px;">
         <button onclick="sendMessageToGroup()">Send</button>
     </div>
 

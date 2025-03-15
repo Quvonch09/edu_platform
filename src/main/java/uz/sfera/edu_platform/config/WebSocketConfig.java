@@ -25,7 +25,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry config)
     {
 
-        config.enableSimpleBroker("/user");
+        config.enableSimpleBroker("/user", "topic/group");
         config.setApplicationDestinationPrefixes("/app");
         config.setUserDestinationPrefix("/user");
     }
@@ -51,6 +51,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         return false;
     }
 
+
+    @Bean
+    public MappingJackson2MessageConverter messageConverter() {
+        return new MappingJackson2MessageConverter();
+    }
 
     @Bean
     public WebMvcConfigurer corsConfigurer()

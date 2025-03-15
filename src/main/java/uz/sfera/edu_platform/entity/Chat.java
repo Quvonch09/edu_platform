@@ -18,7 +18,6 @@ public class Chat extends AbsEntity {
     @Column(nullable = false)
     private Long sender;
 
-    @Column(nullable = false)
     private Long receiver;
 
     @Column(columnDefinition = "text")

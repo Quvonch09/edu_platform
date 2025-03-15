@@ -15,6 +15,7 @@ public class ChatDto {
     private Long id;
     private Long sender;
     private Long receiver;
+    private Long groupId;
     private String content;
     private boolean isRead;
     private String senderName;
@@ -30,6 +31,7 @@ public class ChatDto {
     @JsonCreator
     public ChatDto(@JsonProperty("id") Long id,
                    @JsonProperty("sender") Long sender,
+                   @JsonProperty("groupId") Long groupId,
                    @JsonProperty("receiver") Long receiver,
                    @JsonProperty("content") String content,
                    @JsonProperty("isRead") boolean isRead,
@@ -45,6 +47,7 @@ public class ChatDto {
         this.id = id;
         this.sender = sender;
         this.receiver = receiver;
+        this.groupId = groupId;
         this.content = content;
         this.isRead = isRead;
         this.senderName = senderName;
@@ -55,5 +58,6 @@ public class ChatDto {
         this.attachmentIds = attachmentIds;
         this.isEdited = isEdited;
         this.replayDto = replayDto;
+
     }
 }
