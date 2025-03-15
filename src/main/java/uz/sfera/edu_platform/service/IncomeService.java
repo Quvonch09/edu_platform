@@ -27,7 +27,7 @@ public class IncomeService {
     public ApiResponse createRipPayment(ReqIncome reqPayment) {
         User student = userRepository.findById(reqPayment.getStudentId()).orElse(null);
 
-        if (student == null || !student.isDeleted()){
+        if (student == null || student.isDeleted()){
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
 
