@@ -57,6 +57,7 @@ public class OutcomeService {
                     .teacherName(outcome.getTeacherName())
                     .paymentDate(outcome.getPaymentDate())
                     .outcomeStatus(outcome.getOutcomeStatus().name())
+                    .month(outcome.getMonth().name())
                     .build();
             reqOutcomes.add(reqOutcome);
         }

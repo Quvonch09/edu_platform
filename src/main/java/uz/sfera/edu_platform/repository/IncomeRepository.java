@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import uz.sfera.edu_platform.entity.Income;
+import uz.sfera.edu_platform.payload.res.ResPaymentStatistic;
 
 import java.time.Month;
 import java.util.List;
@@ -45,4 +46,32 @@ public interface IncomeRepository extends JpaRepository<Income,Long> {
     @Query("SELECT COALESCE(AVG(i.price), 0.0) FROM Income i WHERE " +
             "(:month IS NULL OR i.month = :month)")
     Double avgIncome(@Param("month") Month month);
+
+    @Query(value = "select coalesce(sum(price), 0) from income", nativeQuery=true)
+    Double countPrice();
+
+    @Query(value = """
+            WITH months AS (
+                              SELECT
+                                  TO_CHAR(d, 'Month') AS month_name,
+                                  d AS month_start
+                              FROM generate_series(
+                                           DATE_TRUNC('year', CURRENT_DATE),
+                                           DATE_TRUNC('month', CURRENT_DATE),
+                                           INTERVAL '1 month'
+                                   ) d
+                          )
+                          SELECT
+                              m.month_name AS month,
+                              COALESCE(SUM(p.price), 0) AS income,
+                              COALESCE(SUM(o.price), 0) AS outcome,
+                              COALESCE(SUM(p.price) - SUM(o.price), 0) AS revenue
+                          FROM months m
+                                   LEFT JOIN income p ON DATE_TRUNC('month', p.payment_date) = m.month_start
+                                   LEFT JOIN outcome o ON DATE_TRUNC('month', o.payment_date) = m.month_start
+                          WHERE m.month_start <= DATE_TRUNC('month', CURRENT_DATE) -- ❗ Faqat hozirgi oygacha
+                          GROUP BY m.month_name, m.month_start
+                          ORDER BY m.month_start;
+    """, nativeQuery = true)
+    List<ResPaymentStatistic> getMonthlyFinanceReport();
 }

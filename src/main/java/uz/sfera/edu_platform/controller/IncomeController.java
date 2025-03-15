@@ -30,18 +30,6 @@ public class IncomeController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_CEO','ROLE_ADMIN')")
-    @Operation(summary = "CEO/admin tulov qilgan/qilmagan uquvchilar sonini kurish")
-    @GetMapping("/count")
-    public ResponseEntity<ApiResponse> getPaymentCount(
-            @RequestParam(required = false) String studentName,
-            @RequestParam(required = false) Month month,
-            @RequestParam(required = false) Boolean paid
-    ){
-        return ResponseEntity.ok(incomeService.getIncomeCount(studentName, paid, month));
-    }
-
-
 
     @PreAuthorize("hasAnyRole('ROLE_CEO','ROLE_ADMIN')")
     @Operation(summary = "CEO/admin paymentni search qilish")
@@ -55,6 +43,24 @@ public class IncomeController {
     ){
         ApiResponse search = incomeService.search(fullName,paid,month,page,size);
         return ResponseEntity.ok(search);
+    }
+
+
+
+    @PreAuthorize("hasAnyRole('ROLE_CEO', 'ROLE_ADMIN')")
+    @Operation(summary = " CEO ga oylik chart uchun tushum , chiqim , daromad")
+    @GetMapping("/chart")
+    public ResponseEntity<ApiResponse> getPaymentChart()
+    {
+        return ResponseEntity.ok(incomeService.getStatistic());
+    }
+
+
+    @PreAuthorize("hasAnyRole('ROLE_CEO', 'ROLE_ADMIN')")
+    @Operation(summary = "CEO tulov qilgan/qilmagan uquvchilar sonini kurish")
+    @GetMapping("/count")
+    public ResponseEntity<ApiResponse> getPaymentCount(){
+        return ResponseEntity.ok(incomeService.getPaymentCount());
     }
 }
 

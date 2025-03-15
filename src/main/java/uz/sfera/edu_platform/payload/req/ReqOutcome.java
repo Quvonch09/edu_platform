@@ -25,4 +25,7 @@ public class ReqOutcome {
 
     @Schema(hidden = true)
     private String outcomeStatus;
+
+    @Schema(hidden = true)
+    private String month;
 }

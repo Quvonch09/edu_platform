@@ -13,17 +13,21 @@ import uz.sfera.edu_platform.payload.PaymentDTO;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.req.ReqIncome;
 import uz.sfera.edu_platform.payload.res.ResPageable;
+import uz.sfera.edu_platform.payload.res.ResPayment;
 import uz.sfera.edu_platform.repository.IncomeRepository;
+import uz.sfera.edu_platform.repository.OutcomeRepository;
 import uz.sfera.edu_platform.repository.UserRepository;
 
 import java.time.Month;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class IncomeService {
     private final IncomeRepository incomeRepository;
     private final UserRepository userRepository;
+    private final OutcomeRepository outcomeRepository;
 
     public ApiResponse createRipPayment(ReqIncome reqPayment) {
         User student = userRepository.findById(reqPayment.getStudentId()).orElse(null);
@@ -78,6 +82,31 @@ public class IncomeService {
 
         return new ApiResponse(resPageable);
     }
+
+
+    public ApiResponse  getStatistic(){
+        return new ApiResponse(incomeRepository.getMonthlyFinanceReport());
+    }
+
+
+    public ApiResponse getPaymentCount() {
+        int studentCount = Optional.ofNullable(userRepository.countAllByStudent()).orElse(0);
+        int countStudentsHasPaid = Optional.ofNullable(userRepository.countStudentsHasPaid()).orElse(0);
+        Double tushum = Optional.ofNullable(incomeRepository.countPrice()).orElse(0.0);
+        Double chiqim = Optional.ofNullable(outcomeRepository.countPrice()).orElse(0.0);
+
+        ResPayment resPayment = ResPayment.builder()
+                .countAllStudent(studentCount)
+                .tulovQilganStudent(countStudentsHasPaid)
+                .tulovQilmaganStudent(Math.max(studentCount - countStudentsHasPaid, 0))
+                .tushum(tushum)
+                .chiqim(chiqim)
+                .build();
+
+        return new ApiResponse(resPayment);
+    }
+
+
 
     private IncomeDTO incomeDTO(Income income){
         return IncomeDTO.builder()
