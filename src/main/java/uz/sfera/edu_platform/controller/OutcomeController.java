@@ -21,7 +21,7 @@ public class OutcomeController {
     private final OutcomeService outcomeService;
 
 
-    @PreAuthorize("hasRole('ROLE_CEO','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_CEO','ROLE_ADMIN')")
     @Operation(summary = "CEO techerlar uchun chiqim qushish")
     @PostMapping
     public ResponseEntity<ApiResponse> saveOutcome(@RequestParam OutcomeStatus outcomeStatus,
@@ -54,7 +54,7 @@ public class OutcomeController {
 
 
     @Operation(summary = "CEO chiqimlarni uchirish uchun")
-    @PreAuthorize("hasRole('ROLE_CEO','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_CEO','ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse> deleteOutcome(@PathVariable Long id) {
         return ResponseEntity.ok(outcomeService.deleteOutcome(id));
