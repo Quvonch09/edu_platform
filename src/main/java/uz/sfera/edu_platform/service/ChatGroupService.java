@@ -120,7 +120,8 @@ public class ChatGroupService {
         Optional<ChatGroup> chatGroupOptional = chatGroupRepository.findById(groupId);
 
         if (chatGroupOptional.isEmpty()) {
-            throw new NotFoundException("Чат-группа не найдена");
+            return new ApiResponse(ResponseError.NOTFOUND("guruh"));
+
         }
 
         ChatGroup chatGroup = chatGroupOptional.get();
@@ -146,6 +147,7 @@ public class ChatGroupService {
 
         Chat save = chatRepository.save(chat);
         return toChatDto(save);
+
     }
 
     @Transactional
@@ -169,8 +171,9 @@ public class ChatGroupService {
                 .chatGroup(chatGroup)
                 .build();
         chat.setReplayChat(replyChat);
+        Chat save = chatRepository.save(chat);
+        return toChatDto(save);
 
-        return toChatDto(chatRepository.save(chat));
     }
 
 
