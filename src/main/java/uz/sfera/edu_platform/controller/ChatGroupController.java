@@ -53,18 +53,11 @@ public class ChatGroupController {
         return ResponseEntity.ok(chatGroupById);
     }
 
-    @PreAuthorize("hasRole('ROLE_TEACHER')")
-    @Operation(summary = "Teacher o'zini guruhlarini delete qiladi")
-    @DeleteMapping("/delete/{groupId}")
-    public ResponseEntity<ApiResponse> deleteChatGroupById(@CurrentUser User user,
-                                                           @PathVariable Long groupId) {
-        ApiResponse apiResponse = chatGroupService.deleteChatGroupById(groupId, user);
-        return ResponseEntity.ok(apiResponse);
-    }
 
     @MessageMapping("/send/group")
     public void sendMessage(@Payload ChatDto message) {
         Long groupId = message.getGroup();
+        System.out.println(groupId);
         ChatDto chatDto = chatGroupService.sendMessageToGroup(message.getSender(), message.getContent(), groupId);
         log.info("Sent message");
         messagingTemplate.convertAndSend(

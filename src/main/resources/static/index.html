@@ -105,13 +105,11 @@
 
             const chatMessage = {
                 sender: 2,
-                groupId: groupId,
+                group: groupId,
                 content: messageContent,
                 isRead: false,
                 attachmentIds: [],
             }
-
-
             stompClient.send("/app/send/group", {}, JSON.stringify(chatMessage));
 
             stompClient.subscribe('/topic/group/1', function (messageOutput) {

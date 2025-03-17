@@ -38,7 +38,9 @@ public class GroupService {
     private final RoomRepository roomRepository;
     private final GraphicDayRepository graphicDayRepository;
     private final LessonRepository lessonRepository;
+    private final ChatGroupService chatGroupService;
 
+    @Transactional
     public ApiResponse saveGroup(ReqGroup reqGroup) {
         if (groupRepository.existsByName(reqGroup.getGroupName())) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Group"));
@@ -52,7 +54,8 @@ public class GroupService {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
         }
 
-        saveGroup(reqGroup, category, teacher, room);
+        Group group = saveGroup(reqGroup, category, teacher, room);
+        chatGroupService.createChatGroup(teacher, group);
         return new ApiResponse("Successfully saved group");
     }
 
@@ -328,7 +331,7 @@ public class GroupService {
         return graphicDayRepository.existsByGraphicDayInGroup(roomId, startTime, endTime);
     }
 
-    public void saveGroup(ReqGroup reqGroup, Category category, User teacher, Room room) {
+    public Group saveGroup(ReqGroup reqGroup, Category category, User teacher, Room room) {
         GraphicDay day = saveGraphicDay(reqGroup, room);
         Group build = Group.builder()
                 .name(reqGroup.getGroupName())
@@ -339,7 +342,7 @@ public class GroupService {
                 .startDate(reqGroup.getStartDate())
                 .endDate(reqGroup.getStartDate().plusMonths(category.getDuration()))
                 .build();
-        groupRepository.save(build);
+        return groupRepository.save(build);
     }
 
     public GraphicDay saveGraphicDay(ReqGroup reqGroup, Room room) {

@@ -7,7 +7,6 @@ import uz.sfera.edu_platform.entity.Chat;
 import uz.sfera.edu_platform.entity.ChatGroup;
 import uz.sfera.edu_platform.entity.Group;
 import uz.sfera.edu_platform.entity.User;
-import uz.sfera.edu_platform.exception.BadRequestException;
 import uz.sfera.edu_platform.exception.NotFoundException;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.ChatDto;
@@ -18,9 +17,10 @@ import uz.sfera.edu_platform.repository.ChatGroupRepository;
 import uz.sfera.edu_platform.repository.ChatRepository;
 import uz.sfera.edu_platform.repository.FileRepository;
 import uz.sfera.edu_platform.repository.UserRepository;
-import uz.sfera.edu_platform.security.CurrentUser;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,22 +33,20 @@ public class ChatGroupService {
     private final FileRepository fileRepository;
 
 
-    public ApiResponse groupListForTeacher(@CurrentUser User user) {
-        List<ChatGroupDto> chatGroups = chatGroupRepository.getAllByCreatedBy(user.getId())
+    public ApiResponse groupListForTeacher(User user) {
+        List<ChatGroupDto> chatGroups = chatGroupRepository.getAllByTeacherId(user.getId())
                 .stream().map(chatGroup -> ChatGroupDto.builder()
                         .groupId(chatGroup.getId())
                         .groupName(chatGroup.getGroupName())
-                        .groupPhotoId(chatGroup.getFile()!=null ? chatGroup.getFile().getId(): null)
                         .build()).toList();
         return new ApiResponse(chatGroups);
     }
 
-    public ApiResponse groupListForStudent(@CurrentUser User user) {
+    public ApiResponse groupListForStudent(User user) {
         List<ChatGroupDto> chatGroups = chatGroupRepository.getAllByStudent(user.getId())
                 .stream().map(chatGroup -> ChatGroupDto.builder()
                         .groupId(chatGroup.getId())
                         .groupName(chatGroup.getGroupName())
-                        .groupPhotoId(chatGroup.getFile()!=null ? chatGroup.getFile().getId() : null)
                         .build()).toList();
         return new ApiResponse(chatGroups);
     }
@@ -63,21 +61,12 @@ public class ChatGroupService {
         return new ApiResponse(resChatGroup);
     }
 
-    @Transactional
-    public void createChatGroup(String groupName, Set<Long> memberIds, Long fileId) {
 
-        Set<User> members = new HashSet<>();
-
-        if(memberIds !=null){
-            for (Long memberId : memberIds) {
-                members.add(userRepository.findById(memberId).orElse(null));
-            }
-        }
-
+    public void createChatGroup(User teacher, Group group) {
         ChatGroup chatGroup = ChatGroup.builder()
-                .groupName(groupName)
-                .members(members)
-                .file(fileRepository.findById(fileId).orElse(null))
+                .groupName(group.getName())
+                .group(group)
+                .teacher(teacher)
                 .build();
         chatGroupRepository.save(chatGroup);
     }
@@ -95,28 +84,15 @@ public class ChatGroupService {
     }
 
     @Transactional
-    public void addMembersToGroup(Long groupId, Set<Long> newMemberIds) {
-        Optional<ChatGroup> chatGroupOptional = chatGroupRepository.findById(groupId);
-
-        if (chatGroupOptional.isEmpty()) {
-            throw new NotFoundException("Чат-группа не найдена");
+    public void addMembersToGroup(ChatGroup chatGroup, Long memberId) {
+        if (!chatGroupRepository.existsMemberInChat(chatGroup.getId(), memberId)) {
+            chatGroupRepository.addMemberToChatGroup(chatGroup.getId(), memberId);
         }
-
-        ChatGroup chatGroup = chatGroupOptional.get();
-
-        for (Long userId : newMemberIds) {
-            if(!chatGroupRepository.existsMemberInChat(chatGroup.getId(), userId)) {
-                userRepository.findById(userId).ifPresent(user ->
-                        chatGroupRepository.addMemberToChatGroup(chatGroup.getId(), userId));
-            }
-        }
-       chatGroupRepository.save(chatGroup);
-
     }
 
-    @Transactional
-    public void removeMemberFromGroup(Long groupId, Long userId) {
-        chatGroupRepository.removeMemberFromChatGroup(groupId, userId);
+
+    public void removeMemberFromGroup(Long chatGroupId, Long userId) {
+        chatGroupRepository.removeMemberFromChatGroup(chatGroupId, userId);
     }
 
 
@@ -175,8 +151,7 @@ public class ChatGroupService {
         return ResChatGroup.builder()
                 .chats(chatDtos)
                 .groupName(group.getGroupName())
-                .fileId(group.getFile()!=null ? group.getFile().getId() : null)
-                .totalMembers(chatGroupRepository.countAllMembersInChatGroup(group.getId())+1)
+                .totalMembers(chatGroupRepository.countAllMembersInChatGroup(group.getId()) + 1)
                 .build();
     }
 
@@ -189,7 +164,7 @@ public class ChatGroupService {
                 .content(chat.getContent())
                 .createdAt(String.valueOf(chat.getCreatedAt()))
                 .isEdited(chat.getIsEdited() != 0)
-                .senderImg(user.getFile()!=null ? user.getFile().getId():null)
+                .senderImg(user.getFile() != null ? user.getFile().getId() : null)
                 .senderName(user.getFullName())
                 .build();
     }
