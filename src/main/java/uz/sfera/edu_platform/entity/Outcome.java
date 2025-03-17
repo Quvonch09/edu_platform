@@ -3,6 +3,7 @@ package uz.sfera.edu_platform.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import uz.sfera.edu_platform.entity.enums.OutcomeStatus;
+import uz.sfera.edu_platform.entity.template.AbsEntity;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -13,10 +14,7 @@ import java.time.Month;
 @NoArgsConstructor
 @Builder
 @Entity
-public class Outcome {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Outcome extends AbsEntity {
 
     @Column(nullable = false)
     private String teacherName;

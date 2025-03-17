@@ -32,7 +32,7 @@ public interface ChatGroupRepository extends JpaRepository<ChatGroup, Long> {
     @Query(value = "delete from chat_group_members where chat_group_id=?1", nativeQuery = true)
     void removeMembersFromChatGroup(Long chatGroupId);
 
-    List<ChatGroup> getAllByCreatedBy(Long userId);
+    List<ChatGroup> getAllByTeacherId(Long userId);
 
     @Query(value = "select * from chat_group ch join chat_group_members m on ch.id = m.chat_group_id where members_id=?1", nativeQuery = true)
     List<ChatGroup> getAllByStudent(Long userId);
@@ -42,5 +42,6 @@ public interface ChatGroupRepository extends JpaRepository<ChatGroup, Long> {
 
     Optional<ChatGroup> findByIdAndCreatedBy(Long id, Long createdBy);
 
+    Optional<ChatGroup> findByGroupId(Long groupId);
 
 }

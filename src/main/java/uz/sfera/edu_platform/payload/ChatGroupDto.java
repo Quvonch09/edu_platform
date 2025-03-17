@@ -10,5 +10,4 @@ import lombok.*;
 public class ChatGroupDto {
     private Long groupId;
     private String groupName;
-    private Long groupPhotoId;
 }

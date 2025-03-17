@@ -9,9 +9,9 @@
         let stompClient = null;
 
         function connect() {
-            // const socket = new SockJS('http://142.93.106.195:8080/ws');
+            const socket = new SockJS('http://142.93.106.195:8080/ws');
 
-            const socket = new SockJS('http://localhost:8080/ws');
+            // const socket = new SockJS('http://localhost:8080/ws');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
                 console.log('Socket ishladi: ' + frame);
@@ -100,34 +100,32 @@
 
 
         function sendMessageToGroup() {
-            var groupId = 1;  // Replace with your group ID
+            var groupId = 1;
             var messageContent = document.getElementById('messageInput').value;
 
             const chatMessage = {
                 sender: 2,
-                groupId: groupId,
+                group: groupId,
                 content: messageContent,
                 isRead: false,
                 attachmentIds: [],
             }
-
-            // Send the message to the server using STOMP
             stompClient.send("/app/send/group", {}, JSON.stringify(chatMessage));
 
             stompClient.subscribe('/topic/group/1', function (messageOutput) {
                 console.log(messageOutput.chatDto);
             });
-            // Clear the input field
+
             document.getElementById('messageInput').value = '';
         }
 
         function replyToMessage() {
-            var groupId = 1;  // Идентификатор группы (замените на нужный)
-            var messageContent = document.getElementById('messageInput').value;  // Получаем содержимое сообщения из поля ввода
-            var sender = "user1";  // Идентификатор текущего пользователя (замените на динамический идентификатор пользователя)
-            var messageId = 123;  // Идентификатор сообщения, на которое отвечаем (замените на нужный)
+            var groupId = 1;
+            var messageContent = document.getElementById('messageInput').value;
+            var sender = 1;
+            var messageId = 123;
 
-            // Создаем объект сообщения
+
             var message = {
                 messageId: messageId,
                 chatDto: {
@@ -137,10 +135,8 @@
                 }
             };
 
-            // Отправляем сообщение на сервер с помощью STOMP для ответа
             stompClient.send("/app/reply/group", {}, JSON.stringify(message));
 
-            // Очищаем поле ввода после отправки
             document.getElementById('messageInput').value = '';
         }
 

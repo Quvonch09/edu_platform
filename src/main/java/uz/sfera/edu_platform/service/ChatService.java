@@ -144,7 +144,6 @@ public class ChatService {
         return new ApiResponse("Success");
     }
 
-
     public void saveChat(Long sender, Long receiver, Chat chat, String message) {
         chat.setSender(sender);
         chat.setReceiver(receiver);

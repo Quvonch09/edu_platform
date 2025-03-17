@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import uz.sfera.edu_platform.entity.ChatGroup;
 import uz.sfera.edu_platform.entity.File;
 import uz.sfera.edu_platform.entity.Group;
 import uz.sfera.edu_platform.entity.User;
@@ -21,10 +22,7 @@ import uz.sfera.edu_platform.payload.auth.ResponseLogin;
 import uz.sfera.edu_platform.payload.req.ReqStudent;
 import uz.sfera.edu_platform.payload.res.ResPageable;
 import uz.sfera.edu_platform.payload.res.ResStudent;
-import uz.sfera.edu_platform.repository.FileRepository;
-import uz.sfera.edu_platform.repository.GroupRepository;
-import uz.sfera.edu_platform.repository.HomeworkRepository;
-import uz.sfera.edu_platform.repository.UserRepository;
+import uz.sfera.edu_platform.repository.*;
 import uz.sfera.edu_platform.security.JwtProvider;
 
 import java.time.LocalDate;
@@ -44,6 +42,8 @@ public class StudentService {
     private final PasswordEncoder passwordEncoder;
     private final HomeworkRepository homeworkRepository;
     private final JwtProvider jwtProvider;
+    private final ChatGroupService chatGroupService;
+    private final ChatGroupRepository chatGroupRepository;
 
     @Transactional
     public ApiResponse saveStudent(ReqStudent reqStudent) {
@@ -76,10 +76,14 @@ public class StudentService {
                 .accountNonExpired(true)
                 .build();
 
-        userRepository.save(student);
+        User save = userRepository.save(student);
         group.getStudents().add(student);
         groupRepository.save(group);
-
+        Optional<ChatGroup> byGroupId = chatGroupRepository.findByGroupId(group.getId());
+        if (byGroupId.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
+        chatGroupService.addMembersToGroup(byGroupId.get(), save.getId());
         return new ApiResponse("Successfully saved student");
     }
 
