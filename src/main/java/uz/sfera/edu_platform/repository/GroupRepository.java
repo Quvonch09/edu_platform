@@ -305,10 +305,14 @@ LIMIT 1;
                                 Pageable pageable);
 
 
-    @Query(value = "select coalesce(count(*) ,0) from groups g join groups_students gs on g.id = gs.group_id " +
-            "join users u on gs.students_id = u.id\n" +
-            "            where u.user_status = 'CHIQIB_KETGAN'", nativeQuery = true)
-    Integer countGroup(Long groupId);
+    @Query(value = "SELECT COALESCE(COUNT(*), 0) " +
+            "FROM groups g " +
+            "JOIN groups_students gs ON g.id = gs.group_id " +
+            "JOIN users u ON gs.students_id = u.id " +
+            "WHERE u.user_status = 'CHIQIB_KETGAN' " +
+            "AND g.id = :groupId",
+            nativeQuery = true)
+    Integer countGroup(@Param("groupId") Long groupId);
 
     @Query(value = """
         SELECT
