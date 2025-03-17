@@ -191,7 +191,7 @@ public class StudentService {
     public ApiResponse deleteStudent(Long studentId, LocalDate departureDate, String departureDescription) {
         User user = userRepository.findById(studentId).orElse(null);
         if (user == null || !user.isEnabled()) {
-            return new ApiResponse(ResponseError.NOTFOUND("Student"));
+            return new ApiResponse(ResponseError.DEFAULT_ERROR("Student topilmadi yoki oldindan uchirilgan"));
         }
          // Updating user fields
         user.setUserStatus(UserStatus.CHIQIB_KETGAN);
