@@ -12,8 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface GraphicDayRepository extends JpaRepository<GraphicDay, Long> {
-    @Query(value = "select gd.* from graphic_day gd join groups g on gd.id = g.days_id where g.id = ?1 limit 1", nativeQuery = true)
-    Optional<GraphicDay> findGraphicDay(Long id);
+
 
 
     @Query(value = """
@@ -31,16 +30,13 @@ public interface GraphicDayRepository extends JpaRepository<GraphicDay, Long> {
         FROM graphic_day g 
         JOIN groups gr ON gr.days_id = g.id
         WHERE g.room_id = :roomId
-        AND (
-            (:startTime BETWEEN g.start_time AND g.end_time) OR
-            (:endTime BETWEEN g.start_time AND g.end_time) OR
-            (g.start_time BETWEEN :startTime AND :endTime) OR
-            (g.end_time BETWEEN :startTime AND :endTime)
+        AND NOT (
+            g.end_time <= :startTime OR
+            g.start_time >= :endTime
         )
     )
     """, nativeQuery = true)
     boolean existsByGraphicDayInGroup(@Param("roomId") Long roomId,
                                       @Param("startTime") LocalTime startTime,
                                       @Param("endTime") LocalTime endTime);
-
 }

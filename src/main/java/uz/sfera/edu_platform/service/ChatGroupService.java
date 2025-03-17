@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.sfera.edu_platform.entity.Chat;
 import uz.sfera.edu_platform.entity.ChatGroup;
+import uz.sfera.edu_platform.entity.Group;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.exception.BadRequestException;
 import uz.sfera.edu_platform.exception.NotFoundException;
@@ -63,7 +64,7 @@ public class ChatGroupService {
     }
 
     @Transactional
-    public ApiResponse createChatGroup(String groupName, Set<Long> memberIds, Long fileId) {
+    public void createChatGroup(String groupName, Set<Long> memberIds, Long fileId) {
 
         Set<User> members = new HashSet<>();
 
@@ -79,8 +80,6 @@ public class ChatGroupService {
                 .file(fileRepository.findById(fileId).orElse(null))
                 .build();
         chatGroupRepository.save(chatGroup);
-        return new ApiResponse("Guruh yaratildi");
-
     }
 
     @Transactional
@@ -96,7 +95,7 @@ public class ChatGroupService {
     }
 
     @Transactional
-    public ApiResponse addMembersToGroup(Long groupId, Set<Long> newMemberIds) {
+    public void addMembersToGroup(Long groupId, Set<Long> newMemberIds) {
         Optional<ChatGroup> chatGroupOptional = chatGroupRepository.findById(groupId);
 
         if (chatGroupOptional.isEmpty()) {
@@ -112,20 +111,12 @@ public class ChatGroupService {
             }
         }
        chatGroupRepository.save(chatGroup);
-        return new ApiResponse("Студент был добавлен в группу");
+
     }
 
     @Transactional
-    public ApiResponse removeMemberFromGroup(Long groupId, Long userId) {
-        Optional<ChatGroup> chatGroupOptional = chatGroupRepository.findById(groupId);
-
-        if (chatGroupOptional.isEmpty()) {
-            throw new NotFoundException("Чат-группа не найдена");
-        }
-
-        ChatGroup chatGroup = chatGroupOptional.get();
-        chatGroupRepository.removeMemberFromChatGroup(chatGroup.getId(), userId);
-        return new ApiResponse("Студент исключен из группы");
+    public void removeMemberFromGroup(Long groupId, Long userId) {
+        chatGroupRepository.removeMemberFromChatGroup(groupId, userId);
     }
 
 
@@ -146,6 +137,7 @@ public class ChatGroupService {
 
         Chat save = chatRepository.save(chat);
         return toChatDto(save);
+
     }
 
     @Transactional
@@ -169,10 +161,10 @@ public class ChatGroupService {
                 .chatGroup(chatGroup)
                 .build();
         chat.setReplayChat(replyChat);
+        Chat save = chatRepository.save(chat);
+        return toChatDto(save);
 
-        return toChatDto(chatRepository.save(chat));
     }
-
 
     private ResChatGroup toResChatGroup(ChatGroup group) {
         List<Chat> allByGroupId = chatRepository.findAllByChatGroupId(group.getId());

@@ -76,12 +76,8 @@ public class GroupService {
                     PageRequest.of(page, size));
         }
 
-        Map<Long, GraphicDay> graphicDays = graphicDayRepository.findAllByGroupIds(
-                groups.getContent().stream().map(Group::getId).collect(Collectors.toList())
-        ).stream().collect(Collectors.toMap(GraphicDay::getId, Function.identity()));
-
         List<GroupDTO> list = groups.getContent().stream().map(group -> {
-            GraphicDay graphicDay = graphicDays.get(group.getId()); // Xatolikni oldini olish
+            GraphicDay graphicDay = group.getDays();
 
             List<String> days = Optional.ofNullable(group.getDays())
                     .map(gd -> gd.getWeekDay().stream().map(Enum::name).collect(Collectors.toList()))
@@ -182,6 +178,7 @@ public class GroupService {
     }
 
 
+    @Transactional
     public ApiResponse updateGroup(Long groupId, ReqGroup reqGroup) {
         Group group = groupRepository.findById(groupId).orElse(null);
         if (group == null) {
@@ -203,25 +200,23 @@ public class GroupService {
             return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
         }
 
-        if (isRoomOccupied(room.getId(),reqGroup.getStartTime(),reqGroup.getEndTime())) {
+        if (isRoomOccupied(room.getId(), reqGroup.getStartTime(), reqGroup.getEndTime())) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
         }
 
-        // Eski GraphicDay bog‘liqligini olib tashlash
         if (group.getDays() != null) {
+            graphicDayRepository.delete(group.getDays()); // Eski GraphicDay-ni o‘chiradi
             group.setDays(null);
-            groupRepository.save(group); // Oldin bog‘liqlikni olib tashlab saqlaymiz
         }
 
-        // Yangi GraphicDay yaratish
         GraphicDay graphicDay = new GraphicDay();
         graphicDay.setRoom(room);
         graphicDay.setWeekDay(weekDayList(reqGroup.getDayIds()));
         graphicDay.setStartTime(reqGroup.getStartTime());
         graphicDay.setEndTime(reqGroup.getEndTime());
-        graphicDayRepository.save(graphicDay);
 
-        // Guruhni yangilash
+        graphicDay = graphicDayRepository.save(graphicDay);
+
         group.setName(reqGroup.getGroupName());
         group.setCategory(category);
         group.setTeacher(teacher);
@@ -229,12 +224,9 @@ public class GroupService {
         group.setDays(graphicDay);
 
         groupRepository.save(group);
+
         return new ApiResponse("Successfully updated group");
     }
-
-
-
-
 
     public ApiResponse deleteGroup(Long groupId) {
         Group group = groupRepository.findById(groupId).orElse(null);

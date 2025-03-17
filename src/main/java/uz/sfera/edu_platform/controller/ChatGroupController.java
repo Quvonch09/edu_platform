@@ -45,15 +45,6 @@ public class ChatGroupController {
         return ResponseEntity.ok(chatGroupService.groupListForStudent(user));
     }
 
-    @PreAuthorize("hasRole('ROLE_TEACHER')")
-    @Operation(summary = "Faqat teacher guruh yarata oladi")
-    @PostMapping("/create")
-    public ResponseEntity<ApiResponse> createChatGroup(@RequestParam String groupName,
-                                                       @RequestParam(required = false) Set<Long> memberIds,
-                                                       @RequestParam Long fileId) {
-        return ResponseEntity.ok(chatGroupService.createChatGroup(groupName, memberIds, fileId));
-    }
-
     @Operation(summary = "guruhni ichidagi chatlarni korish Teacher ham Student ham kora oladi")
     @PreAuthorize("hasAnyRole('ROLE_TEACHER', 'ROLE_STUDENT')")
     @GetMapping("/{groupId}")
@@ -73,7 +64,7 @@ public class ChatGroupController {
 
     @MessageMapping("/send/group")
     public void sendMessage(@Payload ChatDto message) {
-        Long groupId = message.getGroupId();
+        Long groupId = message.getGroup();
         ChatDto chatDto = chatGroupService.sendMessageToGroup(message.getSender(), message.getContent(), groupId);
         log.info("Sent message");
         messagingTemplate.convertAndSend(
@@ -85,7 +76,7 @@ public class ChatGroupController {
     // Ответить на сообщение в группе
     @MessageMapping("/reply/group")
     public void replyToMessage(@Payload ChatMessageEditOrReplay message) {
-        Long groupId = message.chatDto().getGroupId();
+        Long groupId = message.chatDto().getGroup();
         ChatDto chatDto = chatGroupService.replyToMessage(message.chatDto().getSender(), message.chatDto().getContent(),
                 groupId, message.messageId());
 
@@ -96,15 +87,11 @@ public class ChatGroupController {
     }
 
 
-    @PreAuthorize("hasRole('ROLE_TEACHER')")
-    @PutMapping("/addMember/{groupId}")
-    public ResponseEntity<ApiResponse> addMember(@PathVariable Long groupId, @RequestParam Set<Long> newMemberIds) {
-        return ResponseEntity.ok(chatGroupService.addMembersToGroup(groupId, newMemberIds));
-    }
 
-    @PreAuthorize("hasRole('ROLE_TEACHER')")
-    @PutMapping("/deleteMember/{groupId}")
-    public ResponseEntity<ApiResponse> deleteMember(@PathVariable Long groupId, @RequestParam Long memberId) {
-        return ResponseEntity.ok(chatGroupService.removeMemberFromGroup(groupId, memberId));
-    }
+
+//    @PreAuthorize("hasRole('ROLE_TEACHER')")
+//    @PutMapping("/deleteMember/{groupId}")
+//    public ResponseEntity<ApiResponse> deleteMember(@PathVariable Long groupId, @RequestParam Long memberId) {
+//        return ResponseEntity.ok(chatGroupService.removeMemberFromGroup(groupId, memberId));
+//    }
 }

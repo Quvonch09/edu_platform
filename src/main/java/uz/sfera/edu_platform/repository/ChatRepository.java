@@ -17,8 +17,8 @@ import java.util.List;
 public interface ChatRepository extends JpaRepository<Chat, Long> {
 
     @Query("select ch from Chat ch " +
-            "where (ch.sender = :sender and ch.receiver = :receiver) " +
-            "or (ch.sender = :receiver and ch.receiver = :sender) " +
+            "where (ch.sender = :sender and ch.receiver = :receiver and ch.chatGroup is null) " +
+            "or (ch.sender = :receiver and ch.receiver = :sender and ch.chatGroup is null) " +
             "order by ch.createdAt asc")
     List<Chat> getFindALlChat(@Param("sender") Long sender, @Param("receiver") Long receiver);
 
@@ -80,6 +80,7 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
             "where (sender = :sender and receiver = :receiver) " +
             "or (sender = :receiver and receiver = :sender)")
     void deleteChat(@Param("sender") Long sender, @Param("receiver") Long receiver);
+
 
     @Transactional
     @Modifying
