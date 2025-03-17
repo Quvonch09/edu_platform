@@ -16,5 +16,4 @@ public class ResChatGroup {
     private List<ChatDto> chats;
     private int totalMembers;
     private String groupName;
-    private Long fileId;
 }
