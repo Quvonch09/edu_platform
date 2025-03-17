@@ -81,7 +81,7 @@ public class StudentService {
         groupRepository.save(group);
         Optional<ChatGroup> byGroupId = chatGroupRepository.findByGroupId(group.getId());
         if (byGroupId.isEmpty()){
-            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+            return new ApiResponse(ResponseError.NOTFOUND("Chat Group"));
         }
         chatGroupService.addMembersToGroup(byGroupId.get(), save.getId());
         return new ApiResponse("Successfully saved student");
