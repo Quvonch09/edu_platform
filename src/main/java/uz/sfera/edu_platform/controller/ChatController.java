@@ -135,6 +135,11 @@ public class ChatController {
     {
         ChatDto forward = chatService.replay(edit);
         messagingTemplate.convertAndSendToUser(
+                String.valueOf(edit.chatDto().getSender()),
+                "/queue/messages",
+                forward
+        );
+        messagingTemplate.convertAndSendToUser(
                 String.valueOf(edit.chatDto().getReceiver()),
                 "/queue/messages",
                 forward
