@@ -251,4 +251,7 @@ ORDER BY u.created_at DESC
     select u.* from users u join users_categories uc on u.id = uc.user_id where uc.categories_id = :categoryId
 """, nativeQuery = true)
     List<User> findAllByCategories(@Param("categoryId") Long categoryId);
+
+    @Query(value = "select u.* from users u join test_group_students tgs on tgs.test_group_id = :testGroupId and u.id = tgs.students_id", nativeQuery = true)
+    List<User> findByTestGroup( @Param("testGroupId") Long testGroupId);
 }
