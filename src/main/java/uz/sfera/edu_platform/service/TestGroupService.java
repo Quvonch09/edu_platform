@@ -131,11 +131,11 @@ public class TestGroupService {
         User student = userRepository.findById(studentId).orElse(null);
         TestGroup testGroup = testGroupRepository.findByStudentId(studentId);
 
-        if (group == null || !group.isActive()){
-            return new ApiResponse(ResponseError.NOTFOUND("Guruh"));
-        }
         if (student == null || student.isDeleted() || !student.getRole().equals(Role.ROLE_STUDENT) || testGroup == null || !testGroup.isActive()){
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
+        }
+        if (group == null || !group.isActive()){
+            return new ApiResponse(ResponseError.NOTFOUND("Guruh"));
         }
 
         student.setEnabled(true);
