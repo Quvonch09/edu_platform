@@ -126,29 +126,36 @@ public class TestGroupService {
     }
 
     @Transactional
-    public ApiResponse redirectStudent(Long studentId,Long groupId){
+    public ApiResponse redirectStudent(Long studentId, Long groupId) {
         Group group = groupRepository.findById(groupId).orElse(null);
         User student = userRepository.findById(studentId).orElse(null);
         TestGroup testGroup = testGroupRepository.findByStudentId(studentId);
 
-        if (student == null || student.isDeleted() || !student.getRole().equals(Role.ROLE_STUDENT) || testGroup == null || !testGroup.isActive()){
+        if (student == null || student.isDeleted() || !student.getRole().equals(Role.ROLE_STUDENT) || testGroup == null || !testGroup.isActive()) {
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
-        if (group == null || !group.isActive()){
+        if (group == null || !group.isActive()) {
             return new ApiResponse(ResponseError.NOTFOUND("Guruh"));
         }
 
         student.setEnabled(true);
         userRepository.save(student);
 
-        testGroup.getStudents().remove(student);
-        testGroupRepository.save(testGroup);
+        if (testGroup.getStudents().contains(student)) {
+            testGroup.getStudents().remove(student);
+            testGroupRepository.save(testGroup);
+        }
 
-        group.getStudents().add(student);
-        groupRepository.save(group);
+        if (!group.getStudents().contains(student)) {
+            group.getStudents().add(student);
+            groupRepository.save(group);
+        } else {
+            return new ApiResponse(ResponseError.ALREADY_EXIST("Student"));
+        }
 
         return new ApiResponse("Student ko'chirildi");
     }
+
 
     public ApiResponse deleteStudent(Long studentId){
         User student = userRepository.findById(studentId).orElse(null);
