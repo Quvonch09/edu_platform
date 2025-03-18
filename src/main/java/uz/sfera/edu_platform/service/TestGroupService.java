@@ -202,7 +202,7 @@ public class TestGroupService {
                 .id(testGroup.getId())
                 .name(testGroup.getName())
                 .active(testGroup.isActive())
-                .studentCount(testGroup.getStudents().size())
+                .studentCount(userRepository.findByTestGroup(testGroup.getId()).size())
                 .createdAt(testGroup.getCreatedAt())
                 .build();
     }
