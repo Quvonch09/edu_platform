@@ -18,7 +18,9 @@ public interface TestGroupRepository extends JpaRepository<TestGroup,Long> {
             "            and (:active IS NULL OR tg.active = :active)", nativeQuery = true)
     Page<TestGroup> search(@Param("name") String name, @Param("active") Boolean active, Pageable pageable);
 
-    @Query(value = "select distinct tg.* from test_group tg join test_group_students tgs on tgs.students_id = :studentId", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT tg.* FROM test_group tg " +
+            "JOIN test_group_students tgs ON tgs.students_id = :studentId " +
+            "LIMIT 1", nativeQuery = true)
     TestGroup findByStudentId(@Param("studentId") Long studentId);
 
 }

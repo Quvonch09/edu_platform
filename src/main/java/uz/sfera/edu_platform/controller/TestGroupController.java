@@ -11,7 +11,7 @@ import uz.sfera.edu_platform.payload.req.ReqStudent;
 import uz.sfera.edu_platform.service.TestGroupService;
 
 @RestController
-@RequestMapping("/test-group")
+@RequestMapping("/api/test-group")
 @RequiredArgsConstructor
 public class TestGroupController {
     private final TestGroupService testGroupService;
