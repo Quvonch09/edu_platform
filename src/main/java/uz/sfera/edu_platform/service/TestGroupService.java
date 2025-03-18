@@ -10,6 +10,7 @@ import uz.sfera.edu_platform.entity.Group;
 import uz.sfera.edu_platform.entity.TestGroup;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.entity.enums.Role;
+import uz.sfera.edu_platform.entity.enums.UserStatus;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.ResponseError;
 import uz.sfera.edu_platform.payload.StudentDTO;
@@ -83,7 +84,7 @@ public class TestGroupService {
             return new ApiResponse(ResponseError.NOTFOUND("TestGroup"));
         }
 
-        List<User> students = testGroup.getStudents();
+        List<User> students = userRepository.findByTestGroup(testGroup.getId());
 
         if (students.isEmpty()){
             return new ApiResponse(ResponseError.NOTFOUND("Studentlar"));
@@ -116,11 +117,13 @@ public class TestGroupService {
         if (testGroup == null){
             return new ApiResponse(ResponseError.NOTFOUND("Test guruh"));
         }
+        if (userRepository.existsByPhoneNumberAndEnabledIsTrue(reqStudent.getPhoneNumber())){
+            return new ApiResponse(ResponseError.ALREADY_EXIST("Student"));
+        }
 
         User student = createStudent(reqStudent);
 
-        testGroup.getStudents().add(student);
-        testGroupRepository.save(testGroup);
+        testGroupRepository.addStudentToGroup(testGroup.getId(), student.getId());
 
         return new ApiResponse("Student ro'yxatga qo'shildi");
     }
@@ -139,16 +142,15 @@ public class TestGroupService {
         }
 
         student.setEnabled(true);
+        student.setUserStatus(UserStatus.UQIYAPDI);
         userRepository.save(student);
 
-        if (testGroup.getStudents().contains(student)) {
-            testGroup.getStudents().remove(student);
-            testGroupRepository.save(testGroup);
+        if (testGroupRepository.existsByStudentId(studentId)) {
+            testGroupRepository.deleteByStudentId(studentId);
         }
 
-        if (!group.getStudents().contains(student)) {
-            group.getStudents().add(student);
-            groupRepository.save(group);
+        if (!groupRepository.existByStudentId(studentId)) {
+            groupRepository.addStudentToGroup(groupId, studentId);
         } else {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Student"));
         }
@@ -165,8 +167,7 @@ public class TestGroupService {
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
 
-        testGroup.getStudents().remove(student);
-        testGroupRepository.save(testGroup);
+        testGroupRepository.deleteByStudentId(studentId);
 
         return new ApiResponse("Student o'chirildi");
     }

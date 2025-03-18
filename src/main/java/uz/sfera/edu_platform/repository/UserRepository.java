@@ -1,5 +1,7 @@
 package uz.sfera.edu_platform.repository;
 
+import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.repository.Modifying;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.entity.enums.Role;
 import uz.sfera.edu_platform.payload.res.ResCEODiagram;
@@ -254,4 +256,9 @@ ORDER BY u.created_at DESC
 
     @Query(value = "select u.* from users u join test_group_students tgs on tgs.test_group_id = :testGroupId and u.id = tgs.students_id", nativeQuery = true)
     List<User> findByTestGroup( @Param("testGroupId") Long testGroupId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "delete from users_categories us where us.user_id=?1 and us.categories_id=?2",nativeQuery = true)
+    void deleteByUserCategories(Long userId,Long categoryId);
 }

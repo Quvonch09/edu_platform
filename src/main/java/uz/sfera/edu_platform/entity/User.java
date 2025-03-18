@@ -36,7 +36,7 @@ public class User extends AbsEntity implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     private List<Category> categories;
 
     @Enumerated(EnumType.STRING)
@@ -57,9 +57,6 @@ public class User extends AbsEntity implements UserDetails {
 
     private boolean deleted;
 
-    private boolean accountNonExpired = true;
-    private boolean accountNonLocked = true;
-    private boolean credentialsNonExpired = true;
     private boolean enabled = true;
 
 
@@ -75,17 +72,17 @@ public class User extends AbsEntity implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return accountNonExpired;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return accountNonLocked;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return credentialsNonExpired;
+        return true;
     }
 
     @Override

@@ -1,7 +1,10 @@
 package uz.sfera.edu_platform.repository;
 
 import jakarta.persistence.QueryHint;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.stereotype.Repository;
 import uz.sfera.edu_platform.entity.Group;
@@ -349,4 +352,12 @@ LIMIT 1;
 
     @Query(value = "select g.* from groups g  where g.teacher_id = ?1 ", nativeQuery = true)
     List<Group> findGroup(Long userId);
+
+    @Query(value = "select count(g.*)>0 from groups g join groups_students gs on g.id=gs.group_id where gs.students_id=?1", nativeQuery = true)
+    boolean existByStudentId(Long studentId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "insert into groups_students(group_id, students_id) values (?1, ?2)", nativeQuery = true)
+    void addStudentToGroup(Long groupId, Long studentId);
 }

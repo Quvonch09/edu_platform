@@ -71,9 +71,6 @@ public class StudentService {
                 .enabled(true)
                 .deleted(false)
                 .userStatus(UserStatus.UQIYAPDI)
-                .credentialsNonExpired(true)
-                .accountNonLocked(true)
-                .accountNonExpired(true)
                 .build();
 
         User save = userRepository.save(student);
