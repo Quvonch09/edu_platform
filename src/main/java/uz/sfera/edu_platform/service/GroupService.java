@@ -164,7 +164,7 @@ public class GroupService {
     public ApiResponse getGroupsList(User user) {
         List<Group> groups = user.getRole().equals(Role.ROLE_TEACHER)
                 ? groupRepository.findByTeacherId(user.getId())
-                : groupRepository.findAll();
+                : groupRepository.findAllByActiveTrue();
 
         List<GroupListDTO> groupDTOList = groups.stream()
                 .map(group -> GroupListDTO.builder()

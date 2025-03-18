@@ -83,7 +83,7 @@ public class TestGroupService {
             return new ApiResponse(ResponseError.NOTFOUND("TestGroup"));
         }
 
-        List<User> students = userRepository.findByTestGroup(groupId);
+        List<User> students = testGroup.getStudents();
 
         if (students.isEmpty()){
             return new ApiResponse(ResponseError.NOTFOUND("Studentlar"));
