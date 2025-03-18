@@ -28,9 +28,6 @@ public class DataLoader implements CommandLineRunner {
             newUser.setRole(Role.ROLE_CEO);
             newUser.setPhoneNumber("998901234567");
             newUser.setEnabled(true);
-            newUser.setAccountNonExpired(true);
-            newUser.setAccountNonLocked(true);
-            newUser.setCredentialsNonExpired(true);
             userRepository.save(newUser);
         }
     }

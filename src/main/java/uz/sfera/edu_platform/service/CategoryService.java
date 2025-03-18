@@ -34,14 +34,14 @@ public class CategoryService {
                 return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
             }
 
-            List<Category> categories = teacher.getCategories();
+            List<Category> categories = categoryRepository.findAllByActiveAndTeacherId((byte) 1,teacherId);
             List<CategoryDTO> categoryDTOS = categories.stream()
                     .map(this::convertCategoryToCategoryDTO)
                     .toList();
             return new ApiResponse(categoryDTOS);
         }
         if (currentUser.getRole().equals(Role.ROLE_TEACHER)){
-            List<Category> categories = currentUser.getCategories();
+            List<Category> categories = categoryRepository.findAllByActiveAndTeacherId((byte) 1, currentUser.getId());
             List<CategoryDTO> categoryDTOS = categories.stream()
                     .map(this::convertCategoryToCategoryDTO)
                     .toList();
@@ -124,8 +124,7 @@ public class CategoryService {
 
         List<User> allByCategories = userRepository.findAllByCategories(category1.getId());
         for (User allByCategory : allByCategories) {
-            allByCategory.getCategories().remove(category1);
-            userRepository.save(allByCategory);
+            userRepository.deleteByUserCategories(allByCategory.getId(), category1.getId());
         }
 
         category1.setActive(active ? (byte) 1 : 0);

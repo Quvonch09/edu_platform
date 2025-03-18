@@ -21,7 +21,7 @@ public class TestGroup {
     @Column(nullable = false)
     private String name;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.LAZY)
     private List<User> students;
 
     private boolean active;

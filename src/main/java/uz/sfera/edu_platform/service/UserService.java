@@ -79,9 +79,6 @@ public class UserService {
                 .role(Role.ROLE_TEACHER)
                 .file(file)
                 .deleted(false)
-                .accountNonExpired(true)
-                .accountNonLocked(true)
-                .credentialsNonExpired(true)
                 .build();
 
         userRepository.save(teacher);
@@ -101,7 +98,7 @@ public class UserService {
 
         List<TeacherDTO> teacherList = allTeachers.stream()
                 .map(user -> convertUserToTeacherDTO(user,
-                        user.getCategories().stream()
+                        categoryRepository.findAllByActiveAndTeacherId((byte) 1, user.getId()).stream()
                                 .map(category -> new ResCategory(category.getId(), category.getName()))
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());
@@ -183,6 +180,7 @@ public class UserService {
     }
 
 
+    @Transactional
     public ApiResponse updateTeacher(Long teacherId, ReqTeacher reqTeacher) {
         User user = userRepository.findById(teacherId).orElse(null);
         if (user == null){
@@ -261,9 +259,6 @@ public class UserService {
                 .file(reqAdmin.getFileId() != null ? fileRepository.findById(reqAdmin.getFileId()).orElse(null) : null)
                 .enabled(true)
                 .deleted(false)
-                .accountNonExpired(true)
-                .accountNonLocked(true)
-                .credentialsNonExpired(true)
                 .build();
 
         userRepository.save(admin);
