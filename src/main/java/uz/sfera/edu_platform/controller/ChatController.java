@@ -133,7 +133,9 @@ public class ChatController {
     @MessageMapping("/replay")
     public void forward(@Payload ChatMessageEditOrReplay edit)
     {
+        log.info("before {}", edit.chatDto().getSender());
         ChatDto forward = chatService.replay(edit);
+        log.info("after {}",forward.getSender());
         messagingTemplate.convertAndSendToUser(
                 String.valueOf(edit.chatDto().getSender()),
                 "/queue/messages",
