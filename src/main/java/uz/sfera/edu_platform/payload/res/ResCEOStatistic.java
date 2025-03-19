@@ -19,4 +19,5 @@ public class ResCEOStatistic {
     private Double avgMonPayment;
     private Double inCome;
     private Double outCome;
+    private int testStudentsCount;
 }

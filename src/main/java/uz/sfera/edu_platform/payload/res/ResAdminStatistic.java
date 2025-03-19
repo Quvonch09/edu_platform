@@ -16,4 +16,5 @@ public class ResAdminStatistic {
     private Integer categoryCount;
     private Integer paidAllCount;
     private Integer paidCount;
+    private int testStudentsCount;
 }
