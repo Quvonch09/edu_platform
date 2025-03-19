@@ -50,7 +50,7 @@ public class GroupService {
         User teacher = findByIdOrThrow(userRepository, reqGroup.getTeacherId(), "Teacher");
         Room room = findByIdOrThrow(roomRepository, reqGroup.getRoomId(), "Room");
 
-        if (isRoomOccupied(room.getId(), reqGroup.getStartTime(), reqGroup.getEndTime())) {
+        if (isRoomOccupied(room.getId(), reqGroup.getStartTime(), reqGroup.getEndTime(),reqGroup.getDayIds())) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
         }
 
@@ -203,7 +203,7 @@ public class GroupService {
             return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
         }
 
-        if (isRoomOccupied(room.getId(), reqGroup.getStartTime(), reqGroup.getEndTime())) {
+        if (isRoomOccupied(room.getId(), reqGroup.getStartTime(), reqGroup.getEndTime(),reqGroup.getDayIds())) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
         }
 
@@ -327,8 +327,8 @@ public class GroupService {
 
 
     // Xona bandligini tekshirish uchun metod
-    private boolean isRoomOccupied(Long roomId, LocalTime startTime, LocalTime endTime) {
-        return graphicDayRepository.existsByGraphicDayInGroup(roomId, startTime, endTime);
+    private boolean isRoomOccupied(Long roomId, LocalTime startTime, LocalTime endTime,List<Long> days) {
+        return graphicDayRepository.existsOverlappingLesson(roomId, startTime, endTime,days);
     }
 
     public Group saveGroup(ReqGroup reqGroup, Category category, User teacher, Room room) {
