@@ -39,6 +39,7 @@ public class StatisticService {
         statistic.setAvgMonPayment(incomeRepository.avgIncome(LocalDate.now().getMonth()));
         statistic.setPaidAllCount(userRepository.countAllByStudent());
         statistic.setPaidCount(userRepository.countStudentsHasPaid());
+        statistic.setTestStudentsCount(userRepository.countTestStudents());
 
 
         return new ApiResponse(statistic);
@@ -55,6 +56,7 @@ public class StatisticService {
         statistic.setCategoryCount(categoryRepository.countAllByCategory());
         statistic.setPaidCount(userRepository.countStudentsHasPaid());
         statistic.setPaidAllCount(userRepository.countAllByStudent());
+        statistic.setTestStudentsCount(userRepository.countTestStudents());
 
         return new ApiResponse(statistic);
 
