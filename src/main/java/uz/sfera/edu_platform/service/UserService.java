@@ -214,9 +214,7 @@ public class UserService {
 
 
         userRepository.save(user);
-        String token = jwtProvider.generateToken(user.getPhoneNumber());
-        ResponseLogin responseLogin = new ResponseLogin(token, user.getRole().name(), user.getId());
-        return new ApiResponse(responseLogin);
+        return new ApiResponse("Successfully updated teacher");
     }
 
 
@@ -307,9 +305,7 @@ public class UserService {
 
 
         userRepository.save(user);
-        String token = jwtProvider.generateToken(user.getPhoneNumber());
-        ResponseLogin responseLogin = new ResponseLogin(token, user.getRole().name(), user.getId());
-        return new ApiResponse(responseLogin);
+        return new ApiResponse("Successfully updated admin");
     }
 
 
