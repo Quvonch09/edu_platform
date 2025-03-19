@@ -28,15 +28,21 @@ public interface GraphicDayRepository extends JpaRepository<GraphicDay, Long> {
     SELECT EXISTS (
         SELECT 1 
         FROM graphic_day g 
-        JOIN groups gr ON gr.days_id = g.id
+        JOIN graphic_day_week_day gdwd ON g.id = gdwd.graphic_day_id
+        JOIN day_of_week dow ON gdwd.graphic_day_id = dow.id
         WHERE g.room_id = :roomId
+        AND dow.id IN (:days)
         AND NOT (
             g.end_time <= :startTime OR
             g.start_time >= :endTime
         )
     )
     """, nativeQuery = true)
-    boolean existsByGraphicDayInGroup(@Param("roomId") Long roomId,
-                                      @Param("startTime") LocalTime startTime,
-                                      @Param("endTime") LocalTime endTime);
+    boolean existsOverlappingLesson(
+            @Param("roomId") Long roomId,
+            @Param("startTime") LocalTime startTime,
+            @Param("endTime") LocalTime endTime,
+            @Param("days") List<Long> days
+    );
+
 }

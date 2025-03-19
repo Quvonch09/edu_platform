@@ -11,7 +11,6 @@ import lombok.*;
 public class ReqStudent {
 
     @NotBlank(message = "Bo‘sh bo‘lishi mumkin emas")
-    @Size(max = 32, message = "Ism 32 ta belgidan oshmasligi kerak")
     private String fullName;
 
     @NotBlank(message = "Bo‘sh bo‘lishi mumkin emas")

@@ -194,10 +194,6 @@ public class UserService {
         user.setFullName(reqTeacher.getFullName());
         user.setPhoneNumber(reqTeacher.getPhoneNumber());
 
-        if (reqTeacher.getPassword() != null && !reqTeacher.getPassword().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(reqTeacher.getPassword()));
-        }
-
         File file = (reqTeacher.getFileId() != null)
                 ? fileRepository.findById(reqTeacher.getFileId()).orElse(null)
                 : null;
@@ -209,9 +205,16 @@ public class UserService {
 
         user.setFile(file);
         user.setCategories(categories);
-        userRepository.save(user);
 
-        return new ApiResponse("Teacher successfully updated");
+        if (reqTeacher.getPassword() != null && !reqTeacher.getPassword().isEmpty()) {
+            if (!passwordEncoder.matches(reqTeacher.getPassword(), user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(reqTeacher.getPassword()));
+            }
+        }
+
+
+        userRepository.save(user);
+        return new ApiResponse("Successfully updated teacher");
     }
 
 
@@ -294,11 +297,15 @@ public class UserService {
         user.setPhoneNumber(reqAdmin.getPhoneNumber());
 
         if (reqAdmin.getPassword() != null && !reqAdmin.getPassword().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(reqAdmin.getPassword()));
+            if (!passwordEncoder.matches(reqAdmin.getPassword(), user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(reqAdmin.getPassword()));
+            }
         }
 
+
+
         userRepository.save(user);
-        return new ApiResponse("Admin successfully updated");
+        return new ApiResponse("Successfully updated admin");
     }
 
 
@@ -317,6 +324,12 @@ public class UserService {
     public ApiResponse updateUser(User user, UserDTO userDTO) {
         user.setFullName(userDTO.getFullName());
         user.setPhoneNumber(userDTO.getPhoneNumber());
+
+        if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
+            if (!passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+            }
+        }
 
         if (userDTO.getFileId() == null) {
             user.setFile(null);

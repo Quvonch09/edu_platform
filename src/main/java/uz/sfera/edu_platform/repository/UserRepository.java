@@ -48,7 +48,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 LEFT JOIN users u
                           ON EXTRACT(MONTH FROM u.created_at) = EXTRACT(MONTH FROM m.month_start)
                               AND EXTRACT(YEAR FROM u.created_at) = EXTRACT(YEAR FROM m.month_start)
-                              AND u.role = 'ROLE_STUDENT'
+                              AND u.role = 'ROLE_STUDENT' AND u.enabled = true
        GROUP BY m.month_start
        ORDER BY m.month_start;
 """ , nativeQuery = true)
@@ -256,6 +256,9 @@ ORDER BY u.created_at DESC
 
     @Query(value = "select u.* from users u join test_group_students tgs on tgs.test_group_id = :testGroupId and u.id = tgs.students_id", nativeQuery = true)
     List<User> findByTestGroup( @Param("testGroupId") Long testGroupId);
+
+    @Query(value = "SELECT COUNT(*) FROM test_group_students", nativeQuery = true)
+    int countTestStudents();
 
     @Transactional
     @Modifying
