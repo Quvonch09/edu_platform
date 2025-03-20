@@ -1,5 +1,6 @@
 package uz.sfera.edu_platform.payload;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -26,4 +27,7 @@ public class UserDTO {
     private String role;
 
     private Long fileId;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String password;
 }

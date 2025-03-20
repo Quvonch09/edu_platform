@@ -165,9 +165,12 @@ public class StudentService {
         user.setAge(reqStudent.getAge());
         user.setFile(fileRepository.findById(reqStudent.getFileId()).orElse(null));
         //todo password update qilish alohida api bo'lishi kerak
-        if (reqStudent.getPassword() != null && !reqStudent.getPassword().isBlank()) {
-            user.setPassword(passwordEncoder.encode(reqStudent.getPassword()));
+        if (reqStudent.getPassword() != null && !reqStudent.getPassword().isEmpty()) {
+            if (!passwordEncoder.matches(reqStudent.getPassword(), user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(reqStudent.getPassword()));
+            }
         }
+
 
         //todo user gruppaga bunday qoshilmaydi
         newGroup.getStudents().add(user);

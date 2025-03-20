@@ -110,7 +110,6 @@ public class ChatGroupService {
                 .content(content)
                 .chatGroup(chatGroup)
                 .build();
-
         Chat save = chatRepository.save(chat);
         return toChatDto(save);
 
@@ -161,6 +160,7 @@ public class ChatGroupService {
         return ChatDto.builder()
                 .id(chat.getId())
                 .sender(chat.getSender())
+                .group(chat.getChatGroup()!=null ? chat.getChatGroup().getId(): null)
                 .content(chat.getContent())
                 .createdAt(String.valueOf(chat.getCreatedAt()))
                 .isEdited(chat.getIsEdited() != 0)

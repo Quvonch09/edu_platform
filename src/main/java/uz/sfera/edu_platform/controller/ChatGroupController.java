@@ -57,9 +57,14 @@ public class ChatGroupController {
     @MessageMapping("/send/group")
     public void sendMessage(@Payload ChatDto message) {
         Long groupId = message.getGroup();
-        System.out.println(groupId);
+        log.info("Send message to group {}", groupId);
+        log.info("Send message to user {}", message.getSender());
+        log.info("Content {}", message.getContent());
         ChatDto chatDto = chatGroupService.sendMessageToGroup(message.getSender(), message.getContent(), groupId);
         log.info("Sent message");
+        log.info("Send message to group {}", chatDto.getGroup());
+        log.info("Send message to user {}", chatDto.getSender());
+        log.info("Content {}", chatDto.getContent());
         messagingTemplate.convertAndSend(
                 "/topic/group/" + groupId,
                 chatDto
