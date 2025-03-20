@@ -36,13 +36,14 @@ public interface GraphicDayRepository extends JpaRepository<GraphicDay, Long> {
             g.end_time <= :startTime OR
             g.start_time >= :endTime
         )
+        AND (:groupId IS NULL OR g.id != :groupId)
     )
     """, nativeQuery = true)
     boolean existsOverlappingLesson(
             @Param("roomId") Long roomId,
             @Param("startTime") LocalTime startTime,
             @Param("endTime") LocalTime endTime,
-            @Param("days") List<Long> days
+            @Param("days") List<Long> days,
+            @Param("groupId") Long groupId
     );
-
 }
