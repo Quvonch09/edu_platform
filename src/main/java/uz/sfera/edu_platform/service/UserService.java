@@ -322,6 +322,8 @@ public class UserService {
 
 
     public ApiResponse updateUser(User user, UserDTO userDTO) {
+        boolean phoneChanged = !user.getPhoneNumber().equals(userDTO.getPhoneNumber()); // Telefon raqam o'zgarganligini tekshiramiz
+
         user.setFullName(userDTO.getFullName());
         user.setPhoneNumber(userDTO.getPhoneNumber());
 
@@ -338,9 +340,14 @@ public class UserService {
         }
 
         userRepository.save(user);
-        String token = jwtProvider.generateToken(user.getPhoneNumber());
-        ResponseLogin responseLogin = new ResponseLogin(token, user.getRole().name(), user.getId());
-        return new ApiResponse(responseLogin);
+
+        if (phoneChanged) {
+            String token = jwtProvider.generateToken(user.getPhoneNumber());
+            ResponseLogin responseLogin = new ResponseLogin(token, user.getRole().name(), user.getId());
+            return new ApiResponse(responseLogin);
+        }
+
+        return new ApiResponse("User successfully updated");
     }
 
     public User getUser(Long id) {
