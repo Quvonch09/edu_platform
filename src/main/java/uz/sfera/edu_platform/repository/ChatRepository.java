@@ -72,7 +72,7 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     Integer numberOfUnreadMessages(@Param("sender") Long sender, @Param("receiver") Long receiver);
 
 
-    List<Chat> findAllByChatGroupId(Long groupId);
+    List<Chat> findAllByChatGroupIdOrderById(Long groupId);
 
     @Transactional
     @Modifying

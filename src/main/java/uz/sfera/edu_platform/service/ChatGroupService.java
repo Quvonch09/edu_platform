@@ -142,7 +142,7 @@ public class ChatGroupService {
     }
 
     private ResChatGroup toResChatGroup(ChatGroup group) {
-        List<Chat> allByGroupId = chatRepository.findAllByChatGroupId(group.getId());
+        List<Chat> allByGroupId = chatRepository.findAllByChatGroupIdOrderById(group.getId());
         List<ChatDto> chatDtos = new ArrayList<>();
         for (Chat chat : allByGroupId) {
             chatDtos.add(toChatDto(chat));
