@@ -164,11 +164,11 @@ public class AttendanceService {
 //    }
 
 
-    public ApiResponse updateAttendance(AttendanceDto attendanceDto, Long attendanceId) {
+    public ApiResponse updateAttendance(boolean status, Long attendanceId) {
         Optional<Attendance> byId = attendanceRepository.findById(attendanceId);
         if (byId.isEmpty()) return new ApiResponse("attendance not foud");
         Attendance attendance = byId.get();
-        attendance.setAttendance(attendanceDto.isAttendance());
+        attendance.setAttendance(status);
         attendanceRepository.save(attendance);
         return new ApiResponse("Attendance updated");
     }

@@ -246,12 +246,13 @@ public class GroupService {
 
 
     @Scheduled(cron = "0 0 7 * * *")
-     public void endGroup() {
-        List<Group> groups = groupRepository.findByEndDate(LocalDate.now());
+    @Transactional
+    public void endGroup() {
+        List<Group> groups = groupRepository.findByEndDateLessThanEqualAndActiveTrue(LocalDate.now());
 
         for (Group group : groups) {
             group.setActive(false);
-            for (User student : group.getStudents()) {
+            for (User student : userRepository.findAllByGroupId(group.getId())) {
                 student.setUserStatus(UserStatus.TUGATGAN);
                 userRepository.save(student);
             }
