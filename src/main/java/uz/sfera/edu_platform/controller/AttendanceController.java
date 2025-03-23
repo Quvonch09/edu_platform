@@ -65,9 +65,9 @@ public class AttendanceController {
             description = "Bu narsa Admin yoki Teacher Boshqa studentga adashib yoq " +
                     "qilib qoysa uni update qilish uchun yoki bo'lmasa uni sababli qilib qoyish")
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse> update(@RequestBody AttendanceDto attendanceDto,
+    public ResponseEntity<ApiResponse> update(@RequestParam boolean status,
                                               @PathVariable("id") Long id){
-        ApiResponse apiResponse = attendanceService.updateAttendance(attendanceDto, id);
+        ApiResponse apiResponse = attendanceService.updateAttendance(status, id);
         return ResponseEntity.ok(apiResponse);
     }
 }
