@@ -66,7 +66,7 @@ public class AttendanceController {
                     "qilib qoysa uni update qilish uchun yoki bo'lmasa uni sababli qilib qoyish")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse> update(@RequestParam boolean status,
-                                              @PathVariable("id") Long id){
+                                              @PathVariable("id") List<Long> id){
         ApiResponse apiResponse = attendanceService.updateAttendance(status, id);
         return ResponseEntity.ok(apiResponse);
     }
