@@ -48,6 +48,10 @@ public class AttendanceService {
                         .group(group)
                         .build();
                 attendanceRepository.save(attendance);
+            } else {
+                Attendance oldAttendance = attendanceRepository.findByStudentAndDate(student, attendanceDto.getDate());
+                oldAttendance.setAttendance(attendanceDto.isAttendance());
+                attendanceRepository.save(oldAttendance);
             }
         }
         return new ApiResponse("Attendance successfully saved");
