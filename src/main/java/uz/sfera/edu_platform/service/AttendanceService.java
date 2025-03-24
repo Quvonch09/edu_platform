@@ -48,6 +48,10 @@ public class AttendanceService {
                         .group(group)
                         .build();
                 attendanceRepository.save(attendance);
+            } else {
+                Attendance oldAttendance = attendanceRepository.findByStudentAndDate(student, attendanceDto.getDate());
+                oldAttendance.setAttendance(attendanceDto.isAttendance());
+                attendanceRepository.save(oldAttendance);
             }
         }
         return new ApiResponse("Attendance successfully saved");
@@ -164,12 +168,14 @@ public class AttendanceService {
 //    }
 
 
-    public ApiResponse updateAttendance(boolean status, Long attendanceId) {
-        Optional<Attendance> byId = attendanceRepository.findById(attendanceId);
-        if (byId.isEmpty()) return new ApiResponse("attendance not foud");
-        Attendance attendance = byId.get();
-        attendance.setAttendance(status);
-        attendanceRepository.save(attendance);
+    public ApiResponse updateAttendance(boolean status, List<Long> attendanceId) {
+        for (Long l : attendanceId) {
+            Optional<Attendance> byId = attendanceRepository.findById(l);
+            if (byId.isEmpty()) return new ApiResponse("attendance not foud");
+            Attendance attendance = byId.get();
+            attendance.setAttendance(status);
+            attendanceRepository.save(attendance);
+        }
         return new ApiResponse("Attendance updated");
     }
 
