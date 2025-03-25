@@ -46,7 +46,7 @@ public class RoomController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_CEO', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_CEO', 'ROLE_ADMIN','ROLE_TEACHER')")
     @Operation(summary = "Admin roomni listini kurish")
     @GetMapping("/list")
     public ResponseEntity<ApiResponse> getRoom() {
