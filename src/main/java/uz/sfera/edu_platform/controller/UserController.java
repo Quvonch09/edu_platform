@@ -155,7 +155,6 @@ public class UserController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_STUDENT','ROLE_TEACHER', 'ROLE_ADMIN', 'ROLE_CEO')")
     @Operation(summary = "ChatId saqlash uchun")
     @PostMapping("/saveChatId")
     public ResponseEntity<ApiResponse> saveChatId(@RequestParam Long chatId, @RequestParam String phoneNumber){
@@ -164,7 +163,6 @@ public class UserController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_STUDENT','ROLE_TEACHER', 'ROLE_ADMIN', 'ROLE_CEO')")
     @Operation(summary = "userlarni check qilish uchun")
     @GetMapping("/checkUser")
     public ResponseEntity<ApiResponse> checkUser(@RequestParam String phoneNumber) {
