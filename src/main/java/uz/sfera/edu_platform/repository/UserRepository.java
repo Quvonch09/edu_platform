@@ -264,4 +264,7 @@ ORDER BY u.created_at DESC
     @Modifying
     @Query(value = "delete from users_categories us where us.user_id=?1 and us.categories_id=?2",nativeQuery = true)
     void deleteByUserCategories(Long userId,Long categoryId);
+
+
+    User findByParentPhoneNumber(String parentPhoneNumber);
 }

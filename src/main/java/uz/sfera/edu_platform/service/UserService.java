@@ -19,10 +19,7 @@ import uz.sfera.edu_platform.payload.*;
 import uz.sfera.edu_platform.payload.auth.ResponseLogin;
 import uz.sfera.edu_platform.payload.req.ReqAdmin;
 import uz.sfera.edu_platform.payload.req.ReqTeacher;
-import uz.sfera.edu_platform.payload.res.ResCategory;
-import uz.sfera.edu_platform.payload.res.ResGroupDto;
-import uz.sfera.edu_platform.payload.res.ResPageable;
-import uz.sfera.edu_platform.payload.res.ResStudentCount;
+import uz.sfera.edu_platform.payload.res.*;
 import uz.sfera.edu_platform.repository.CategoryRepository;
 import uz.sfera.edu_platform.repository.FileRepository;
 import uz.sfera.edu_platform.repository.GroupRepository;
@@ -349,6 +346,36 @@ public class UserService {
 
         return new ApiResponse("User successfully updated");
     }
+
+
+    public ApiResponse checkUser(String parentPhoneNumber){
+
+        User user = userRepository.findByParentPhoneNumber(parentPhoneNumber);
+        if (user == null || user.getChatId() == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("User"));
+        }
+
+        ResUser resUser = ResUser.builder()
+                .userId(user.getId())
+                .fullName(user.getFullName())
+                .chatId(user.getChatId())
+                .build();
+
+        return new ApiResponse(resUser);
+    }
+
+
+    public ApiResponse saveUserChatId(Long chatId, String phoneNumber){
+        User user = userRepository.findByParentPhoneNumber(phoneNumber);
+        if (user == null){
+            return new ApiResponse(ResponseError.NOTFOUND("Bu nomerdagi user topilmadi"));
+        }
+
+        user.setChatId(chatId);
+        userRepository.save(user);
+        return new ApiResponse("User successfully saved");
+    }
+
 
     public User getUser(Long id) {
         return userRepository.findById(id).orElse(null);
