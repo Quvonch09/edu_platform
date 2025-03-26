@@ -51,7 +51,7 @@ public class UserService {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Iltimos, to‘liq ma'lumot kiriting"));
         }
 
-        if (userRepository.existsByPhoneNumberAndEnabledIsTrue(reqTeacher.getPhoneNumber())) {
+        if (userRepository.existsByPhoneNumberAndEnabled(reqTeacher.getPhoneNumber(),true)) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu telefon raqam"));
         }
 
@@ -250,7 +250,7 @@ public class UserService {
 
 
     public ApiResponse saveAdmin(ReqAdmin reqAdmin){
-        if (userRepository.existsByPhoneNumberAndEnabledIsTrue(reqAdmin.getPhoneNumber())) {
+        if (userRepository.existsByPhoneNumberAndEnabled(reqAdmin.getPhoneNumber(), true)) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Bu Admin"));
         }
 
