@@ -46,6 +46,8 @@ public class User extends AbsEntity implements UserDetails {
 
     private String departure_description;
 
+    private Long chatId;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 
