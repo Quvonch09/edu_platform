@@ -114,10 +114,10 @@ public class TestGroupService {
     public ApiResponse addStudent(ReqStudent reqStudent){
         TestGroup testGroup = testGroupRepository.findById(reqStudent.getGroupId()).orElse(null);
 
-        if (testGroup == null){
+        if (testGroup == null || !testGroup.isActive()){
             return new ApiResponse(ResponseError.NOTFOUND("Test guruh"));
         }
-        if (userRepository.existsByPhoneNumberAndEnabledIsTrue(reqStudent.getPhoneNumber())){
+        if (userRepository.existsByPhoneNumberAndEnabled(reqStudent.getPhoneNumber(), false)){
             return new ApiResponse(ResponseError.ALREADY_EXIST("Student"));
         }
 
@@ -163,7 +163,7 @@ public class TestGroupService {
         User student = userRepository.findById(studentId).orElse(null);
         TestGroup testGroup = testGroupRepository.findByStudentId(studentId);
 
-        if (student == null || student.isDeleted() || !student.getRole().equals(Role.ROLE_STUDENT) || testGroup == null || !testGroup.isActive()){
+        if (student == null || student.isDeleted() || !student.getRole().equals(Role.ROLE_STUDENT) || testGroup == null){
             return new ApiResponse(ResponseError.NOTFOUND("Student"));
         }
 

@@ -47,7 +47,7 @@ public class StudentService {
 
     @Transactional
     public ApiResponse saveStudent(ReqStudent reqStudent) {
-        if (userRepository.existsByPhoneNumberAndEnabledIsTrue(reqStudent.getPhoneNumber())) {
+        if (userRepository.existsByPhoneNumberAndEnabled(reqStudent.getPhoneNumber(), true)) {
             return new ApiResponse(ResponseError.ALREADY_EXIST("Student"));
         }
 

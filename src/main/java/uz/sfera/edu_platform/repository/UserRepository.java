@@ -76,7 +76,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 """ , nativeQuery = true)
     List<ResCEODiagram> getLeaveStudent();
 
-    boolean existsByPhoneNumberAndEnabledIsTrue(String phone);
+    boolean existsByPhoneNumberAndEnabled(String phone, boolean enabled);
     boolean existsByPhoneNumberAndEnabledIsTrueAndIdNot(String phone, Long id);
 
     @Query(value = """
