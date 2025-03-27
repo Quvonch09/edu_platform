@@ -350,7 +350,7 @@ public class UserService {
 
     public ApiResponse checkUser(String parentPhoneNumber){
 
-        User user = userRepository.findByPhoneNumber(parentPhoneNumber);
+        User user = userRepository.findByPhoneOrParentPhoneNumber(parentPhoneNumber);
         if (user == null || user.getChatId() == null) {
             return new ApiResponse(ResponseError.NOTFOUND("User"));
         }
