@@ -350,16 +350,24 @@ public class UserService {
 
     public ApiResponse checkUser(String parentPhoneNumber){
 
-        User user = userRepository.findByParentPhoneNumber(parentPhoneNumber);
+        User user = userRepository.findByPhoneNumber(parentPhoneNumber);
         if (user == null || user.getChatId() == null) {
             return new ApiResponse(ResponseError.NOTFOUND("User"));
         }
 
-        ResUser resUser = ResUser.builder()
-                .userId(user.getId())
-                .fullName(user.getFullName())
-                .chatId(user.getChatId())
-                .build();
+        Group group = groupRepository.findByStudentId(user.getId()).orElse(null);
+        if (group == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
+
+
+        ResUser resUser;
+
+        if (user.getPhoneNumber().equals(parentPhoneNumber)){
+            resUser = resUser(user, group.getName(), true);
+        } else {
+            resUser = resUser(user, group.getName(), false);
+        }
 
         return new ApiResponse(resUser);
     }
@@ -415,6 +423,17 @@ public class UserService {
         return ResGroupDto.builder()
                 .groupId(group.getId())
                 .groupName(group.getName())
+                .build();
+    }
+
+
+    private ResUser resUser(User user,String groupName, boolean status) {
+        return ResUser.builder()
+                .userId(user.getId())
+                .fullName(user.getFullName())
+                .groupName(groupName)
+                .chatId(user.getChatId())
+                .status(status)
                 .build();
     }
 }
