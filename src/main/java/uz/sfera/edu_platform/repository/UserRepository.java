@@ -136,6 +136,10 @@ SELECT
         ) THEN TRUE
         ELSE FALSE
         END AS hasPaid,
+    CASE
+            WHEN u.chat_id IS NOT NULL THEN TRUE
+            ELSE FALSE
+            END AS isStarted,
     COALESCE(SUM(h.ball), 0) AS score
 FROM users u
          JOIN groups_students gsl ON u.id = gsl.students_id

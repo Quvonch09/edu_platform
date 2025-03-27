@@ -17,5 +17,6 @@ public interface ResStudent {
     String getDepartureDescription();
     String getParentPhoneNumber();
     Boolean getHasPaid();
+    Boolean getIsStarted();
     Double getScore();
 }
