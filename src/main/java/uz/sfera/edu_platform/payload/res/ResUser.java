@@ -10,5 +10,7 @@ import lombok.*;
 public class ResUser {
     private Long userId;
     private String fullName;
+    private String groupName;
     private Long chatId;
+    private boolean status;
 }
