@@ -89,81 +89,76 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     Integer countAllByGroup(Long teacherId);
 
     @Query(value = """
-WITH lessons_per_group AS (
-    SELECT
-        lt.group_id,
-        COUNT(*) AS total_lessons
-    FROM lesson_tracking lt
-    GROUP BY lt.group_id
-),
-     lessons_watched AS (
-         SELECT
-             g.id AS group_id,
-             COUNT(lt.id) AS watched_lessons
-         FROM groups g
-                  LEFT JOIN lesson_tracking lt ON g.id = lt.group_id
-         WHERE g.id IN (
-             SELECT group_id FROM groups_students WHERE students_id = :studentId
-         )
-         GROUP BY g.id
-     ),
-     student_scores AS (
-         SELECT
-             g.id AS group_id,
-             COALESCE(SUM(h.ball), 0) AS total_score
-         FROM groups g
-                  LEFT JOIN homework h ON h.student_id = :studentId
-         WHERE h.checked = 1 
-         GROUP BY g.id
-     ),
-     ranking AS (
-         SELECT
-             student_id,
-             SUM(ball) AS total_score,
-             RANK() OVER (ORDER BY SUM(ball) DESC) AS rank_position,
-             COUNT(*) OVER () AS total_students
-         FROM homework
-         WHERE checked = 1
-         GROUP BY student_id
-     )
-SELECT
-    g.name AS groupName,
-    g.id AS groupId,
-    t.full_name AS teacherName,
-
-    -- ✅ Guruhning tugash foizi (progress)
-   CASE
-       -- Guruh tugagan bo‘lsa, 100% chiqadi
-       WHEN g.end_date <= CURRENT_DATE THEN 100.0
-       -- Guruh davom etayotgan bo‘lsa, foiz hisoblanadi
-       WHEN g.end_date > g.created_at THEN
-           ROUND(
-               100.0 * (DATE_PART('day', CURRENT_DATE - g.created_at) /
-                        NULLIF(DATE_PART('day', g.end_date - g.created_at), 0))::numeric, 2
-           )
-       ELSE 100.0
-   END AS categoryPercentage ,
-   
-
-    COALESCE(lw.watched_lessons, 0) || '/' || COALESCE(lp.total_lessons, 0) AS lessonsProgress,
-    m.name AS currentModule,
-    COALESCE(ss.total_score, 0) || '/' || (COALESCE(lp.total_lessons, 0) * 5) AS studentScore,
-    COALESCE(r.rank_position, 0) || '/' || COALESCE(r.total_students, 0) AS rankingPosition
-FROM groups g
-         JOIN users t ON g.teacher_id = t.id
-         LEFT JOIN lessons_per_group lp ON lp.group_id = g.id
-         LEFT JOIN lessons_watched lw ON lw.group_id = g.id
-         LEFT JOIN lesson l ON l.id = (
-    SELECT lesson_id FROM lesson_tracking WHERE group_id = g.id ORDER BY created_at DESC LIMIT 1
-)
-         LEFT JOIN module m ON m.id = l.module_id
-         LEFT JOIN student_scores ss ON ss.group_id = g.id
-         LEFT JOIN ranking r ON r.student_id = :studentId
-WHERE g.active = TRUE
-  AND g.id IN (
-    SELECT group_id FROM groups_students WHERE students_id = :studentId
-)
-LIMIT 1;
+            WITH lessons_per_group AS (
+            SELECT
+                g.id,
+                COUNT(l) AS total_lessons
+            FROM groups g  join groups_students gs on g.id = gs.group_id
+            join category c on g.category_id = c.id
+            join module m on m.category_id = c.id
+            join lesson l on l.module_id = m.id
+            where gs.students_id = :studentId and l.deleted = 0 and m.deleted = 0\s
+            group by g.id
+        ),
+             lessons_watched AS (
+                 SELECT
+                     g.id AS group_id,
+                     COUNT(lt.id) AS watched_lessons
+                 FROM groups g
+                          LEFT JOIN lesson_tracking lt ON g.id = lt.group_id
+                 WHERE g.id IN (
+                     SELECT group_id FROM groups_students WHERE students_id = :studentId
+                 )
+                 GROUP BY g.id
+             ),
+             ranking AS (
+                 SELECT
+                     s.id,
+                     gs.group_id,
+                     COALESCE(SUM(h.ball), 0) AS total_score,
+                     DENSE_RANK() OVER (PARTITION BY gs.group_id ORDER BY COALESCE(SUM(h.ball), 0) DESC) AS rank_position,
+                     COUNT(*) OVER (PARTITION BY gs.group_id) AS total_students
+                 FROM groups_students gs
+                          JOIN users s ON s.id = gs.students_id
+                          LEFT JOIN homework h ON s.id = h.student_id
+                 GROUP BY s.id, gs.group_id
+             )
+        SELECT
+            g.name AS groupName,
+            g.id AS groupId,
+            t.full_name AS teacherName,
+        
+            -- ✅ Guruhning tugash foizi (progress)
+            CASE
+                -- Guruh tugagan bo‘lsa, 100% chiqadi
+                WHEN g.end_date <= CURRENT_DATE THEN 100.0
+                -- Guruh davom etayotgan bo‘lsa, foiz hisoblanadi
+                WHEN g.end_date > g.start_date THEN
+                    ROUND(
+                            100.0 * ((CURRENT_DATE - g.start_date) * 1.0 /
+                                     NULLIF((g.end_date - g.start_date), 0)), 2
+                    )
+                ELSE 100.0
+                END AS categoryPercentage,
+        
+            COALESCE(lw.watched_lessons, 0) || '/' || COALESCE(lp.total_lessons, 0) AS lessonsProgress,
+            m.name AS currentModule,
+            COALESCE(r.total_score, 0) || '/' || (COALESCE(lp.total_lessons, 0) * 5) AS studentScore,
+            COALESCE(r.rank_position, 0) || '/' || COALESCE(r.total_students, 0) AS rankingPosition
+        FROM groups g
+                 JOIN users t ON g.teacher_id = t.id
+                 LEFT JOIN lessons_per_group lp ON lp.id = g.id
+                 LEFT JOIN lessons_watched lw ON lw.group_id = g.id
+                 LEFT JOIN lesson l ON l.id = (
+            SELECT lesson_id FROM lesson_tracking WHERE group_id = g.id ORDER BY created_at DESC LIMIT 1
+        )
+                 LEFT JOIN module m ON m.id = l.module_id
+                 LEFT JOIN ranking r ON r.id= :studentId
+        WHERE g.active = TRUE
+          AND g.id IN (
+            SELECT group_id FROM groups_students WHERE students_id = :studentId
+        )
+        LIMIT 1;
 """, nativeQuery = true)
     ResStudentStatistic findGroupByStudentId(@Param("studentId") Long studentId);
 
