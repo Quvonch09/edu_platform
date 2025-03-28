@@ -272,6 +272,7 @@ ORDER BY u.created_at DESC
 
     User findByParentPhoneNumber(String parentPhoneNumber);
 
-    @Query(value = "select * from users u where u.phone_number = ?1 or u.parent_phone_number = ?1", nativeQuery = true)
+    @Query(value = "select * from users u where u.phone_number = ?1 or u.parent_phone_number = ?1 " +
+            "and role = 'ROLE_STUDENT' and user_status = 'UQIYAPDI';", nativeQuery = true)
     User findByPhoneOrParentPhoneNumber(String phoneOrParentPhoneNumber);
 }
