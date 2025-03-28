@@ -19,10 +19,7 @@ import uz.sfera.edu_platform.payload.*;
 import uz.sfera.edu_platform.payload.auth.ResponseLogin;
 import uz.sfera.edu_platform.payload.req.ReqAdmin;
 import uz.sfera.edu_platform.payload.req.ReqTeacher;
-import uz.sfera.edu_platform.payload.res.ResCategory;
-import uz.sfera.edu_platform.payload.res.ResGroupDto;
-import uz.sfera.edu_platform.payload.res.ResPageable;
-import uz.sfera.edu_platform.payload.res.ResStudentCount;
+import uz.sfera.edu_platform.payload.res.*;
 import uz.sfera.edu_platform.repository.CategoryRepository;
 import uz.sfera.edu_platform.repository.FileRepository;
 import uz.sfera.edu_platform.repository.GroupRepository;
@@ -350,6 +347,44 @@ public class UserService {
         return new ApiResponse("User successfully updated");
     }
 
+
+    public ApiResponse checkUser(String parentPhoneNumber){
+
+        User user = userRepository.findByPhoneOrParentPhoneNumber(parentPhoneNumber);
+        if (user == null || user.getChatId() == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("User"));
+        }
+
+        Group group = groupRepository.findByStudentId(user.getId()).orElse(null);
+        if (group == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
+
+
+        ResUser resUser;
+
+        if (user.getPhoneNumber().equals(parentPhoneNumber)){
+            resUser = resUser(user, group.getName(), true);
+        } else {
+            resUser = resUser(user, group.getName(), false);
+        }
+
+        return new ApiResponse(resUser);
+    }
+
+
+    public ApiResponse saveUserChatId(Long chatId, String phoneNumber){
+        User user = userRepository.findByParentPhoneNumber(phoneNumber);
+        if (user == null){
+            return new ApiResponse(ResponseError.NOTFOUND("Bu nomerdagi user topilmadi"));
+        }
+
+        user.setChatId(chatId);
+        userRepository.save(user);
+        return new ApiResponse("User successfully saved");
+    }
+
+
     public User getUser(Long id) {
         return userRepository.findById(id).orElse(null);
 
@@ -388,6 +423,17 @@ public class UserService {
         return ResGroupDto.builder()
                 .groupId(group.getId())
                 .groupName(group.getName())
+                .build();
+    }
+
+
+    private ResUser resUser(User user,String groupName, boolean status) {
+        return ResUser.builder()
+                .userId(user.getId())
+                .fullName(user.getFullName())
+                .groupName(groupName)
+                .chatId(user.getChatId())
+                .status(status)
                 .build();
     }
 }

@@ -154,4 +154,20 @@ public class UserController {
         return ResponseEntity.ok(apiResponse);
     }
 
+
+    @Operation(summary = "ChatId saqlash uchun")
+    @PostMapping("/saveChatId")
+    public ResponseEntity<ApiResponse> saveChatId(@RequestParam Long chatId, @RequestParam String phoneNumber){
+        ApiResponse apiResponse = userService.saveUserChatId(chatId, phoneNumber);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+
+    @Operation(summary = "userlarni check qilish uchun")
+    @GetMapping("/checkUser")
+    public ResponseEntity<ApiResponse> checkUser(@RequestParam String phoneNumber) {
+        ApiResponse apiResponse = userService.checkUser(phoneNumber);
+        return ResponseEntity.ok(apiResponse);
+    }
+
 }

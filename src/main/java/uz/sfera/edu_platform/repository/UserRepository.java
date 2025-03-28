@@ -136,6 +136,10 @@ SELECT
         ) THEN TRUE
         ELSE FALSE
         END AS hasPaid,
+    CASE
+            WHEN u.chat_id IS NOT NULL THEN TRUE
+            ELSE FALSE
+            END AS isStarted,
     COALESCE(SUM(h.ball), 0) AS score
 FROM users u
          JOIN groups_students gsl ON u.id = gsl.students_id
@@ -264,4 +268,11 @@ ORDER BY u.created_at DESC
     @Modifying
     @Query(value = "delete from users_categories us where us.user_id=?1 and us.categories_id=?2",nativeQuery = true)
     void deleteByUserCategories(Long userId,Long categoryId);
+
+
+    User findByParentPhoneNumber(String parentPhoneNumber);
+
+    @Query(value = "select * from users u where u.phone_number = ?1 or u.parent_phone_number = ?1 " +
+            "and role = 'ROLE_STUDENT' and user_status = 'UQIYAPDI';", nativeQuery = true)
+    User findByPhoneOrParentPhoneNumber(String phoneOrParentPhoneNumber);
 }
