@@ -3,6 +3,7 @@ package uz.sfera.edu_platform.controller;
 import jakarta.validation.Valid;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.entity.enums.Role;
+import uz.sfera.edu_platform.entity.enums.UserPaymentStatus;
 import uz.sfera.edu_platform.payload.ApiResponse;
 import uz.sfera.edu_platform.payload.UserDTO;
 import uz.sfera.edu_platform.payload.req.ReqAdmin;
@@ -165,8 +166,8 @@ public class UserController {
 
     @Operation(summary = "userlarni check qilish uchun")
     @GetMapping("/checkUser")
-    public ResponseEntity<ApiResponse> checkUser(@RequestParam String phoneNumber) {
-        ApiResponse apiResponse = userService.checkUser(phoneNumber);
+    public ResponseEntity<ApiResponse> checkUser(@RequestParam UserPaymentStatus paymentStatus) {
+        ApiResponse apiResponse = userService.getCheckUsers(paymentStatus);
         return ResponseEntity.ok(apiResponse);
     }
 
