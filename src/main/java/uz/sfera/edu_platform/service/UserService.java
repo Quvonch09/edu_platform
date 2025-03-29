@@ -14,6 +14,7 @@ import uz.sfera.edu_platform.entity.Group;
 import uz.sfera.edu_platform.entity.User;
 import uz.sfera.edu_platform.entity.enums.ChatStatus;
 import uz.sfera.edu_platform.entity.enums.Role;
+import uz.sfera.edu_platform.entity.enums.UserPaymentStatus;
 import uz.sfera.edu_platform.exception.NotFoundException;
 import uz.sfera.edu_platform.payload.*;
 import uz.sfera.edu_platform.payload.auth.ResponseLogin;
@@ -372,6 +373,39 @@ public class UserService {
         return new ApiResponse(resUser);
     }
 
+
+    public ApiResponse getCheckUsers(UserPaymentStatus paymentStatus){
+        Page<ResStudent> users = null;
+        if (paymentStatus.equals(UserPaymentStatus.TULOV_QILGAN)){
+            users = userRepository.searchStudents(
+                    null, null, null, null,
+                    null, null, null, true, PageRequest.of(0, 10000)
+            );
+        } else if (paymentStatus.equals(UserPaymentStatus.TULOV_QILMAGAN)){
+            users = userRepository.searchStudents(
+                    null, null, null, null,
+                    null, null, null, false, PageRequest.of(0, 1000)
+            );
+        }
+
+        if (users.isEmpty()){
+            return new ApiResponse(ResponseError.NOTFOUND("User"));
+        }
+
+        List<ResUser> resUsers = new ArrayList<>();
+
+        for (ResStudent resStudent : users.getContent()) {
+            ResUser resUser = ResUser.builder()
+                    .userId(resStudent.getId())
+                    .groupName(resStudent.getGroupName())
+                    .fullName(resStudent.getFullName())
+                    .chatId(resStudent.getChatId())
+                    .build();
+            resUsers.add(resUser);
+        }
+
+        return new ApiResponse(resUsers);
+    }
 
     public ApiResponse saveUserChatId(Long chatId, String phoneNumber){
         User user = userRepository.findByParentPhoneNumber(phoneNumber);

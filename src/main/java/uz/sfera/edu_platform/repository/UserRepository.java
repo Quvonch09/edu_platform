@@ -120,6 +120,7 @@ SELECT
     u.phone_number,
     g.name AS groupName,
     g.id AS groupId,
+    u.chat_id,
     u.created_at,
     u.age,
     u.user_status AS status,
@@ -176,7 +177,7 @@ WHERE
               )
           )
 GROUP BY
-    u.id, u.full_name, u.phone_number, g.name, g.id,
+    u.id, u.full_name, u.phone_number, g.name, g.id, u.chat_id,
     u.created_at, u.age, u.user_status, u.departure_date, u.departure_description, u.parent_phone_number, u2.full_name
 ORDER BY u.created_at DESC
 """,
