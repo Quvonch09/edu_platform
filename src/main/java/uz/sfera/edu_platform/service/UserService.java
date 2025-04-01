@@ -379,10 +379,9 @@ public class UserService {
 
         if (paymentStatus == null){
             users = userRepository.searchStudents(null, null, null, null,
-                    null, null, null, null, PageRequest.of(0, 1000));
-        }
-
-        if (paymentStatus.equals(UserPaymentStatus.TULOV_QILGAN)){
+                    null, null, null, null, PageRequest.of(0, 1000)
+            );
+        } else if (paymentStatus.equals(UserPaymentStatus.TULOV_QILGAN)){
             users = userRepository.searchStudents(
                     null, null, null, null,
                     null, null, null, true, PageRequest.of(0, 10000)
