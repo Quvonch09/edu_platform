@@ -166,7 +166,7 @@ public class UserController {
 
     @Operation(summary = "userlarni check qilish uchun")
     @GetMapping("/checkUser")
-    public ResponseEntity<ApiResponse> checkUser(@RequestParam UserPaymentStatus paymentStatus) {
+    public ResponseEntity<ApiResponse> checkUser(@RequestParam(required = false) UserPaymentStatus paymentStatus) {
         ApiResponse apiResponse = userService.getCheckUsers(paymentStatus);
         return ResponseEntity.ok(apiResponse);
     }
