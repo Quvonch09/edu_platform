@@ -12,5 +12,4 @@ public class ResUser {
     private String fullName;
     private String groupName;
     private Long chatId;
-    private boolean status;
 }
