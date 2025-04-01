@@ -388,6 +388,12 @@ public class UserService {
             );
         }
 
+        if (paymentStatus == null){
+            users = userRepository.searchStudents(null, null, null, null,
+                    null, null, null, null, PageRequest.of(0, 1000));
+        }
+
+        assert users != null;
         if (users.isEmpty()){
             return new ApiResponse(ResponseError.NOTFOUND("User"));
         }
