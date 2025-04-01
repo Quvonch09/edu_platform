@@ -365,9 +365,9 @@ public class UserService {
         ResUser resUser;
 
         if (user.getPhoneNumber().equals(parentPhoneNumber)){
-            resUser = resUser(user, group.getName(), true);
+            resUser = resUser(user, group.getName());
         } else {
-            resUser = resUser(user, group.getName(), false);
+            resUser = resUser(user, group.getName());
         }
 
         return new ApiResponse(resUser);
@@ -467,13 +467,12 @@ public class UserService {
     }
 
 
-    private ResUser resUser(User user,String groupName, boolean status) {
+    private ResUser resUser(User user,String groupName) {
         return ResUser.builder()
                 .userId(user.getId())
                 .fullName(user.getFullName())
                 .groupName(groupName)
                 .chatId(user.getChatId())
-                .status(status)
                 .build();
     }
 }
