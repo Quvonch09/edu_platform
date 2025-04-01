@@ -376,6 +376,12 @@ public class UserService {
 
     public ApiResponse getCheckUsers(UserPaymentStatus paymentStatus){
         Page<ResStudent> users = null;
+
+        if (paymentStatus == null){
+            users = userRepository.searchStudents(null, null, null, null,
+                    null, null, null, null, PageRequest.of(0, 1000));
+        }
+
         if (paymentStatus.equals(UserPaymentStatus.TULOV_QILGAN)){
             users = userRepository.searchStudents(
                     null, null, null, null,
@@ -388,10 +394,6 @@ public class UserService {
             );
         }
 
-        if (paymentStatus == null){
-            users = userRepository.searchStudents(null, null, null, null,
-                    null, null, null, null, PageRequest.of(0, 1000));
-        }
 
         assert users != null;
         if (users.isEmpty()){
