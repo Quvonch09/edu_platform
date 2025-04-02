@@ -170,7 +170,7 @@ WHERE
                   OR (:hasPaid = FALSE AND NOT EXISTS (
                   SELECT 1 FROM income inc2
                   WHERE inc2.student_id = u.id
-                    AND inc2.paid = TRUE
+                    AND inc2.paid = FALSE
                     AND EXTRACT(MONTH FROM inc2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
                     AND EXTRACT(YEAR FROM inc2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
               ))
