@@ -182,29 +182,39 @@ GROUP BY
 ORDER BY u.created_at DESC
 """,
             countQuery = """
-    SELECT COUNT(DISTINCT u.id)
-    FROM users u
-    JOIN groups_students gsl ON u.id = gsl.students_id
-    JOIN groups g ON gsl.group_id = g.id
-    LEFT JOIN users u2 ON u2.id = g.teacher_id
-    LEFT JOIN income inc ON inc.student_id = u.id
-    WHERE
-        (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', COALESCE(:fullName, ''), '%')))
-        AND (COALESCE(:phoneNumber, '') = '' OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', COALESCE(:phoneNumber, ''), '%')))
-        AND (COALESCE(:userStatus, '') = '' OR u.user_status = :userStatus)
-        AND (COALESCE(:groupName, '') = '' OR LOWER(g.name) LIKE LOWER(CONCAT('%', COALESCE(:groupName, ''), '%')))
-        AND (:teacherId IS NULL OR g.teacher_id = :teacherId)
-        AND (:startAge IS NULL OR u.age >= :startAge)
-        AND (:endAge IS NULL OR u.age <= :endAge)
-        AND u.role = 'ROLE_STUDENT'
-        AND (
-    :hasPaid IS NULL OR EXISTS (
-        SELECT 1 FROM income inc2
-        WHERE inc2.student_id = u.id
-          AND inc2.paid = CASE WHEN :hasPaid THEN TRUE ELSE FALSE END
-          AND EXTRACT(MONTH FROM inc2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
-          AND EXTRACT(YEAR FROM inc2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
-    ))
+  SELECT COUNT(DISTINCT U.id)  FROM users u
+JOIN groups_students gsl ON u.id = gsl.students_id
+JOIN groups g ON gsl.group_id = g.id
+LEFT JOIN users u2 ON u2.id = g.teacher_id
+LEFT JOIN income inc ON inc.student_id = u.id
+WHERE
+    (:fullName IS NULL OR LOWER(u.full_name) LIKE LOWER(CONCAT('%', COALESCE(:fullName, ''), '%')))
+    AND (COALESCE(:phoneNumber, '') = '' OR LOWER(u.phone_number) LIKE LOWER(CONCAT('%', COALESCE(:phoneNumber, ''), '%')))
+    AND (COALESCE(:userStatus, '') = '' OR u.user_status = :userStatus)
+    AND (COALESCE(:groupName, '') = '' OR LOWER(g.name) LIKE LOWER(CONCAT('%', COALESCE(:groupName, ''), '%')))
+    AND (:teacherId IS NULL OR g.teacher_id = :teacherId)
+    AND (:startAge IS NULL OR u.age >= :startAge)
+    AND (:endAge IS NULL OR u.age <= :endAge)
+    AND u.role = 'ROLE_STUDENT'
+    AND (
+        :hasPaid IS NULL
+        OR (
+            (:hasPaid = TRUE AND EXISTS (
+                SELECT 1 FROM income inc2
+                WHERE inc2.student_id = u.id
+                  AND inc2.paid = TRUE
+                  AND EXTRACT(MONTH FROM inc2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+                  AND EXTRACT(YEAR FROM inc2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+            ))
+            OR (:hasPaid = FALSE AND NOT EXISTS (
+                SELECT 1 FROM income inc2
+                WHERE inc2.student_id = u.id
+                  AND inc2.paid = TRUE
+                  AND EXTRACT(MONTH FROM inc2.payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+                  AND EXTRACT(YEAR FROM inc2.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+            ))
+        )
+    )
 """,
             nativeQuery = true)
 
