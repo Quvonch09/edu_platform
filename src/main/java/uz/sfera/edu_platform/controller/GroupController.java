@@ -89,6 +89,16 @@ public class GroupController {
         return ResponseEntity.ok(apiResponse);
     }
 
+    @PutMapping("/redirect/{groupId}/{targetGroupId}")
+    @Operation(summary = "Admin Guruhning hamma studentlarini boshqa guruhga o'tkazish")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse> redirectGroup(
+            @PathVariable Long groupId,
+            @PathVariable Long targetGroupId
+    ){
+        ApiResponse apiResponse = groupService.redirectGroupStudents(groupId, targetGroupId);
+        return ResponseEntity.ok(apiResponse);
+    }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_CEO')")
     @Operation(summary = "ADMIN groupni vaqtini uzgartirish uchun")
@@ -100,9 +110,6 @@ public class GroupController {
         ApiResponse apiResponse = groupService.updateEndDateGroup(groupId, duration);
         return ResponseEntity.ok(apiResponse);
     }
-
-
-
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "ADMIN groupni delete qilish")

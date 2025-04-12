@@ -97,9 +97,14 @@ public class StudentController {
         return ResponseEntity.ok(apiResponse);
     }
 
-
-
-
-
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Admin studentni groupni o'zgartirish")
+    @PutMapping("/redirect/{studentId}/{targetGroupId}")
+    public ResponseEntity<ApiResponse> redirectStudent(
+            @PathVariable Long studentId,
+            @PathVariable Long targetGroupId
+    ){
+        ApiResponse apiResponse = studentService.redirectStudent(studentId, targetGroupId);
+        return ResponseEntity.ok(apiResponse);
+    }
 }
