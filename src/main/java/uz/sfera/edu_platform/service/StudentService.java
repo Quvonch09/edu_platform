@@ -261,8 +261,8 @@ public class StudentService {
 
         List<User> students = groupRepository.findByGroup(oldGroup.getId());
         students.remove(student);
-        group.setStudents(students);
-        groupRepository.save(group);
+        oldGroup.setStudents(students);
+        groupRepository.save(oldGroup);
 
         groupRepository.addStudentToGroup(targetGroupId, studentId);
         return new ApiResponse("User ko'chirildi");

@@ -378,15 +378,16 @@ public class GroupService {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
 
+        List<User> students = userRepository.findAllByGroupId(group.getId());
+        List<User> targetGroupStudents = userRepository.findAllByGroupId(targetGroupId);
+
+        targetGroupStudents.addAll(students);
+        groupRepository.save(targetGroup);
+
         group.setActive(false);
         group.setStudents(null);
         groupRepository.save(group);
 
-        List<User> students = userRepository.findAllByGroupId(group.getId());
-        for (User student : students) {
-            targetGroup.setStudents(students);
-            groupRepository.save(targetGroup);
-        }
         return new ApiResponse("Guruhga o'quvchilari ko'chirildi");
     }
 }
