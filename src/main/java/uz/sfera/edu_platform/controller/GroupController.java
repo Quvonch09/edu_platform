@@ -89,16 +89,14 @@ public class GroupController {
         return ResponseEntity.ok(apiResponse);
     }
 
-
-
-
+    @PutMapping("/redirect/{groupId}/{targetGroupId}")
+    @Operation(summary = "Admin Guruhning hamma studentlarini boshqa guruhga o'tkazish")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @Operation(summary = "ADMIN groupni delete qilish")
-    @DeleteMapping("/{groupId}")
-    public ResponseEntity<ApiResponse> deleteGroup(
-            @PathVariable Long groupId
+    public ResponseEntity<ApiResponse> redirectGroup(
+            @PathVariable Long groupId,
+            @PathVariable Long targetGroupId
     ){
-        ApiResponse apiResponse = groupService.deleteGroup(groupId);
+        ApiResponse apiResponse = groupService.redirectGroupStudents(groupId, targetGroupId);
         return ResponseEntity.ok(apiResponse);
     }
 }

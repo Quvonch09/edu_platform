@@ -249,6 +249,24 @@ public class StudentService {
         return new ApiResponse(list);
     }
 
+    public ApiResponse redirectStudent(Long studentId, Long targetGroupId) {
+        Group group = groupRepository.findById(targetGroupId).orElse(null);
+        Group oldGroup = groupRepository.findByStudentId(studentId).orElse(null);
+        User student = userRepository.findById(studentId).orElse(null);
+        if (student == null || student.isDeleted() || !student.getRole().equals(Role.ROLE_STUDENT) || oldGroup == null || !oldGroup.isActive()) {
+            return new ApiResponse(ResponseError.NOTFOUND("User"));
+        } else if (group == null || !group.isActive()) {
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
+
+        List<User> students = groupRepository.findByGroup(oldGroup.getId());
+        students.remove(student);
+        group.setStudents(students);
+        groupRepository.save(group);
+
+        groupRepository.addStudentToGroup(targetGroupId, studentId);
+        return new ApiResponse("User ko'chirildi");
+    }
 
     public UserDTO getTeacherDTO(User user) {  // ✅ Metod nomi to‘g‘ri bo‘ldi
         return UserDTO.builder()
@@ -258,6 +276,4 @@ public class StudentService {
                 .fileId(user.getFile() != null ? user.getFile().getId() : null)
                 .build();
     }
-
-
 }

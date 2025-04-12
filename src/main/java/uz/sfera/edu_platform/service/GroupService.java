@@ -231,20 +231,6 @@ public class GroupService {
         return new ApiResponse("Successfully updated group");
     }
 
-    public ApiResponse deleteGroup(Long groupId) {
-        Group group = groupRepository.findById(groupId).orElse(null);
-
-        if (group == null){
-            return new ApiResponse(ResponseError.NOTFOUND("Group"));
-        }
-
-        group.setActive(false);
-        groupRepository.save(group);
-
-        return new ApiResponse("Group o'chirildi");
-    }
-
-
     @Scheduled(cron = "0 0 7 * * *")
     @Transactional
     public void endGroup() {
@@ -356,5 +342,22 @@ public class GroupService {
         return graphicDayRepository.save(buildGraphic);
     }
 
+    public ApiResponse redirectGroupStudents(Long groupId,Long targetGroupId){
+        Group group = groupRepository.findById(groupId).orElse(null);
+        Group targetGroup = groupRepository.findById(targetGroupId).orElse(null);
+        if (group == null || targetGroup == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
 
+        group.setActive(false);
+        group.setStudents(null);
+        groupRepository.save(group);
+
+        List<User> students = userRepository.findAllByGroupId(group.getId());
+        for (User student : students) {
+            targetGroup.setStudents(students);
+            groupRepository.save(targetGroup);
+        }
+        return new ApiResponse("Guruhga o'quvchilari ko'chirildi");
+    }
 }
