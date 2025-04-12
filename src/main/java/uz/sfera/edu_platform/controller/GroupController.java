@@ -89,12 +89,12 @@ public class GroupController {
         return ResponseEntity.ok(apiResponse);
     }
 
-    @PutMapping("/redirect/{groupId}/{targetGroupId}")
+    @PutMapping("/redirect")
     @Operation(summary = "Admin Guruhning hamma studentlarini boshqa guruhga o'tkazish")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse> redirectGroup(
-            @PathVariable Long groupId,
-            @PathVariable Long targetGroupId
+            @RequestParam Long groupId,
+            @RequestParam Long targetGroupId
     ){
         ApiResponse apiResponse = groupService.redirectGroupStudents(groupId, targetGroupId);
         return ResponseEntity.ok(apiResponse);
