@@ -371,6 +371,7 @@ public class GroupService {
         return graphicDayRepository.save(buildGraphic);
     }
 
+    @Transactional
     public ApiResponse redirectGroupStudents(Long groupId,Long targetGroupId){
         Group group = groupRepository.findById(groupId).orElse(null);
         Group targetGroup = groupRepository.findById(targetGroupId).orElse(null);
