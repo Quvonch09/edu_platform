@@ -99,4 +99,25 @@ public class GroupController {
         ApiResponse apiResponse = groupService.redirectGroupStudents(groupId, targetGroupId);
         return ResponseEntity.ok(apiResponse);
     }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_CEO')")
+    @Operation(summary = "ADMIN groupni vaqtini uzgartirish uchun")
+    @PutMapping("/updateGroup/EndDate")
+    public ResponseEntity<ApiResponse> updateGroupEndDate(
+            @RequestParam Long groupId,
+            @RequestParam int duration
+    ){
+        ApiResponse apiResponse = groupService.updateEndDateGroup(groupId, duration);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "ADMIN groupni delete qilish")
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<ApiResponse> deleteGroup(
+            @PathVariable Long groupId
+    ){
+        ApiResponse apiResponse = groupService.deleteGroup(groupId);
+        return ResponseEntity.ok(apiResponse);
+    }
 }

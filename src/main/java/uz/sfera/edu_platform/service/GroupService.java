@@ -231,6 +231,35 @@ public class GroupService {
         return new ApiResponse("Successfully updated group");
     }
 
+
+    public ApiResponse updateEndDateGroup(Long groupId, int duration){
+
+        Group group = groupRepository.findById(groupId).orElse(null);
+        if (group == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
+
+        group.setEndDate(group.getEndDate().plusMonths(duration));
+        groupRepository.save(group);
+
+        return new ApiResponse("Successfully updated group");
+    }
+
+
+    public ApiResponse deleteGroup(Long groupId) {
+        Group group = groupRepository.findById(groupId).orElse(null);
+
+        if (group == null){
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
+
+        group.setActive(false);
+        groupRepository.save(group);
+
+        return new ApiResponse("Group o'chirildi");
+    }
+
+
     @Scheduled(cron = "0 0 7 * * *")
     @Transactional
     public void endGroup() {
@@ -349,15 +378,16 @@ public class GroupService {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
 
+        List<User> students = userRepository.findAllByGroupId(group.getId());
+        List<User> targetGroupStudents = userRepository.findAllByGroupId(targetGroupId);
+
+        targetGroupStudents.addAll(students);
+        groupRepository.save(targetGroup);
+
         group.setActive(false);
         group.setStudents(null);
         groupRepository.save(group);
 
-        List<User> students = userRepository.findAllByGroupId(group.getId());
-        for (User student : students) {
-            targetGroup.setStudents(students);
-            groupRepository.save(targetGroup);
-        }
         return new ApiResponse("Guruhga o'quvchilari ko'chirildi");
     }
 }
