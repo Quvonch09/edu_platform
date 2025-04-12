@@ -90,6 +90,18 @@ public class GroupController {
     }
 
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_CEO')")
+    @Operation(summary = "ADMIN groupni vaqtini uzgartirish uchun")
+    @PutMapping("/updateGroup/EndDate")
+    public ResponseEntity<ApiResponse> updateGroupEndDate(
+            @RequestParam Long groupId,
+            @RequestParam int duration
+    ){
+        ApiResponse apiResponse = groupService.updateEndDateGroup(groupId, duration);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+
 
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")

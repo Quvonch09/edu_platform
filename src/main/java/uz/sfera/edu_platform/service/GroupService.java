@@ -231,6 +231,21 @@ public class GroupService {
         return new ApiResponse("Successfully updated group");
     }
 
+
+    public ApiResponse updateEndDateGroup(Long groupId, int duration){
+
+        Group group = groupRepository.findById(groupId).orElse(null);
+        if (group == null) {
+            return new ApiResponse(ResponseError.NOTFOUND("Group"));
+        }
+
+        group.setEndDate(group.getEndDate().plusMonths(duration));
+        groupRepository.save(group);
+
+        return new ApiResponse("Successfully updated group");
+    }
+
+
     public ApiResponse deleteGroup(Long groupId) {
         Group group = groupRepository.findById(groupId).orElse(null);
 
