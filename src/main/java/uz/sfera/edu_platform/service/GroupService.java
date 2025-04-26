@@ -50,7 +50,7 @@ public class GroupService {
         User teacher = findByIdOrThrow(userRepository, reqGroup.getTeacherId(), "Teacher");
         Room room = findByIdOrThrow(roomRepository, reqGroup.getRoomId(), "Room");
 
-        if (isRoomOccupied(room.getId(), reqGroup.getStartTime(), reqGroup.getEndTime(),reqGroup.getDayIds(),null)) {
+        if (isRoomOccupied(room.getId(), reqGroup.getStartTime(), reqGroup.getEndTime(),weekDayListString(reqGroup.getDayIds()),null)) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
         }
 
@@ -204,7 +204,7 @@ public class GroupService {
         }
         GraphicDay oldGraphicDay = group.getDays();
 
-        if (isRoomOccupied(room.getId(), reqGroup.getStartTime(), reqGroup.getEndTime(), reqGroup.getDayIds(), groupId)) {
+        if (isRoomOccupied(room.getId(), reqGroup.getStartTime(), reqGroup.getEndTime(), weekDayListString(reqGroup.getDayIds()), groupId)) {
             return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
         }
         if (oldGraphicDay != null) {
@@ -336,6 +336,22 @@ public class GroupService {
                 .collect(Collectors.toList());
     }
 
+    private List<String> weekDayListString(List<Long> daysId) {
+        return daysId.stream()
+                .map(id -> switch (id.intValue()) {
+                    case 1 -> WeekDay.MONDAY.name();
+                    case 2 -> WeekDay.TUESDAY.name();
+                    case 3 -> WeekDay.WEDNESDAY.name();
+                    case 4 -> WeekDay.THURSDAY.name();
+                    case 5 -> WeekDay.FRIDAY.name();
+                    case 6 -> WeekDay.SATURDAY.name();
+                    case 7 -> WeekDay.SUNDAY.name();
+                    default -> null; // Noto'g'ri ID kiritilganda null bo'ladi
+                })
+                .filter(Objects::nonNull) // null qiymatlarni chiqarib tashlaydi
+                .collect(Collectors.toList());
+    }
+
 
     private <T> T findByIdOrThrow(JpaRepository<T, Long> repository, Long id, String entityName) {
         return repository.findById(id).orElse(null);
@@ -343,7 +359,7 @@ public class GroupService {
 
 
     // Xona bandligini tekshirish uchun metod
-    private boolean isRoomOccupied(Long roomId, LocalTime startTime, LocalTime endTime,List<Long> days,Long groupId) {
+    private boolean isRoomOccupied(Long roomId, LocalTime startTime, LocalTime endTime,List<String> days,Long groupId) {
         return graphicDayRepository.existsOverlappingLesson(roomId, startTime, endTime,days,groupId);
     }
 
@@ -371,6 +387,7 @@ public class GroupService {
         return graphicDayRepository.save(buildGraphic);
     }
 
+    @Transactional
     public ApiResponse redirectGroupStudents(Long groupId,Long targetGroupId){
         Group group = groupRepository.findById(groupId).orElse(null);
         Group targetGroup = groupRepository.findById(targetGroupId).orElse(null);
