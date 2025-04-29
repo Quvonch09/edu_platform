@@ -240,6 +240,7 @@ public class GroupService {
         }
 
         group.setEndDate(group.getEndDate().plusMonths(duration));
+        group.setActive(true);
         groupRepository.save(group);
 
         return new ApiResponse("Successfully updated group");
