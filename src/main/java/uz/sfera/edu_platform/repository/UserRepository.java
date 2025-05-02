@@ -272,7 +272,7 @@ WHERE
     @Query(value = "select u.* from users u join test_group_students tgs on tgs.test_group_id = :testGroupId and u.id = tgs.students_id", nativeQuery = true)
     List<User> findByTestGroup( @Param("testGroupId") Long testGroupId);
 
-    @Query(value = "SELECT COUNT(*) FROM test_group_students", nativeQuery = true)
+    @Query(value = "SELECT COUNT(*) FROM test_group_students tgs join test_group tg  on tg.id = tgs.test_group_id where tg. active = true", nativeQuery = true)
     int countTestStudents();
 
     @Transactional
