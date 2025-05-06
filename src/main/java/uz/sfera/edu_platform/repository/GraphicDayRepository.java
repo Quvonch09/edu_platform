@@ -29,9 +29,8 @@ public interface GraphicDayRepository extends JpaRepository<GraphicDay, Long> {
         SELECT 1 
         FROM graphic_day g 
         JOIN graphic_day_week_day gdwd ON g.id = gdwd.graphic_day_id
-        JOIN day_of_week dow ON gdwd.graphic_day_id = dow.id
         WHERE g.room_id = :roomId
-        AND dow.id IN (:days)
+        AND gdwd.week_day IN (:days)
         AND NOT (
             g.end_time <= :startTime OR
             g.start_time >= :endTime
@@ -43,7 +42,7 @@ public interface GraphicDayRepository extends JpaRepository<GraphicDay, Long> {
             @Param("roomId") Long roomId,
             @Param("startTime") LocalTime startTime,
             @Param("endTime") LocalTime endTime,
-            @Param("days") List<Long> days,
+            @Param("days") List<String> days,
             @Param("groupId") Long groupId
     );
 }
