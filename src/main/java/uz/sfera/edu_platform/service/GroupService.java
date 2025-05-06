@@ -382,6 +382,7 @@ public class GroupService {
         List<User> targetGroupStudents = userRepository.findAllByGroupId(targetGroupId);
 
         targetGroupStudents.addAll(students);
+        targetGroup.setStudents(targetGroupStudents);
         groupRepository.save(targetGroup);
 
         group.setActive(false);
