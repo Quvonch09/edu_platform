@@ -65,7 +65,7 @@ public class TestGroupService {
     }
 
     public ApiResponse getList(){
-        List<TestGroup> testGroups = testGroupRepository.findAll();
+        List<TestGroup> testGroups = testGroupRepository.findAllByActiveTrue();
 
         if (testGroups.isEmpty()){
             return new ApiResponse(ResponseError.NOTFOUND("test guruhlar"));
