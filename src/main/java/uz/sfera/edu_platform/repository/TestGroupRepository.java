@@ -40,4 +40,6 @@ public interface TestGroupRepository extends JpaRepository<TestGroup,Long> {
     @Query(value = "insert into test_group_students(test_group_id, students_id) values (?1, ?2)", nativeQuery = true)
     void addStudentToGroup(Long groupId, Long studentId);
 
+    List<TestGroup> findAllByActiveTrue();
+
 }

@@ -203,10 +203,14 @@ public class GroupService {
             return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
         }
         GraphicDay oldGraphicDay = group.getDays();
+        boolean isTimeChanged = oldGraphicDay == null || !oldGraphicDay.getStartTime().equals(reqGroup.getStartTime()) || !oldGraphicDay.getEndTime().equals(reqGroup.getEndTime());
 
-        if (isRoomOccupied(room.getId(), reqGroup.getStartTime(), reqGroup.getEndTime(), weekDayListString(reqGroup.getDayIds()), groupId)) {
-            return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
+        if (isTimeChanged) {
+            if (isRoomOccupied(room.getId(), reqGroup.getStartTime(), reqGroup.getEndTime(), weekDayListString(reqGroup.getDayIds()), groupId)) {
+                return new ApiResponse(ResponseError.DEFAULT_ERROR("Bu vaqtda xona band"));
+            }
         }
+
         if (oldGraphicDay != null) {
             graphicDayRepository.delete(oldGraphicDay);
             group.setDays(null);
