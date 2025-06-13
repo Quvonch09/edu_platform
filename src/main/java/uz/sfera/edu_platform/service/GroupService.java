@@ -149,6 +149,8 @@ public class GroupService {
                 .countAllLessons(category != null ? lessonRepository.countLessonsByCategoryId(category.getId()) : 0)
                 .countGroupLessons(groupRepository.countGroupLessons(group.getId()))
                 .departureStudentCount(groupRepository.countGroup(group.getId()))
+                .startTime(group.getDays() != null ? group.getDays().getStartTime() : null)
+                .endTime(group.getDays() != null ? group.getDays().getEndTime() : null)
                 .days(days)
                 .build();
 
@@ -203,7 +205,7 @@ public class GroupService {
             return new ApiResponse(ResponseError.NOTFOUND("Teacher"));
         }
         GraphicDay oldGraphicDay = group.getDays();
-        boolean isTimeChanged = oldGraphicDay == null || !oldGraphicDay.getStartTime().equals(reqGroup.getStartTime()) || !oldGraphicDay.getEndTime().equals(reqGroup.getEndTime());
+        boolean isTimeChanged = !oldGraphicDay.getStartTime().equals(reqGroup.getStartTime()) ||  !oldGraphicDay.getEndTime().equals(reqGroup.getEndTime());
 
         if (isTimeChanged) {
             if (isRoomOccupied(room.getId(), reqGroup.getStartTime(), reqGroup.getEndTime(), weekDayListString(reqGroup.getDayIds()), groupId)) {
@@ -234,7 +236,6 @@ public class GroupService {
 
         return new ApiResponse("Successfully updated group");
     }
-
 
     public ApiResponse updateEndDateGroup(Long groupId, int duration){
 
