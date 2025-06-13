@@ -259,6 +259,8 @@ public class GroupService {
             return new ApiResponse(ResponseError.NOTFOUND("Group"));
         }
 
+        graphicDayRepository.delete(group.getDays());
+
         group.setActive(false);
         groupRepository.save(group);
 
